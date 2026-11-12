@@ -27,6 +27,7 @@ Done:
 - [x] UI design options produced for the user to choose from (see "Design" below)
 - [x] 2026-11-12: new design chosen (Option 1 · Clean Console) and 5 screens mocked up in `design/` (see "Design")
 - [x] `PRODUCT.md` (product brief used by the Impeccable design skill)
+- [x] 2026-11-12: pushed to GitHub https://github.com/Rampy2122/FYP-Project (`main` and `mvp` both at the same commit), with a README covering the project, design and progress. From now on: feature branches + PRs into `main`
 
 Next steps:
 1. ~~User picks a design direction~~ Done 2026-11-12: Option 1 · Clean Console (see "Design")
