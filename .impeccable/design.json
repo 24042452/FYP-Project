@@ -1,0 +1,528 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-12T06:45:50.786Z",
+  "title": "Design System: Merchant Portal",
+  "extensions": {
+    "colorMeta": {
+      "bg": {
+        "role": "neutral",
+        "displayName": "Cool Paper",
+        "canonical": "#F5F7FA",
+        "oklch": "oklch(97.5% 0.005 258.3)",
+        "tonalRamp": [
+          "#0A0B0C",
+          "#242527",
+          "#414244",
+          "#606164",
+          "#818285",
+          "#A3A5A7",
+          "#C8C9CB",
+          "#EDEEF0"
+        ]
+      },
+      "surface": {
+        "role": "neutral",
+        "displayName": "White",
+        "canonical": "#FFFFFF",
+        "oklch": "oklch(100.0% 0.000 89.9)",
+        "tonalRamp": [
+          "#0B0B0B",
+          "#252525",
+          "#424242",
+          "#616161",
+          "#828282",
+          "#A5A5A5",
+          "#C9C9C9",
+          "#EEEEEE"
+        ]
+      },
+      "border": {
+        "role": "neutral",
+        "displayName": "Hairline",
+        "canonical": "#E2E7EE",
+        "oklch": "oklch(92.6% 0.011 256.7)",
+        "tonalRamp": [
+          "#090B0E",
+          "#232529",
+          "#3F4247",
+          "#5D6267",
+          "#7E8389",
+          "#A1A5AB",
+          "#C6C9CE",
+          "#EBEFF3"
+        ]
+      },
+      "border-strong": {
+        "role": "neutral",
+        "displayName": "Strong Hairline",
+        "canonical": "#CBD3DE",
+        "oklch": "oklch(86.4% 0.018 256.3)",
+        "tonalRamp": [
+          "#080B10",
+          "#21252B",
+          "#3D424A",
+          "#5B626B",
+          "#7C838C",
+          "#9FA6AE",
+          "#C4CAD2",
+          "#EAEFF6"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Navy Ink",
+        "canonical": "#14213D",
+        "oklch": "oklch(25.2% 0.056 264.0)",
+        "tonalRamp": [
+          "#040A1A",
+          "#1B2539",
+          "#35425C",
+          "#526180",
+          "#7282A3",
+          "#96A5C4",
+          "#BBCAE5",
+          "#E2EFFF"
+        ]
+      },
+      "ink-2": {
+        "role": "neutral",
+        "displayName": "Slate",
+        "canonical": "#46536A",
+        "oklch": "oklch(44.0% 0.042 261.7)",
+        "tonalRamp": [
+          "#060B16",
+          "#1D2534",
+          "#384255",
+          "#556278",
+          "#75839B",
+          "#99A6BC",
+          "#BECADE",
+          "#E5EFFF"
+        ]
+      },
+      "ink-3": {
+        "role": "neutral",
+        "displayName": "Light Slate",
+        "canonical": "#5C6980",
+        "oklch": "oklch(51.9% 0.040 261.8)",
+        "tonalRamp": [
+          "#060B16",
+          "#1D2534",
+          "#384254",
+          "#556277",
+          "#76839A",
+          "#9AA6BB",
+          "#BFCADD",
+          "#E5EFFF"
+        ]
+      },
+      "accent": {
+        "role": "primary",
+        "displayName": "Ledger Blue",
+        "canonical": "#0B4DB8",
+        "oklch": "oklch(45.4% 0.180 260.6)",
+        "tonalRamp": [
+          "#00052D",
+          "#052153",
+          "#1D3F7B",
+          "#365FA6",
+          "#5681CC",
+          "#7DA5EA",
+          "#A5CAFF",
+          "#CFF0FF"
+        ]
+      },
+      "accent-hover": {
+        "role": "primary",
+        "displayName": "Deep Ledger Blue",
+        "canonical": "#08398A",
+        "oklch": "oklch(37.0% 0.144 260.6)",
+        "tonalRamp": [
+          "#00052D",
+          "#052153",
+          "#1D3F7B",
+          "#365FA6",
+          "#5681CC",
+          "#7DA5EA",
+          "#A5CAFF",
+          "#CFF0FF"
+        ]
+      },
+      "accent-soft": {
+        "role": "primary",
+        "displayName": "Blue Wash",
+        "canonical": "#EAF1FD",
+        "oklch": "oklch(95.6% 0.018 261.3)",
+        "tonalRamp": [
+          "#090B10",
+          "#21252C",
+          "#3E424A",
+          "#5C616B",
+          "#7D838D",
+          "#A0A5AF",
+          "#C4C9D2",
+          "#EAEFF6"
+        ]
+      },
+      "chart-2": {
+        "role": "primary",
+        "displayName": "Pale Chart Blue",
+        "canonical": "#A8C3F0",
+        "oklch": "oklch(81.3% 0.070 260.6)",
+        "tonalRamp": [
+          "#020A1E",
+          "#16253E",
+          "#2F4262",
+          "#4B6287",
+          "#6B83AB",
+          "#90A6CB",
+          "#B6CAEC",
+          "#DEF0FF"
+        ]
+      },
+      "red": {
+        "role": "secondary",
+        "displayName": "Signal Red",
+        "canonical": "#D3162B",
+        "oklch": "oklch(55.3% 0.215 24.2)",
+        "tonalRamp": [
+          "#240000",
+          "#4A070B",
+          "#712423",
+          "#9B403D",
+          "#C1625D",
+          "#E28983",
+          "#FFB1AA",
+          "#FFD9D3"
+        ]
+      },
+      "red-hover": {
+        "role": "secondary",
+        "displayName": "Deep Signal Red",
+        "canonical": "#B01224",
+        "oklch": "oklch(48.4% 0.187 23.8)",
+        "tonalRamp": [
+          "#240000",
+          "#4A070B",
+          "#712324",
+          "#9B403E",
+          "#C1625E",
+          "#E28983",
+          "#FFB1AB",
+          "#FFD9D4"
+        ]
+      },
+      "red-soft": {
+        "role": "secondary",
+        "displayName": "Red Wash",
+        "canonical": "#FDE9EB",
+        "oklch": "oklch(95.1% 0.022 10.6)",
+        "tonalRamp": [
+          "#10090A",
+          "#2C2223",
+          "#4B3E40",
+          "#6C5D5E",
+          "#8E7D7F",
+          "#B0A1A2",
+          "#D3C5C6",
+          "#F8EBEC"
+        ]
+      },
+      "ok": {
+        "role": "tertiary",
+        "displayName": "Paid Green",
+        "canonical": "#0E7A3E",
+        "oklch": "oklch(50.9% 0.130 151.9)",
+        "tonalRamp": [
+          "#001300",
+          "#003109",
+          "#005122",
+          "#12743C",
+          "#3F975C",
+          "#6DB983",
+          "#99DCAA",
+          "#C6FFD3"
+        ]
+      },
+      "ok-bg": {
+        "role": "tertiary",
+        "displayName": "Mint",
+        "canonical": "#E3F5EA",
+        "oklch": "oklch(95.4% 0.024 159.1)",
+        "tonalRamp": [
+          "#060D09",
+          "#1E2822",
+          "#39453E",
+          "#57655D",
+          "#77877D",
+          "#9BA9A0",
+          "#C0CDC5",
+          "#E6F2EB"
+        ]
+      },
+      "warn": {
+        "role": "tertiary",
+        "displayName": "Amber Ink",
+        "canonical": "#8A5300",
+        "oklch": "oklch(49.4% 0.109 66.9)",
+        "tonalRamp": [
+          "#1D0300",
+          "#3E1A00",
+          "#623600",
+          "#88540D",
+          "#AC7537",
+          "#CC9A64",
+          "#EDBF90",
+          "#FFE6BD"
+        ]
+      },
+      "warn-bg": {
+        "role": "tertiary",
+        "displayName": "Cream",
+        "canonical": "#FFF1D6",
+        "oklch": "oklch(96.2% 0.038 83.8)",
+        "tonalRamp": [
+          "#100A02",
+          "#2C2415",
+          "#4A412E",
+          "#6B604A",
+          "#8D816A",
+          "#AFA48E",
+          "#D2C8B5",
+          "#F6EEDC"
+        ]
+      },
+      "mute-bg": {
+        "role": "neutral",
+        "displayName": "Mist",
+        "canonical": "#EEF1F5",
+        "oklch": "oklch(95.7% 0.006 255.5)",
+        "tonalRamp": [
+          "#0A0B0D",
+          "#242527",
+          "#404245",
+          "#5F6165",
+          "#808286",
+          "#A3A5A8",
+          "#C7C9CC",
+          "#EDEFF1"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "answer": {
+        "displayName": "Answer",
+        "purpose": "The one-sentence answer at the top of a screen."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Page titles; always followed by a technical subtitle."
+      },
+      "figure": {
+        "displayName": "Figure",
+        "purpose": "Big money numbers in the summary strip and detail panel."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Panel headings."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Normal text and chat messages."
+      },
+      "body-sm": {
+        "displayName": "Body small",
+        "purpose": "Descriptions under figures, to-do lines, panel footers."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Status pills and table column headers."
+      },
+      "nav-group": {
+        "displayName": "Nav group",
+        "purpose": "The four sidebar group titles only. Uppercase."
+      }
+    },
+    "shadows": [
+      {
+        "name": "resting",
+        "value": "0 1px 2px rgba(26,34,51,0.06), 0 1px 1px rgba(26,34,51,0.03)",
+        "purpose": "Panels, selects, secondary buttons, answer cards."
+      },
+      {
+        "name": "floating",
+        "value": "0 12px 32px -8px rgba(26,34,51,0.22), 0 2px 6px rgba(26,34,51,0.08)",
+        "purpose": "Phone drawer, bottom sheet, assistant message box only."
+      },
+      {
+        "name": "focus-glow",
+        "value": "0 0 0 3px #EAF1FD",
+        "purpose": "Inputs and search boxes on focus, with a blue border."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease",
+        "value": "cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "All transitions."
+      },
+      {
+        "name": "state",
+        "value": "140ms",
+        "purpose": "Colour and border changes on buttons and cards."
+      },
+      {
+        "name": "slide",
+        "value": "260ms to 280ms",
+        "purpose": "Phone drawer and transaction bottom sheet."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "phone",
+        "value": "640px"
+      },
+      {
+        "name": "table-cards",
+        "value": "760px"
+      },
+      {
+        "name": "tablet",
+        "value": "1023px"
+      },
+      {
+        "name": "detail-sheet",
+        "value": "1180px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The one main action on a screen. Red. Only one per screen.",
+      "html": "<button class=\"ds-btn-primary\">See what needs attention<svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M5 12h14M13 6l6 6-6 6\"/></svg></button>",
+      "css": ".ds-btn-primary{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 16px;border-radius:8px;border:1px solid transparent;font-weight:600;font-size:15px;cursor:pointer;font-family:Inter,system-ui,-apple-system,\"Segoe UI\",sans-serif;transition:background-color 140ms cubic-bezier(0.16,1,0.3,1),border-color 140ms cubic-bezier(0.16,1,0.3,1);background:#D3162B;color:#fff;box-shadow:0 1px 2px rgba(211,22,43,0.3),inset 0 1px 0 rgba(255,255,255,0.12);}.ds-btn-primary:hover{background:#B01224;}.ds-btn-primary:focus-visible{outline:3px solid #0B4DB8;outline-offset:2px;}"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Actions next to the main one, such as date filters.",
+      "html": "<button class=\"ds-btn-secondary\"><svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><rect x=\"4\" y=\"5\" width=\"16\" height=\"16\" rx=\"1\"/><path d=\"M4 10h16M8 3v4M16 3v4\"/></svg>Last 7 days</button>",
+      "css": ".ds-btn-secondary{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 16px;border-radius:8px;border:1px solid transparent;font-weight:600;font-size:15px;cursor:pointer;font-family:Inter,system-ui,-apple-system,\"Segoe UI\",sans-serif;transition:background-color 140ms cubic-bezier(0.16,1,0.3,1),border-color 140ms cubic-bezier(0.16,1,0.3,1);background:#fff;color:#14213D;border-color:#CBD3DE;box-shadow:0 1px 2px rgba(26,34,51,0.06),0 1px 1px rgba(26,34,51,0.03);}.ds-btn-secondary:hover{border-color:#5C6980;}.ds-btn-secondary:focus-visible{outline:3px solid #0B4DB8;outline-offset:2px;}"
+    },
+    {
+      "name": "Quiet Button",
+      "kind": "button",
+      "refersTo": "button-quiet",
+      "description": "Small actions inside cards.",
+      "html": "<button class=\"ds-btn-quiet\">Mark as looked at</button>",
+      "css": ".ds-btn-quiet{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 16px;border-radius:8px;border:1px solid transparent;font-weight:600;font-size:15px;cursor:pointer;font-family:Inter,system-ui,-apple-system,\"Segoe UI\",sans-serif;transition:background-color 140ms cubic-bezier(0.16,1,0.3,1),border-color 140ms cubic-bezier(0.16,1,0.3,1);background:transparent;color:#08398A;padding:0 10px;}.ds-btn-quiet:hover{background:#EAF1FD;}.ds-btn-quiet:focus-visible{outline:3px solid #0B4DB8;outline-offset:2px;}"
+    },
+    {
+      "name": "Text Field",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Form input with label above; blue border and soft blue glow on focus.",
+      "html": "<label class=\"ds-field\"><span>Email</span><input class=\"ds-input\" type=\"email\" placeholder=\"you@yourbusiness.sg\"></label>",
+      "css": ".ds-field{display:flex;flex-direction:column;gap:6px;font-family:Inter,system-ui,-apple-system,\"Segoe UI\",sans-serif;color:#14213D;}.ds-field span{font-size:15px;font-weight:600;}.ds-input{min-height:48px;padding:0 14px;border-radius:8px;border:1px solid #CBD3DE;font-size:16px;background:#fff;color:#14213D;font-family:Inter,system-ui,-apple-system,\"Segoe UI\",sans-serif;}.ds-input::placeholder{color:#5C6980;}.ds-input:hover{border-color:#5C6980;}.ds-input:focus{outline:0;border-color:#0B4DB8;box-shadow:0 0 0 3px #EAF1FD;}"
+    },
+    {
+      "name": "Status Pills",
+      "kind": "chip",
+      "refersTo": "pill-ok",
+      "description": "Status is always icon + word + colour.",
+      "html": "<div class=\"ds-pills\"><span class=\"ds-pill ds-ok\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.4\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"m5 12 5 5 9-10\"/></svg>In your bank</span><span class=\"ds-pill ds-info\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.4\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M12 7v5l3 2\"/></svg>Arriving Fri 13 Nov</span><span class=\"ds-pill ds-bad\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.4\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M12 3 2 20h20z\"/><path d=\"M12 10v4M12 17h.01\"/></svg>Late, due Tue 10 Nov</span></div>",
+      "css": ".ds-pills{display:flex;flex-wrap:wrap;gap:8px;}.ds-pill{display:inline-flex;align-items:center;gap:6px;padding:2px 9px 2px 7px;border-radius:999px;font-size:13px;font-weight:600;line-height:1.6;white-space:nowrap;font-family:Inter,system-ui,-apple-system,\"Segoe UI\",sans-serif;}.ds-ok{background:#E3F5EA;color:#0E7A3E;}.ds-info{background:#EAF1FD;color:#08398A;}.ds-bad{background:#FDE9EB;color:#B01224;}"
+    },
+    {
+      "name": "Sidebar Navigation",
+      "kind": "nav",
+      "refersTo": "nav-item",
+      "description": "Grouped menu with plain label and technical term underneath; current page in blue wash; Ask button pinned at the bottom.",
+      "html": "<nav class=\"ds-nav\"><div class=\"ds-nav-title\">My business</div><a href=\"#\" class=\"ds-nav-item\"><svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z\"/></svg><span>Home</span></a><a href=\"#\" class=\"ds-nav-item\" aria-current=\"page\"><svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"m8 12 3 3 5-6\"/></svg><span>Check-up<small>Reconciliation</small></span></a><a class=\"ds-nav-item ds-soon\"><svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M5 3h14v18l-3-2-2 2-2-2-2 2-2-2-3 2z\"/><path d=\"M9 8h6M9 12h6\"/></svg><span>Refunds &amp; disputes</span><em>Soon</em></a><a href=\"#\" class=\"ds-ask\"><svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M21 12a8 8 0 0 1-11.6 7.1L3 21l1.9-6.4A8 8 0 1 1 21 12z\"/></svg>Ask NETS Assistant</a></nav>",
+      "css": ".ds-nav{display:flex;flex-direction:column;gap:1px;width:240px;padding:12px;background:#fff;font-family:Inter,system-ui,-apple-system,\"Segoe UI\",sans-serif;}.ds-nav-title{padding:6px 12px 2px;font-size:12px;font-weight:600;color:#5C6980;text-transform:uppercase;letter-spacing:0.06em;}.ds-nav-item{display:grid;grid-template-columns:20px 1fr auto;align-items:center;column-gap:10px;min-height:44px;padding:6px 12px;border-radius:8px;text-decoration:none;color:#14213D;font-size:15px;font-weight:500;line-height:1.2;}.ds-nav-item svg{color:#5C6980;}.ds-nav-item small{display:block;font-size:12px;font-weight:400;color:#5C6980;}.ds-nav-item:hover{background:#EEF1F5;}.ds-nav-item:focus-visible{outline:3px solid #0B4DB8;outline-offset:2px;}.ds-nav-item[aria-current=\"page\"]{background:#EAF1FD;color:#08398A;font-weight:650;}.ds-nav-item[aria-current=\"page\"] svg{color:#0B4DB8;}.ds-soon{color:#5C6980;}.ds-soon:hover{background:transparent;}.ds-soon em{font-style:normal;font-size:11px;font-weight:600;padding:2px 7px;border-radius:999px;background:#EEF1F5;color:#46536A;}.ds-ask{display:flex;align-items:center;gap:10px;min-height:48px;padding:0 14px;margin-top:12px;border-radius:8px;background:#0B4DB8;color:#fff;text-decoration:none;font-weight:600;font-size:15px;}.ds-ask:hover{background:#08398A;}.ds-ask:focus-visible{outline:3px solid #0B4DB8;outline-offset:2px;}"
+    },
+    {
+      "name": "Summary Strip",
+      "kind": "card",
+      "refersTo": "panel",
+      "description": "One panel, three figures split by hairlines; the attention figure turns red.",
+      "html": "<section class=\"ds-summary\"><div><span class=\"k\">Money in today</span><span class=\"v\">$214.80</span><span class=\"d\">34 payments so far</span></div><div><span class=\"k\">Coming to your bank</span><span class=\"v\">$593.40</span><span class=\"d\">Tomorrow, Fri 13 Nov</span></div><div class=\"attn\"><span class=\"k\">Needs your attention</span><span class=\"v\">3 things</span><a href=\"#\">See what to do</a></div></section>",
+      "css": ".ds-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));background:#fff;border:1px solid #E2E7EE;border-radius:12px;box-shadow:0 1px 2px rgba(26,34,51,0.06),0 1px 1px rgba(26,34,51,0.03);font-family:Inter,system-ui,-apple-system,\"Segoe UI\",sans-serif;color:#14213D;}.ds-summary>div{padding:20px 22px;display:flex;flex-direction:column;gap:4px;}.ds-summary>div+div{border-left:1px solid #E2E7EE;}.ds-summary .k{font-size:14px;font-weight:500;color:#46536A;}.ds-summary .v{font-size:32px;font-weight:650;letter-spacing:-0.025em;line-height:1.15;font-variant-numeric:tabular-nums;}.ds-summary .d{font-size:14px;color:#46536A;}.ds-summary .attn .v,.ds-summary .attn a{color:#B01224;}.ds-summary a{font-size:14px;font-weight:600;text-underline-offset:3px;}.ds-summary a:focus-visible{outline:3px solid #0B4DB8;outline-offset:2px;}"
+    },
+    {
+      "name": "Money Flow Bar",
+      "kind": "custom",
+      "refersTo": "panel",
+      "description": "Sales split into money to your bank (blue) and NETS fees (red).",
+      "html": "<div class=\"ds-flowwrap\"><div class=\"ds-flow\"><i class=\"s\" style=\"flex:4270\"></i><i class=\"f\" style=\"flex:39\"></i></div><div class=\"ds-flow-lab\"><div><b>$4,309.35</b>Your sales</div><div class=\"fee\"><b>−$38.80</b>NETS fees</div><div><b>$4,270.55</b>To your bank</div></div></div>",
+      "css": ".ds-flowwrap{font-family:Inter,system-ui,-apple-system,\"Segoe UI\",sans-serif;color:#46536A;}.ds-flow{display:flex;height:40px;border-radius:6px;overflow:hidden;gap:2px;}.ds-flow i{display:block;}.ds-flow .s{background:#0B4DB8;}.ds-flow .f{background:#D3162B;min-width:10px;}.ds-flow-lab{display:grid;grid-template-columns:1fr auto auto;gap:24px;margin-top:12px;font-size:14px;}.ds-flow-lab b{display:block;font-size:20px;color:#14213D;font-weight:650;font-variant-numeric:tabular-nums;}.ds-flow-lab .fee b{color:#B01224;}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Plain-Spoken Ledger",
+    "overview": "This is a conventional merchant portal, built to the quality of the Stripe Dashboard, but written for a hawker uncle as much as for an accountant. Every screen opens with the answer as one sentence (\"Good week, Ah Hock. You took $4,309...\"), then shows the figures, then the details. Each screen has one main action, and it is the only red button on the screen.\n\nThe look is light and calm: a pale cool-grey page, white panels with thin grey lines, dark navy text. Two colours do all the work. Blue means data and navigation (charts, links, the selected menu item, the Ask button). Red is the brand mark, the one main action, and problems (money that is short, late or wrong). Green and amber appear only inside status pills. The density is medium: big enough to read on a phone at a stall, tidy enough for an accountant filtering a table on a desktop.\n\nPlain words come first and the technical term sits underneath in smaller grey text (\"Check-up\" / *Reconciliation*). This is a visual rule, not only a writing rule: every heading pair uses the same two-level style. The design rejects themed or metaphor worlds (an airport-board direction was turned down) and does not copy Stripe's or NETS's branding.",
+    "keyCharacteristics": [
+      "Light page, white panels, 1px hairlines, very quiet shadows.",
+      "Blue for data and navigation; red for brand, the main action and problems.",
+      "Status is always icon + word + colour, never colour alone.",
+      "Inter with tabular numbers for every amount.",
+      "Answer-first sentence at the top of every screen.",
+      "Every touch target is at least 44px tall."
+    ],
+    "rules": [
+      {
+        "name": "The Two Jobs Rule",
+        "body": "Blue is for data and navigation. Red is for the brand, the one main action, and problems. If something is neither, it is navy ink or grey.",
+        "section": "colors"
+      },
+      {
+        "name": "The One Red Button Rule",
+        "body": "Each screen has exactly one red (primary) button: the main action named in that screen's brief (\"See what needs attention\", \"Download for my accountant\", \"Log in\"). Other actions use the secondary, quiet or blue button. A second red button is allowed only inside a problem card where the action fixes that problem (for example \"Ask NETS to check\" in an assistant answer about late money).",
+        "section": "colors"
+      },
+      {
+        "name": "The Never Colour Alone Rule",
+        "body": "A status always shows an icon, a word and a colour together (\"✓ In your bank\", \"clock Arriving Fri 13 Nov\", \"alert Late, due Tue 10 Nov\"). Colour-blind users and phone screens in sunlight must still read it.",
+        "section": "colors"
+      },
+      {
+        "name": "The Plain Word On Top Rule",
+        "body": "Plain words are the big line; the technical term is the small grey line under or beside it (14px for page titles, 13px in panels, 12px in the sidebar). Never the other way round.",
+        "section": "typography"
+      },
+      {
+        "name": "The Tabular Money Rule",
+        "body": "Every amount, count and percentage uses `font-variant-numeric: tabular-nums` and is right-aligned in tables.",
+        "section": "typography"
+      },
+      {
+        "name": "The Float Means Above Rule",
+        "body": "The floating shadow is only for something that sits on top of other content (drawer, sheet, sticky composer). Panels in the page flow always use the resting shadow.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do open every screen with a one-sentence answer, and put the key figure in it in Deep Ledger Blue.",
+      "Do use exactly one red primary button per screen for that screen's main action.",
+      "Do show status as icon + word + colour in a pill, every time.",
+      "Do put the plain word first and the technical term underneath in smaller Light Slate text.",
+      "Do use tabular numbers for every amount and right-align amounts in tables.",
+      "Do keep every touch target at least 44px tall, and test each screen at phone width.",
+      "Do group related figures in one panel divided by hairlines (summary strip, comparison rows) instead of a grid of small cards.",
+      "Do label sample figures as \"Sample data\"."
+    ],
+    "donts": [
+      "Don't use red for decoration, headings or navigation; red means brand, main action or a problem.",
+      "Don't use blue for warnings or problems.",
+      "Don't show a status with colour only (a coloured dot or coloured text with no word).",
+      "Don't use the floating shadow on panels that sit in the page.",
+      "Don't add small uppercase labels above page headlines or panel titles; the uppercase style belongs to the four sidebar group titles only.",
+      "Don't add new colours, font sizes or corner sizes outside this file; reuse the tokens above.",
+      "Don't use the NETS logo or copy Stripe's branding."
+    ]
+  }
+}

@@ -1,0 +1,131 @@
+{
+  "title": "Choose the visual world for the Merchant Portal",
+  "question": "The roll assigned Arrivals Hall. Keep it, take an alternate, or re-roll.",
+  "options": [
+    {
+      "id": "assigned",
+      "label": "Arrivals Hall",
+      "kicker": "THE ROLL",
+      "lineage": "Singapore airport arrivals boards and terminal signage",
+      "thesis": "Every payment is a traveller heading to your bank; the portal is the arrivals board that says where your money is and when it lands.",
+      "palette": ["#0B1F3A", "#F2B33D", "#FFFFFF", "#E9EDF2", "#1F7A4D"],
+      "materials": ["backlit board rows", "brushed aluminium sign frames", "monumental gate numerals"],
+      "viewport": "Home opens on the plain-English headline as the board header, a monumental 'Next to land: $1,948.10 tomorrow', and the Money-arriving board: date, from (channel), amount, status in words (Landed / On time / Delayed, we are checking).",
+      "risk": "A dark board can feel like transport, not a shop, and long boards can drift into the density you ruled out.",
+      "raised": [
+        {"from": "challenger-labanotation", "raise": "Each arrival row draws its transit time as a bar whose length is the real days from sale to bank."},
+        {"from": "challenger-saville", "raise": "One figure owns each screen; everything else stays quiet."},
+        {"from": "challenger-lexicon", "raise": "A head rule always names the span you are looking at, e.g. 'Showing 3 to 9 Nov'."},
+        {"from": "challenger-doujin", "raise": "Items you have checked get circled and stay marked."},
+        {"from": "challenger-splitflap", "raise": "Status changes repaint a row in place; the board never reflows."}
+      ]
+    },
+    {
+      "id": "model-pick",
+      "label": "Stall Lightbox",
+      "kicker": "IMPECCABLE’S PICK",
+      "lineage": "hawker stall lightbox signboards and numbered menu panels",
+      "thesis": "The portal talks like your stall's signboard: numbered panels, huge prices, nothing extra.",
+      "palette": ["#C8102E", "#FFFFFF", "#1A1A1A", "#F7C600"],
+      "materials": ["backlit acrylic panels", "vinyl-cut numerals", "stall number plates"],
+      "viewport": "Home as a row of lit panels, No. 1 Money in today, No. 2 Coming to your bank, No. 3 Needs a look, each with a giant number and one button.",
+      "risk": "The most obvious local reference, and it can tip into the kitsch or playful look you said to avoid."
+    },
+    {
+      "id": "challenger-wayfinding",
+      "label": "Terminal Wayfinding",
+      "verdict": "competitive",
+      "lineage": "international airport yellow sign system",
+      "thesis": "The portal shows only your next decision, one yellow band at a time.",
+      "palette": ["#FFD100", "#111111", "#FFFFFF"],
+      "materials": ["framed overhead sign bands", "pictogram insets"],
+      "viewport": "Home as one band: 'Next: 3 payments need a look, about 2 minutes', with a monumental count and one arrow-button.",
+      "case": "Fuses well: 'one main action per screen' becomes the next-decision band; wins on clarity but merchants manage money, not route through a terminal.",
+      "risk": "Hides the overview accountants and Tan & Sons need; yellow everywhere tires fast.",
+      "hero": "https://impeccable.style/worlds/cards/wayfinding-cartography-signage-terminal-yellow-wayfinding-hero.webp",
+      "board": "https://impeccable.style/worlds/cards/wayfinding-cartography-signage-terminal-yellow-wayfinding.webp"
+    },
+    {
+      "id": "challenger-splitflap",
+      "label": "Split-flap Concourse",
+      "verdict": "declined",
+      "lineage": "rail concourse departure boards",
+      "thesis": "Payments as rows on a flapping departure board.",
+      "palette": ["#111111", "#FFFFFF", "#F2A900"],
+      "materials": ["flap cells", "steel frame"],
+      "viewport": "A full-screen board of payment rows.",
+      "case": "Same family as the roll, colder and less local; loses both axes.",
+      "kept": "Status changes repaint a row in place; the board never reflows.",
+      "risk": "Caps-heavy dark board, hard to read on a phone outdoors.",
+      "hero": "https://impeccable.style/worlds/cards/signals-instruments-split-flap-concourse-hero.webp"
+    },
+    {
+      "id": "challenger-labanotation",
+      "label": "Dance Score",
+      "verdict": "declined",
+      "lineage": "labanotation",
+      "thesis": "Time drawn exactly as length on a vertical staff.",
+      "palette": ["#FFFFFF", "#111111", "#D9D9D9"],
+      "materials": ["score paper", "hatched symbol blocks"],
+      "viewport": "A rising staff of sales blocks.",
+      "case": "Abstract notation no merchant reads; loses both axes.",
+      "kept": "Transit time drawn as a bar whose length is the real days.",
+      "risk": "Unreadable without training.",
+      "hero": "https://impeccable.style/worlds/cards/notation-diagram-systems-labanotation-hero.webp"
+    },
+    {
+      "id": "challenger-saville",
+      "label": "Catalog Sleeve",
+      "verdict": "declined",
+      "lineage": "coded record-sleeve identity",
+      "thesis": "Everything a catalog number, labels as colour codes.",
+      "palette": ["#0A0A0A", "#FFFFFF", "#E4572E", "#2E86AB"],
+      "materials": ["matte black sleeve", "hairline plot"],
+      "viewport": "One pulse plot on black.",
+      "case": "Codes instead of words breaks the plain-words rule; loses both axes.",
+      "kept": "One figure owns each screen; everything else stays quiet.",
+      "risk": "Meaning hidden behind codes.",
+      "hero": "https://impeccable.style/worlds/cards/brand-identity-canon-saville-catalog-sleeve-hero.webp"
+    },
+    {
+      "id": "challenger-lexicon",
+      "label": "Lexicon Page",
+      "verdict": "declined",
+      "lineage": "19th-century reference lexicon",
+      "thesis": "Dense text columns with guide words at the head.",
+      "palette": ["#F3EEDF", "#111111", "#C1272D"],
+      "materials": ["uncoated paper", "bordered plates"],
+      "viewport": "Columns of entries under guide words.",
+      "case": "Dense and bookish, the opposite of hawker-simple; loses both axes.",
+      "kept": "A head rule always names the span you are looking at.",
+      "risk": "Too dense.",
+      "hero": "https://impeccable.style/worlds/cards/rw-lexicon-shoulder-and-plate-hero.webp"
+    },
+    {
+      "id": "challenger-doujin",
+      "label": "Convention Catalog",
+      "verdict": "declined",
+      "lineage": "doujin event circle catalog",
+      "thesis": "Thousands of stamp-sized cells, circled in pen.",
+      "palette": ["#EDEBE4", "#111111", "#E03C31"],
+      "materials": ["newsprint", "biro circles"],
+      "viewport": "A packed grid of tiny cells.",
+      "case": "Tiny dense cells fail both audiences; loses both axes.",
+      "kept": "Items you have checked get circled and stay marked.",
+      "risk": "Far too dense.",
+      "hero": "https://impeccable.style/worlds/cards/pop-culture-shelf-doujin-event-catalog-hero.webp"
+    }
+  ],
+  "reroll": {"registers": ["safer", "bolder"]},
+  "buildPath": {"value": "code"},
+  "canon": true,
+  "canonCard": {
+    "label": "The category standard",
+    "thesis": "A clean merchant dashboard like the big payment providers ship, executed impeccably.",
+    "palette": ["#FFFFFF", "#111827", "#2563EB"],
+    "materials": ["clean card grid", "line charts"],
+    "viewport": "Sidebar, KPI cards, a sales chart and a recent-payments table.",
+    "risk": "Indistinguishable from every other payment portal by design."
+  },
+  "steer": true
+}

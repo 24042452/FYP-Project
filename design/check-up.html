@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Check-up · Merchant Portal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;650;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/portal.css">
+<style>
+/* Route: payments → bank → bill */
+.route { display: grid; grid-template-columns: minmax(0, 1fr) minmax(120px, 0.7fr) minmax(0, 1fr) minmax(120px, 0.7fr) minmax(0, 1fr); align-items: center; padding: 22px 20px; gap: 0; }
+.stop { display: flex; flex-direction: column; gap: 2px; padding: 4px; }
+.stop .k { font-size: 14px; color: var(--ink-2); font-weight: 500; display: flex; align-items: center; gap: 8px; }
+.stop .k .icon { color: var(--accent); }
+.stop .v { font-size: 24px; font-weight: 650; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+.stop .d { font-size: 13px; color: var(--ink-3); }
+.link { position: relative; display: flex; justify-content: center; padding: 0 8px; }
+.link::before { content: ""; position: absolute; left: 0; right: 0; top: 50%; height: 2px; background: var(--border-strong); }
+.link .pill { position: relative; z-index: 1; box-shadow: 0 0 0 4px var(--surface); }
+
+.tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--border); overflow-x: auto; }
+.tabs button { min-height: 44px; padding: 0 14px; border: 0; background: none; font-weight: 600; font-size: 15px; color: var(--ink-2); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; white-space: nowrap; display: inline-flex; align-items: center; gap: 8px; }
+.tabs button[aria-selected="true"] { color: var(--accent-ink); border-bottom-color: var(--accent); }
+.tabs .cnt { font-size: 12px; font-weight: 700; padding: 1px 7px; border-radius: 99px; background: var(--mute-bg); color: var(--ink-2); }
+.tabs button[aria-selected="true"] .cnt { background: var(--accent-soft); color: var(--accent-ink); }
+
+.issue { padding: 20px; display: grid; grid-template-columns: 40px minmax(0, 1fr); gap: 4px 16px; }
+.issue + .issue { border-top: 1px solid var(--border); }
+.issue .ic { width: 40px; height: 40px; border-radius: 10px; background: var(--red-soft); color: var(--red-ink); display: grid; place-items: center; grid-row: span 2; }
+.issue h3 { font-size: 18px; font-weight: 650; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+.issue .what { color: var(--ink-2); }
+.cmp { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0; margin-top: 14px; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+.cmp > div { padding: 12px 14px 12px 0; display: flex; flex-direction: column; gap: 2px; }
+.cmp > div + div { padding-left: 14px; }
+.cmp > div + div { border-left: 1px solid var(--border); }
+.cmp .k { font-size: 13px; color: var(--ink-2); }
+.cmp .v { font-size: 20px; font-weight: 650; font-variant-numeric: tabular-nums; }
+.cmp .diff .v { color: var(--red-ink); }
+.why { margin-top: 12px; padding: 12px 14px; border-radius: var(--r); background: var(--accent-soft); color: var(--accent-ink); font-size: 15px; display: flex; gap: 10px; }
+.why .icon { margin-top: 2px; }
+.issue .acts { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+.issue .tech { font-size: 13px; color: var(--ink-3); margin-top: 12px; }
+.issue.done .ic { background: var(--ok-bg); color: var(--ok); }
+.issue.done h3 { color: var(--ink-2); }
+
+@media (max-width: 860px) {
+  .route { grid-template-columns: 1fr; gap: 0; }
+  .link { height: 52px; align-items: center; }
+  .link::before { left: 50%; right: auto; top: 0; bottom: 0; width: 2px; height: auto; }
+}
+@media (max-width: 640px) {
+  .issue { grid-template-columns: 1fr; padding: 16px; }
+  .issue .ic { grid-row: auto; }
+  .cmp { grid-template-columns: 1fr; }
+  .cmp > div + div { border-left: 0; border-top: 1px solid var(--border); padding-left: 0; }
+  .cmp > div { flex-direction: row; justify-content: space-between; align-items: baseline; }
+  .issue .acts .btn { flex: 1 1 100%; }
+}
+</style>
+</head>
+<body data-page="check-up" data-merchant="ahhock">
+<div class="app">
+  <aside class="sidebar" id="sidebar"></aside>
+  <div class="scrim"></div>
+  <div class="main">
+    <header class="topbar" id="topbar"></header>
+    <main class="page">
+      <div class="page-head">
+        <div>
+          <h1>Check-up</h1>
+          <p class="tech">Reconciliation · we compare your payments, your bank deposits and your NETS bill</p>
+        </div>
+      </div>
+
+      <div class="page-head">
+        <div>
+          <p class="answer">October mostly matches. <em>29 of 31</em> bank deposits are right to the cent, and 2 things still need a look.</p>
+          <p class="answer-sub">Last checked today at 7:30am. Excel download includes every payment and every deposit.</p>
+        </div>
+        <div class="actions">
+          <label class="sr-only" for="month">Month</label>
+          <select id="month" class="select" style="width:auto;min-width:170px"><option>October 2026</option><option>September 2026</option></select>
+          <button class="btn btn-secondary" type="button"><i data-icon="refund"></i>Check again</button>
+          <button class="btn btn-primary" type="button"><i data-icon="download"></i>Download for my accountant</button>
+        </div>
+      </div>
+
+      <section class="panel" aria-label="What we compared">
+        <div class="route">
+          <div class="stop"><span class="k"><i data-icon="receipt"></i>Your payments</span><span class="v">$18,402.55</span><span class="d">2,786 payments in October</span></div>
+          <div class="link"><span class="pill warn"><i data-icon="alert"></i>29 of 31 match</span></div>
+          <div class="stop"><span class="k"><i data-icon="bank"></i>Money to your bank</span><span class="v">$18,277.85</span><span class="d">31 deposits</span></div>
+          <div class="link"><span class="pill bad"><i data-icon="alert"></i>Fee off by $3.60</span></div>
+          <div class="stop"><span class="k"><i data-icon="bill"></i>Your NETS bill</span><span class="v">$86.20</span><span class="d">October fees</span></div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="tabs" role="tablist" aria-label="Check-up results" style="padding:0 12px">
+          <button role="tab" aria-selected="true" data-tab="open">Needs a look <span class="cnt">2</span></button>
+          <button role="tab" aria-selected="false" data-tab="done">Looked at <span class="cnt">1</span></button>
+          <button role="tab" aria-selected="false" data-tab="ok">Matched <span class="cnt">29</span></button>
+        </div>
+
+        <div data-panel="open">
+          <article class="issue" id="issue-short">
+            <span class="ic"><i data-icon="alert"></i></span>
+            <div>
+              <h3>Short by $42.10 <span class="pill bad">Needs a look</span></h3>
+              <p class="what">Card sales on Sat 18 Oct. Less money reached your bank than your card payments add up to.</p>
+              <div class="cmp">
+                <div><span class="k">We expected</span><span class="v">$781.45</span></div>
+                <div><span class="k">Arrived in your bank</span><span class="v">$739.35</span></div>
+                <div class="diff"><span class="k">Difference</span><span class="v">−$42.10</span></div>
+              </div>
+              <p class="why"><i data-icon="info"></i><span>This usually means a refund or a chargeback was taken from that day's money. One card payment of $42.10 was refunded on 18 Oct.</span></p>
+              <div class="acts">
+                <a class="btn btn-secondary" href="transactions.html">See the 18 Oct payments</a>
+                <button class="btn btn-secondary" type="button">Ask NETS about this</button>
+                <button class="btn btn-quiet" type="button" data-mark="issue-short">Mark as looked at</button>
+              </div>
+              <p class="tech">Amount mismatch · Settlement STL-1018-CARD · Cards</p>
+            </div>
+          </article>
+
+          <article class="issue" id="issue-fee">
+            <span class="ic"><i data-icon="bill"></i></span>
+            <div>
+              <h3>Fee looks $3.60 too high <span class="pill bad">Needs a look</span></h3>
+              <p class="what">Your October bill charges more in fees than your payments add up to.</p>
+              <div class="cmp">
+                <div><span class="k">Fees on your bill</span><span class="v">$86.20</span></div>
+                <div><span class="k">Fees from your payments</span><span class="v">$82.60</span></div>
+                <div class="diff"><span class="k">Difference</span><span class="v">$3.60</span></div>
+              </div>
+              <p class="why"><i data-icon="info"></i><span>Small differences can come from a fee rate change during the month. If you did not expect one, ask NETS to check the bill before you pay it.</span></p>
+              <div class="acts">
+                <a class="btn btn-secondary" href="#">Open the October bill</a>
+                <button class="btn btn-secondary" type="button">Ask NETS about this bill</button>
+                <button class="btn btn-quiet" type="button" data-mark="issue-fee">Mark as looked at</button>
+              </div>
+              <p class="tech">Fee mismatch · Invoice INV-2026-10</p>
+            </div>
+          </article>
+        </div>
+
+        <div data-panel="done" hidden>
+          <article class="issue done">
+            <span class="ic"><i data-icon="tick"></i></span>
+            <div>
+              <h3>Late by 2 days <span class="pill ok"><i data-icon="tick"></i>Looked at</span></h3>
+              <p class="what">NETS QR money from Mon 27 Oct ($612.80) was due Wed 29 Oct and arrived Fri 31 Oct. Nothing is missing.</p>
+              <p class="tech">Marked by Tan Ah Hock on 3 Nov · Settlement delay · STL-1027-QR</p>
+            </div>
+          </article>
+        </div>
+
+        <div data-panel="ok" hidden>
+          <div class="panel-body"><p class="muted">29 deposits matched your payments to the cent. They are listed in the Excel download.</p></div>
+        </div>
+      </section>
+    </main>
+  </div>
+  <nav class="tabbar" id="tabbar" aria-label="Main"></nav>
+</div>
+<script src="assets/shell.js"></script>
+<script>
+  // Tabs
+  document.querySelectorAll('[data-tab]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      document.querySelectorAll('[data-tab]').forEach(function (x) { x.setAttribute('aria-selected', x === b); });
+      document.querySelectorAll('[data-panel]').forEach(function (p) { p.hidden = p.dataset.panel !== b.dataset.tab; });
+    });
+  });
+  // "Mark as looked at" flips the item's status in place
+  document.addEventListener('click', function (e) {
+    var btn = e.target.closest('[data-mark]');
+    if (!btn) return;
+    var item = document.getElementById(btn.dataset.mark);
+    item.classList.add('done');
+    var pill = item.querySelector('h3 .pill');
+    pill.className = 'pill ok';
+    pill.innerHTML = window.icon('tick') + 'Looked at';
+    btn.textContent = 'Undo';
+    btn.removeAttribute('data-mark');
+  });
+</script>
+</body>
+</html>

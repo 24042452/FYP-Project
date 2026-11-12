@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sales &amp; payments · Merchant Portal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;650;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/portal.css">
+<style>
+.filters { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; padding: 14px 16px; border-bottom: 1px solid var(--border); }
+.filters .select { width: auto; min-width: 150px; }
+.seg { display: inline-flex; border: 1px solid var(--border-strong); border-radius: var(--r); padding: 3px; background: var(--surface); }
+.seg button { min-height: 36px; padding: 0 12px; border: 0; border-radius: 6px; background: none; font-weight: 600; font-size: 14px; color: var(--ink-2); cursor: pointer; white-space: nowrap; }
+.seg button[aria-pressed="true"] { background: var(--accent-soft); color: var(--accent-ink); }
+.find { display: flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 12px; border: 1px solid var(--border-strong); border-radius: var(--r); background: var(--surface); color: var(--ink-3); flex: 1 1 220px; }
+.find input { border: 0; outline: 0; flex: 1; min-width: 0; font-size: 15px; background: none; color: var(--ink); }
+.find:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+
+.split { display: grid; grid-template-columns: minmax(0, 1fr) 380px; gap: 20px; align-items: start; }
+.detail { position: sticky; top: 80px; }
+.detail .top { padding: 20px; border-bottom: 1px solid var(--border); display: flex; flex-direction: column; gap: 8px; }
+.detail .amt { font-size: 32px; font-weight: 650; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+.detail .plain { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; flex-direction: column; gap: 10px; }
+.detail .plain h3 { font-size: 16px; font-weight: 650; }
+.box-red { padding: 12px 14px; border-radius: var(--r); background: var(--red-soft); color: var(--red-ink); font-size: 15px; }
+.box-blue { padding: 12px 14px; border-radius: var(--r); background: var(--accent-soft); color: var(--accent-ink); font-size: 15px; }
+.box-ok { padding: 12px 14px; border-radius: var(--r); background: var(--ok-bg); color: var(--ok); font-size: 15px; }
+dl.kv { margin: 0; padding: 16px 20px; display: grid; grid-template-columns: auto 1fr; gap: 10px 16px; font-size: 15px; }
+dl.kv dt { color: var(--ink-2); }
+dl.kv dd { margin: 0; text-align: right; font-weight: 500; font-variant-numeric: tabular-nums; }
+.detail .acts { padding: 0 20px 20px; display: flex; flex-direction: column; gap: 10px; }
+.close-detail { display: none; }
+td .ch { display: inline-flex; align-items: center; gap: 8px; }
+td.c-time, td.c-where, td.c-time .sub { white-space: nowrap; }
+.seg { max-width: 100%; flex-wrap: wrap; }
+
+@media (max-width: 1180px) {
+  .split { grid-template-columns: 1fr; }
+  .detail { position: fixed; inset: auto 0 0 0; top: auto; z-index: 40; max-height: 86vh; overflow: auto; border-radius: 16px 16px 0 0; box-shadow: var(--shadow-pop); transform: translateY(105%); transition: transform 280ms var(--ease); }
+  .detail.open { transform: none; }
+  .close-detail { display: grid; position: absolute; top: 12px; right: 12px; }
+}
+@media (max-width: 760px) {
+  table.data thead { display: none; }
+  table.data, table.data tbody, table.data tr, table.data td { display: block; }
+  table.data tr { display: grid; grid-template-columns: 1fr auto; gap: 2px 12px; padding: 12px 16px; border-bottom: 1px solid var(--border); }
+  table.data td { padding: 0; border: 0; }
+  table.data td.c-time { grid-column: 1; }
+  table.data td.c-amt { grid-column: 2; grid-row: 1; text-align: right; }
+  table.data td.c-where, table.data td.c-with { grid-column: 1; font-size: 14px; color: var(--ink-2); }
+  table.data td.c-res { grid-column: 2; grid-row: 2 / span 2; text-align: right; align-self: center; }
+  .filters .select { flex: 1 1 140px; }
+}
+</style>
+</head>
+<body data-page="transactions" data-merchant="tansons">
+<div class="app">
+  <aside class="sidebar" id="sidebar"></aside>
+  <div class="scrim"></div>
+  <div class="main">
+    <header class="topbar" id="topbar"></header>
+    <main class="page">
+      <div class="page-head">
+        <div>
+          <h1>Sales &amp; payments</h1>
+          <p class="tech">Transactions · every payment at every outlet</p>
+        </div>
+      </div>
+
+      <div class="page-head">
+        <div>
+          <p class="answer">In the last 7 days you took <em>$38,410.20</em> from 982 payments. 14 didn't go through.</p>
+          <p class="answer-sub">All 3 outlets · Thu 5 to Wed 11 Nov, plus today so far</p>
+        </div>
+        <div class="actions">
+          <button class="btn btn-primary" type="button"><i data-icon="download"></i>Download for my accountant</button>
+        </div>
+      </div>
+
+      <div class="split">
+        <section class="panel" style="overflow:hidden">
+          <div class="filters">
+            <label class="find"><span class="sr-only">Find a payment</span><i data-icon="search" data-class="icon-sm"></i><input type="search" placeholder="Amount, card digits or ref"></label>
+            <label class="sr-only" for="f-date">Dates</label>
+            <select id="f-date" class="select"><option>Last 7 days</option><option>Today</option><option>This month</option><option>Pick dates…</option></select>
+            <label class="sr-only" for="f-outlet">Outlet</label>
+            <select id="f-outlet" class="select"><option>All 3 outlets</option><option>Tampines Mall</option><option>Bedok Mall</option><option>Online store</option></select>
+            <label class="sr-only" for="f-with">Paid with</label>
+            <select id="f-with" class="select"><option>Any way of paying</option><option>NETS QR</option><option>Cards</option><option>SGQR</option><option>NETS Click</option><option>eNETS (online)</option></select>
+            <div class="seg" role="group" aria-label="Result">
+              <button type="button" aria-pressed="true">All</button>
+              <button type="button" aria-pressed="false">Went through</button>
+              <button type="button" aria-pressed="false">Didn't go through</button>
+              <button type="button" aria-pressed="false">Refunded</button>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table class="data" id="txns">
+              <thead><tr><th>Time</th><th>Outlet</th><th>Paid with</th><th class="n">Amount</th><th>Result</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+          <div class="panel-foot"><span>Showing 10 of 982</span><button class="btn btn-secondary" type="button">Show more</button></div>
+        </section>
+
+        <aside class="panel detail" id="detail" aria-label="Payment details">
+          <button class="icon-btn close-detail" type="button" aria-label="Close details" id="closeDetail"><i data-icon="x"></i></button>
+          <div class="top">
+            <span id="d-pill"></span>
+            <span class="amt" id="d-amt"></span>
+            <span class="muted" id="d-when"></span>
+          </div>
+          <div class="plain">
+            <h3>What happened</h3>
+            <div id="d-plain"></div>
+            <div id="d-action" class="box-blue"></div>
+          </div>
+          <dl class="kv" id="d-kv"></dl>
+          <div class="acts">
+            <a class="btn btn-secondary" href="assistant.html"><i data-icon="chat"></i>Ask NETS Assistant about this</a>
+            <button class="btn btn-quiet" type="button"><i data-icon="copy"></i>Copy reference</button>
+          </div>
+        </aside>
+      </div>
+    </main>
+  </div>
+  <nav class="tabbar" id="tabbar" aria-label="Main"></nav>
+</div>
+<script src="assets/shell.js"></script>
+<script>
+  // Sample payments (synthetic). r: ok | fail | refund
+  var T = [
+    { t: '1:02pm', d: 'Thu 12 Nov', o: 'Tampines Mall #02-15', w: 'Card', c: 'Visa ending 4821', a: '128.50', r: 'fail', code: '51', term: 'TM-02', ref: 'TXN-1112-0417' },
+    { t: '12:58pm', d: 'Thu 12 Nov', o: 'Online store', w: 'eNETS', c: 'eNETS (online)', a: '46.90', r: 'ok', term: 'WEB', ref: 'TXN-1112-0416' },
+    { t: '12:51pm', d: 'Thu 12 Nov', o: 'Bedok Mall #B1-30', w: 'NETS QR', c: 'NETS QR', a: '23.40', r: 'ok', term: 'BM-01', ref: 'TXN-1112-0415' },
+    { t: '12:47pm', d: 'Thu 12 Nov', o: 'Tampines Mall #02-15', w: 'NETS QR', c: 'NETS QR', a: '15.80', r: 'ok', term: 'TM-01', ref: 'TXN-1112-0414' },
+    { t: '12:40pm', d: 'Thu 12 Nov', o: 'Online store', w: 'NETS Click', c: 'NETS Click', a: '89.00', r: 'ok', term: 'WEB', ref: 'TXN-1112-0413' },
+    { t: '12:36pm', d: 'Thu 12 Nov', o: 'Bedok Mall #B1-30', w: 'Card', c: 'Mastercard ending 1177', a: '212.00', r: 'refund', term: 'BM-02', ref: 'TXN-1112-0412' },
+    { t: '12:31pm', d: 'Thu 12 Nov', o: 'Tampines Mall #02-15', w: 'SGQR', c: 'SGQR', a: '32.70', r: 'ok', term: 'TM-01', ref: 'TXN-1112-0411' },
+    { t: '12:22pm', d: 'Thu 12 Nov', o: 'Bedok Mall #B1-30', w: 'Card', c: 'Visa ending 0390', a: '54.20', r: 'ok', term: 'BM-02', ref: 'TXN-1112-0410' },
+    { t: '12:15pm', d: 'Thu 12 Nov', o: 'Online store', w: 'eNETS', c: 'eNETS (online)', a: '38.60', r: 'fail', code: 'TO', term: 'WEB', ref: 'TXN-1112-0409' },
+    { t: '12:09pm', d: 'Thu 12 Nov', o: 'Tampines Mall #02-15', w: 'NETS QR', c: 'NETS QR', a: '19.90', r: 'ok', term: 'TM-01', ref: 'TXN-1112-0408' }
+  ];
+  var FAIL = {
+    '51': { plain: "The customer's bank declined it (not enough funds). The customer was not charged.", action: 'Ask the customer to pay another way. Nothing is wrong with your terminal.' },
+    'TO': { plain: 'The payment timed out before the customer confirmed. The customer was not charged.', action: 'Ask the customer to try again.' }
+  };
+  var PILL = {
+    ok: '<span class="pill ok">' + icon('tick') + 'Went through</span>',
+    fail: '<span class="pill bad">' + icon('x') + "Didn't go through</span>",
+    refund: '<span class="pill mute">' + icon('refund') + 'Refunded</span>'
+  };
+  var body = document.querySelector('#txns tbody');
+  body.innerHTML = T.map(function (x, i) {
+    return '<tr tabindex="0" data-i="' + i + '" aria-selected="' + (i === 0) + '">' +
+      '<td class="c-time"><b style="font-weight:600">' + x.t + '</b><span class="sub">' + x.d + '</span></td>' +
+      '<td class="c-where">' + x.o.replace(/ #.*/, '') + '</td>' +
+      '<td class="c-with">' + x.c + '</td>' +
+      '<td class="n amount c-amt">$' + x.a + '</td>' +
+      '<td class="c-res">' + PILL[x.r] + '</td></tr>';
+  }).join('');
+
+  var detail = document.getElementById('detail');
+  function show(i, open) {
+    var x = T[i];
+    document.querySelectorAll('#txns tbody tr').forEach(function (r) { r.setAttribute('aria-selected', r.dataset.i == i); });
+    document.getElementById('d-pill').innerHTML = PILL[x.r];
+    document.getElementById('d-amt').textContent = '$' + x.a;
+    document.getElementById('d-when').textContent = x.d + ', ' + x.t + ' · ' + x.o;
+    var plain = document.getElementById('d-plain'), act = document.getElementById('d-action');
+    if (x.r === 'fail') {
+      plain.className = 'box-red'; plain.textContent = FAIL[x.code].plain;
+      act.hidden = false; act.innerHTML = '<b>What to do:</b> ' + FAIL[x.code].action;
+    } else if (x.r === 'refund') {
+      plain.className = 'box-blue'; plain.textContent = 'This payment went through, then was refunded to the customer on the same day. The refund is taken from this day’s money to your bank.';
+      act.hidden = true;
+    } else {
+      plain.className = 'box-ok'; plain.textContent = 'The payment went through. It will be in your bank with the rest of today’s sales.';
+      act.hidden = true;
+    }
+    var kv = [['Paid with', x.c], ['Terminal', x.term], ['Reference', x.ref]];
+    if (x.code) kv.push(['Bank response code', x.code]);
+    kv.push(['Money to your bank', x.r === 'fail' ? 'None' : 'With Thu 12 Nov sales']);
+    document.getElementById('d-kv').innerHTML = kv.map(function (k) { return '<dt>' + k[0] + '</dt><dd>' + k[1] + '</dd>'; }).join('');
+    if (open) detail.classList.add('open');
+  }
+  body.addEventListener('click', function (e) { var r = e.target.closest('tr'); if (r) show(+r.dataset.i, true); });
+  body.addEventListener('keydown', function (e) { var r = e.target.closest('tr'); if (r && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); show(+r.dataset.i, true); } });
+  document.getElementById('closeDetail').addEventListener('click', function () { detail.classList.remove('open'); });
+  document.querySelectorAll('.seg button').forEach(function (b) {
+    b.addEventListener('click', function () { document.querySelectorAll('.seg button').forEach(function (x) { x.setAttribute('aria-pressed', x === b); }); });
+  });
+  show(0, false);
+</script>
+</body>
+</html>

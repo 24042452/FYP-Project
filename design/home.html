@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Home · Merchant Portal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;650;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/portal.css">
+</head>
+<body data-page="home" data-merchant="ahhock">
+<div class="app">
+  <aside class="sidebar" id="sidebar"></aside>
+  <div class="scrim"></div>
+  <div class="main">
+    <header class="topbar" id="topbar"></header>
+    <main class="page">
+      <div class="page-head">
+        <div>
+          <h1 class="answer">Good week, Ah Hock. You took <em>$4,309</em>, which is $460 more than the week before.</h1>
+          <p class="answer-sub">Last 7 days · Thu 5 to Wed 11 Nov</p>
+        </div>
+        <div class="actions">
+          <button class="btn btn-secondary" type="button"><i data-icon="calendar"></i>Last 7 days</button>
+          <a class="btn btn-primary" href="check-up.html">See what needs attention<i data-icon="arrow"></i></a>
+        </div>
+      </div>
+
+      <section class="panel summary" aria-label="Summary">
+        <div><span class="k">Money in today</span><span class="v">$214.80</span><span class="d">34 payments so far · 1 didn't go through</span></div>
+        <div><span class="k">Coming to your bank</span><span class="v">$593.40</span><span class="d">Tomorrow, Fri 13 Nov</span></div>
+        <div class="attn"><span class="k">Needs your attention</span><span class="v">3 things</span><a class="go" href="check-up.html">See what to do</a></div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head"><h2>Where your money went this week</h2><a class="small" href="#" style="font-weight:600">How fees work</a></div>
+        <div class="panel-body">
+          <div class="flow" role="img" aria-label="Of $4,309.35 in sales, $38.80 went to NETS fees and $4,270.55 goes to your bank"><i class="s" style="flex:4270"></i><i class="f" style="flex:39"></i></div>
+          <div class="flow-lab">
+            <div><b>$4,309.35</b>Your sales</div>
+            <div class="fee"><b>−$38.80</b>NETS fees</div>
+            <div><b>$4,270.55</b>To your bank</div>
+          </div>
+        </div>
+      </section>
+
+      <div class="grid-2">
+        <section class="panel">
+          <div class="panel-head"><h2>Sales this week</h2><a class="small" href="assistant.html" style="font-weight:600">Explain this</a></div>
+          <div class="panel-body">
+            <div class="bars" role="img" aria-label="Daily sales, highest on Saturday at $742">
+              <div class="bar"><span>$548</span><i style="height:110px"></i></div>
+              <div class="bar"><span>$732</span><i style="height:146px"></i></div>
+              <div class="bar best"><span>$742</span><i style="height:148px"></i></div>
+              <div class="bar"><span>$513</span><i style="height:102px"></i></div>
+              <div class="bar"><span>$604</span><i style="height:121px"></i></div>
+              <div class="bar"><span>$572</span><i style="height:114px"></i></div>
+              <div class="bar"><span>$598</span><i style="height:119px"></i></div>
+            </div>
+            <div class="bar-days"><span><b>Thu</b>5</span><span><b>Fri</b>6</span><span><b>Sat</b>7</span><span><b>Sun</b>8</span><span><b>Mon</b>9</span><span><b>Tue</b>10</span><span><b>Wed</b>11</span></div>
+          </div>
+        </section>
+        <section class="panel">
+          <div class="panel-head"><h2>How customers paid</h2></div>
+          <div class="panel-body mix">
+            <div class="mix-row"><span>NETS QR</span><span class="track"><i style="width:46%"></i></span><span class="p">46%</span></div>
+            <div class="mix-row"><span>Cards</span><span class="track"><i style="width:24%"></i></span><span class="p">24%</span></div>
+            <div class="mix-row"><span>SGQR</span><span class="track"><i style="width:14%"></i></span><span class="p">14%</span></div>
+            <div class="mix-row"><span>NETS Click</span><span class="track"><i style="width:10%"></i></span><span class="p">10%</span></div>
+            <div class="mix-row"><span>eNETS</span><span class="track"><i style="width:6%"></i></span><span class="p">6%</span></div>
+          </div>
+        </section>
+      </div>
+
+      <div class="grid-2">
+        <section class="panel">
+          <div class="panel-head"><h2>Money to your bank <span class="tech">Settlements</span></h2><a class="small" href="#" style="font-weight:600">See all</a></div>
+          <div class="table-wrap" style="margin-top:8px">
+            <table class="data">
+              <thead><tr><th>Sales from</th><th class="n">Amount</th><th>Status</th></tr></thead>
+              <tbody>
+                <tr><td style="white-space:nowrap">Wed 11 Nov</td><td class="n amount">$593.40</td><td><span class="pill info"><i data-icon="clock"></i>Arriving Fri 13 Nov</span></td></tr>
+                <tr><td style="white-space:nowrap">Tue 10 Nov</td><td class="n amount">$567.05</td><td><span class="pill ok"><i data-icon="tick"></i>In your bank</span></td></tr>
+                <tr><td style="white-space:nowrap">Mon 9 Nov</td><td class="n amount">$599.50</td><td><span class="pill ok"><i data-icon="tick"></i>In your bank</span></td></tr>
+                <tr><td style="white-space:nowrap">Sun 8 Nov</td><td class="n amount">$508.70</td><td><span class="pill bad"><i data-icon="alert"></i>Late, due Tue 10 Nov</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+        <section class="panel">
+          <div class="panel-head"><h2>Needs your attention</h2></div>
+          <div class="panel-body">
+            <ul class="todo">
+              <li><span class="ic"><i data-icon="clock"></i></span><div><b>Sunday's money is 2 days late</b><span>$508.70 from Sun 8 Nov.</span> <a href="#">Ask NETS to check</a></div></li>
+              <li><span class="ic"><i data-icon="alert"></i></span><div><b>Short by $42.10</b><span>Card sales on Sat 18 Oct.</span> <a href="check-up.html">See why</a></div></li>
+              <li><span class="ic"><i data-icon="bill"></i></span><div><b>Fee looks $3.60 too high</b><span>On your October bill.</span> <a href="check-up.html">Check the bill</a></div></li>
+            </ul>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+  <nav class="tabbar" id="tabbar" aria-label="Main"></nav>
+</div>
+<script src="assets/shell.js"></script>
+</body>
+</html>

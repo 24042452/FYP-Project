@@ -1,0 +1,111 @@
+{
+  "buildPath": "code",
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "overused-font",
+        "value": "inter",
+        "createdAt": "2026-11-12T06:36:31.220Z",
+        "reason": "Project font recorded in CLAUDE.md (Inter) and the user picked the Inter-based Option 1; workhorse UI face for an Operate surface"
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "15px",
+        "createdAt": "2026-11-12T06:46:02.441Z",
+        "reason": "Shipped mockup value that passed the 2026-11-12 finish review; DESIGN.md ramp omits it (documentation gap, not drift)"
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "20px",
+        "createdAt": "2026-11-12T06:46:02.528Z",
+        "reason": "Shipped mockup value that passed the 2026-11-12 finish review; DESIGN.md ramp omits it (documentation gap, not drift)"
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "18px",
+        "createdAt": "2026-11-12T06:46:02.628Z",
+        "reason": "Shipped mockup value that passed the 2026-11-12 finish review; DESIGN.md ramp omits it (documentation gap, not drift)"
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "24px",
+        "createdAt": "2026-11-12T06:46:02.731Z",
+        "reason": "Shipped mockup value that passed the 2026-11-12 finish review; DESIGN.md ramp omits it (documentation gap, not drift)"
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "26px",
+        "createdAt": "2026-11-12T06:46:02.817Z",
+        "reason": "Shipped mockup value that passed the 2026-11-12 finish review; DESIGN.md ramp omits it (documentation gap, not drift)"
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "11px",
+        "createdAt": "2026-11-12T06:46:02.923Z",
+        "reason": "Shipped mockup value that passed the 2026-11-12 finish review; DESIGN.md ramp omits it (documentation gap, not drift)"
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "10px",
+        "createdAt": "2026-11-12T06:46:03.016Z",
+        "reason": "Shipped mockup value that passed the 2026-11-12 finish review; DESIGN.md ramp omits it (documentation gap, not drift)"
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "clamp(30px, 3vw, 42px)",
+        "createdAt": "2026-11-12T06:46:03.102Z",
+        "reason": "Shipped mockup value that passed the 2026-11-12 finish review; DESIGN.md ramp omits it (documentation gap, not drift)"
+      },
+      {
+        "rule": "design-system-radius",
+        "value": "4px",
+        "createdAt": "2026-11-12T06:46:03.191Z",
+        "reason": "Shipped mockup value that passed the 2026-11-12 finish review; DESIGN.md ramp omits it (documentation gap, not drift)"
+      },
+      {
+        "rule": "design-system-radius",
+        "value": "10px",
+        "createdAt": "2026-11-12T06:46:03.282Z",
+        "reason": "Shipped mockup value that passed the 2026-11-12 finish review; DESIGN.md ramp omits it (documentation gap, not drift)"
+      },
+      {
+        "rule": "design-system-color",
+        "value": "#c9d7fa",
+        "createdAt": "2026-11-12T06:46:03.370Z",
+        "reason": "Shipped mockup value that passed the 2026-11-12 finish review; DESIGN.md ramp omits it (documentation gap, not drift)"
+      },
+      {
+        "rule": "design-system-color",
+        "value": "#dce4f7",
+        "createdAt": "2026-11-12T06:46:03.457Z",
+        "reason": "Shipped mockup value that passed the 2026-11-12 finish review; DESIGN.md ramp omits it (documentation gap, not drift)"
+      },
+      {
+        "rule": "design-system-color",
+        "value": "#d6e2f8",
+        "createdAt": "2026-11-12T06:46:03.544Z",
+        "reason": "Shipped mockup value that passed the 2026-11-12 finish review; DESIGN.md ramp omits it (documentation gap, not drift)"
+      },
+      {
+        "rule": "design-system-color",
+        "value": "rgba(4, 22, 60, 0.6)",
+        "createdAt": "2026-11-12T06:46:03.647Z",
+        "reason": "Shipped mockup value that passed the 2026-11-12 finish review; DESIGN.md ramp omits it (documentation gap, not drift)"
+      },
+      {
+        "rule": "design-system-color",
+        "value": "#000",
+        "createdAt": "2026-11-12T06:46:03.737Z",
+        "reason": "Mask-image gradient stop for the sidebar fade, not a visible colour"
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "42px",
+        "createdAt": "2026-11-12T06:46:12.059Z",
+        "reason": "Login hero headline max size; shipped mockup value that passed the 2026-11-12 finish review; DESIGN.md ramp omits it"
+      }
+    ]
+  }
+}

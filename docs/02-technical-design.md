@@ -14,7 +14,7 @@ Version 0.1 · 2026-11-11 · Living document: update it in the same PR as any ar
 
 | Area | Choice | Why |
 |---|---|---|
-| Framework | **Next.js 15 (App Router) + TypeScript** | First-class on Vercel; server components keep secrets server-side |
+| Framework | **Next.js 15 (App Router), plain JavaScript (no TypeScript)** | First-class on Vercel; server components keep secrets server-side. Plain JS because the team has not learned TypeScript (decided 2026-11-12); JSDoc comments can document types where helpful |
 | Styling / UI | **Tailwind CSS + shadcn/ui** (Radix primitives) | Accessible components out of the box, fast to theme for the chosen design |
 | Charts | **Recharts** | Simple React API, responsive |
 | Tables | **TanStack Table** | Sorting, filtering, pagination for transactions |
@@ -61,12 +61,12 @@ flowchart LR
   /(portal)/reconciliation  /reports  /assistant  /notifications
   /(portal)/offers  /campaigns  /lending  /services  /terminals
   /(portal)/business  /disputes  /integrations  /analytics  /settings
-  /api/assistant/route.ts      # streaming copilot
-  /api/export/[type]/route.ts  # xlsx / pdf
+  /api/assistant/route.js      # streaming copilot
+  /api/export/[type]/route.js  # xlsx / pdf
 /components  (ui/, charts/, layout/)
 /lib         (supabase/, assistant/tools/, recon/, format/)
 /supabase    (migrations/, seed/, functions/, tests/)
-/scripts     generate-synthetic-data.ts
+/scripts     generate-synthetic-data.js
 /docs
 ```
 
@@ -125,6 +125,11 @@ For a selected month:
 - **Help tool:** `search_help_centre(query)` embeds the query, runs a pgvector similarity search over `kb_chunks`, and returns the top passages with their source, which the answer then cites.
 - **Guardrails:** the system prompt tells the assistant to answer only from tool results, to say "I don't know" rather than guess, and to always state the date range. Tools are read-only in the MVP. Any later write actions (e.g. raising a refund) need user confirmation, plus maker-checker in Phase 4.
 - **Summary card:** template-based in the MVP (deterministic). The LLM is used only for the chat.
+- **Two modes (`ASSISTANT_MODE`):**
+  - `rules` (MVP default, no AI, no key needed): keyword intent matching plus time-phrase parsing picks a data tool and fills a sentence template. Help questions return the best-matching help-centre answer verbatim, with its source. This is retrieval without generation, so it is **not** RAG.
+  - `ai`: Claude chooses the same tools itself and writes the reply. Help questions use **RAG**: `search_help_centre` retrieves passages, and Claude answers from them with citations.
+  - Both modes share the tools and the help-centre search, so switching is a config change.
+- **Help-centre search in the MVP:** Postgres full-text search (`tsvector` + `ts_rank`) over `kb_chunks`. Phase 2 adds pgvector embeddings (gte-small) for meaning-based search ("hybrid" keyword + vector).
 
 ## 7. Open API & integrations (two-way)
 

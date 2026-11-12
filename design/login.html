@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Log in · Merchant Portal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;650;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/portal.css">
+<style>
+body { background: var(--surface); }
+.login { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); min-height: 100vh; }
+.side { background: var(--accent); color: #fff; padding: 40px clamp(24px, 4vw, 56px); display: flex; flex-direction: column; gap: 32px; position: relative; overflow: hidden; }
+.side .brand { color: #fff; padding: 0; }
+.side .brand-mark { background: #fff; color: var(--red); }
+.side h1 { font-size: clamp(30px, 3vw, 42px); line-height: 1.15; font-weight: 700; letter-spacing: -0.02em; max-width: 16ch; }
+.side p { color: #D6E2F8; font-size: 17px; max-width: 42ch; }
+.preview { margin-top: auto; background: #fff; color: var(--ink); border-radius: var(--r-lg); box-shadow: 0 30px 60px -20px rgba(4, 22, 60, 0.6); padding: 18px; display: flex; flex-direction: column; gap: 12px; max-width: 460px; }
+.preview .h { font-size: 15px; font-weight: 600; }
+.preview .row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border: 1px solid var(--border); border-radius: var(--r); }
+.preview .row > div { padding: 10px 12px; display: flex; flex-direction: column; }
+.preview .row > div + div { border-left: 1px solid var(--border); }
+.preview .k { font-size: 12px; color: var(--ink-2); }
+.preview .v { font-size: 18px; font-weight: 650; font-variant-numeric: tabular-nums; }
+.preview .v.r { color: var(--red-ink); }
+.preview .flow { height: 14px; }
+.preview .cap { font-size: 12px; color: var(--ink-3); }
+
+.form-side { display: flex; align-items: center; justify-content: center; padding: 40px 24px; }
+.form { width: 100%; max-width: 420px; display: flex; flex-direction: column; gap: 22px; }
+.form h2 { font-size: 26px; font-weight: 700; }
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field label { font-size: 15px; font-weight: 600; }
+.input { min-height: 48px; padding: 0 14px; border-radius: var(--r); border: 1px solid var(--border-strong); font-size: 16px; background: var(--surface); }
+.input:focus { outline: 0; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+.row-between { display: flex; justify-content: space-between; align-items: center; gap: 12px; font-size: 15px; }
+.check { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; }
+.check input { width: 20px; height: 20px; accent-color: var(--accent); }
+.or { display: flex; align-items: center; gap: 12px; color: var(--ink-3); font-size: 14px; }
+.or::before, .or::after { content: ""; flex: 1; height: 1px; background: var(--border); }
+.demo { display: flex; flex-direction: column; gap: 10px; }
+.demo a { display: grid; grid-template-columns: 44px 1fr 20px; gap: 14px; align-items: center; padding: 14px 16px; border-radius: var(--r-lg); border: 1px solid var(--border-strong); text-decoration: none; color: var(--ink); background: var(--surface); transition: border-color 140ms var(--ease), box-shadow 140ms var(--ease); }
+.demo a:hover { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); color: var(--ink); }
+.demo .ic { width: 44px; height: 44px; border-radius: 10px; background: var(--accent-soft); color: var(--accent-ink); display: grid; place-items: center; }
+.demo b { display: block; font-weight: 650; }
+.demo span.s { font-size: 14px; color: var(--ink-2); }
+.demo .icon:last-child { color: var(--ink-3); }
+.note { font-size: 13px; color: var(--ink-3); text-align: center; }
+
+@media (max-width: 900px) {
+  .login { grid-template-columns: 1fr; }
+  .side { padding: 24px 20px 28px; gap: 16px; }
+  .side h1 { font-size: 26px; }
+  .side p, .preview { display: none; }
+  .form-side { padding: 28px 20px 40px; align-items: flex-start; }
+}
+</style>
+</head>
+<body>
+<div class="login">
+  <section class="side">
+    <div class="brand"><span class="brand-mark">M</span><span class="brand-name" style="color:#fff">Merchant Portal</span></div>
+    <h1>Know where your money is, every day.</h1>
+    <p>See your sales from every NETS payment type, check what reaches your bank, and get plain answers to your money questions.</p>
+    <div class="preview" aria-hidden="true">
+      <span class="h">Good week. You took $4,309.</span>
+      <div class="row">
+        <div><span class="k">Today</span><span class="v">$214.80</span></div>
+        <div><span class="k">To your bank</span><span class="v">$593.40</span></div>
+        <div><span class="k">Needs a look</span><span class="v r">3</span></div>
+      </div>
+      <div class="flow"><i class="s" style="flex:110"></i><i class="f" style="flex:1"></i></div>
+      <span class="cap">Sample data</span>
+    </div>
+  </section>
+
+  <section class="form-side">
+    <form class="form" action="home.html">
+      <div>
+        <h2>Log in</h2>
+        <p class="muted" style="margin-top:4px">Use the email your business registered with NETS.</p>
+      </div>
+      <div class="field"><label for="email">Email</label><input class="input" id="email" type="email" autocomplete="email" placeholder="you@yourbusiness.sg"></div>
+      <div class="field"><label for="pw">Password</label><input class="input" id="pw" type="password" autocomplete="current-password"></div>
+      <div class="row-between">
+        <label class="check"><input type="checkbox"> Keep me logged in</label>
+        <a href="#" style="font-weight:600">Forgot password?</a>
+      </div>
+      <button class="btn btn-primary btn-lg btn-block" type="submit">Log in</button>
+
+      <div class="or">Just looking? Try a sample business</div>
+      <div class="demo">
+        <a href="home.html"><span class="ic"><i data-icon="store"></i></span><span><b>Try as Ah Hock Chicken Rice</b><span class="s">Hawker stall · 1 outlet · Owner</span></span><i data-icon="chev"></i></a>
+        <a href="transactions.html"><span class="ic"><i data-icon="building"></i></span><span><b>Try as Tan &amp; Sons Retail</b><span class="s">3 outlets incl. online shop · Accountant</span></span><i data-icon="chev"></i></a>
+      </div>
+      <p class="note">Sample businesses use made-up data. Nothing you do there is real.</p>
+    </form>
+  </section>
+</div>
+<div class="app" hidden></div>
+<script src="assets/shell.js"></script>
+</body>
+</html>

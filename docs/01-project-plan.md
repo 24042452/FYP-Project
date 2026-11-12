@@ -103,6 +103,10 @@ Version control: GitHub, with a `main` branch (production) and short-lived featu
 | **C** | AI & assistant | Copilot API route, query tools (sales by period, busiest day, failed payment lookup, settlement status), FAQ content + embeddings | Chat UI, summary card text, notifications rules, prompt tuning & guardrails |
 | **D** | Reports, QA, PM & docs | GitHub repo/board, CI, Vercel setup, invoice PDF template | Excel/PDF exports, test plan + test cases, user-guide draft, demo script & slides |
 
+**Scope decisions (2026-11-11):** two demo merchants (hawker stall + 3-outlet retailer); login offers both email/password and one-click demo buttons (demo mode only); the assistant ships in no-AI "rules" mode first, with AI/RAG mode switched on when an API key is available.
+
+**If the team falls behind, cut in this order:** (1) notifications bell → (2) PDF version of the reconciliation export (Excel stays) → (3) "Coming soon" pages, replaced by greyed-out "Soon" menu items → (4) assistant AI mode (rules mode stays).
+
 Day 10 = **feature freeze**. Days 11–12 = bug fixes, rehearse the demo, keep a backup demo video.
 
 ---

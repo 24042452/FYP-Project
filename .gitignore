@@ -44,3 +44,8 @@ next-env.d.ts
 .superpowers/
 .env*.local
 !.env.example
+
+# Impeccable design tool: runtime files
+.impeccable/questions/
+.impeccable/hook.cache.json
+.impeccable/config.local.json

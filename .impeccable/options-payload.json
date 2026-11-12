@@ -1,0 +1,47 @@
+{
+  "title": "Pick the Merchant Portal look",
+  "question": "Three professional home pages in red, blue and white. The one you pick becomes the style for every screen (Login, Check-up, Transactions, Assistant, phone).",
+  "options": [
+    {
+      "id": "option-1",
+      "label": "1 · Clean Console",
+      "kicker": "OPTION 1",
+      "lineage": "Stripe-calibre console: light sidebar, white panels",
+      "thesis": "The calm, precise one: everything in tidy panels, blue for data, red only for the main button and problems.",
+      "palette": ["#FFFFFF", "#0B4DB8", "#D3162B", "#14213D", "#F5F7FA"],
+      "materials": ["light sidebar", "summary strip", "money-flow bar (sales → fees → bank)"],
+      "viewport": "Headline sentence, red 'See what needs attention' button, one strip of 3 numbers, a 'where your money went' bar, then chart, payment mix, payouts table and to-do list.",
+      "risk": "Closest to a standard dashboard; distinct mainly through the money-flow bar and plain words.",
+      "comp": "mocks/decision/option-1-desktop.png",
+      "hero": "mocks/decision/option-1-phone.png"
+    },
+    {
+      "id": "option-2",
+      "label": "2 · Brand Band",
+      "kicker": "OPTION 2",
+      "lineage": "Banking-app style: navy brand band, menus along the top",
+      "thesis": "The confident one: a deep navy band carries the headline and the 3 key numbers, white cards rise over it, menus sit across the top.",
+      "palette": ["#0A2E6E", "#D0172C", "#FFFFFF", "#1856C9", "#F3F5F9"],
+      "materials": ["full-width navy band", "top menu with dropdowns", "payout progress steps", "big quick-action tiles"],
+      "viewport": "Top menu (Home, My business, My money, Grow, Settings), navy band with headline and 3 numbers plus a red 'See what to do' button, then chart and payout steps, then 4 big action tiles.",
+      "risk": "Top menus hide the plain-word/technical-term labels until opened; the band uses a lot of height on small laptops.",
+      "comp": "mocks/decision/option-2-desktop.png",
+      "hero": "mocks/decision/option-2-phone.png"
+    },
+    {
+      "id": "option-3",
+      "label": "3 · Your Day",
+      "kicker": "OPTION 3",
+      "lineage": "Navy sidebar with a timeline feed of today's events",
+      "thesis": "The most distinctive one: a navy sidebar and a 'Your day so far' timeline that tells the story of today, with problems in red.",
+      "palette": ["#0B2A63", "#D2182D", "#FFFFFF", "#1754C4", "#F4F6FA"],
+      "materials": ["navy sidebar, red Ask button", "event timeline", "navy check-up card"],
+      "viewport": "Big headline and 3 numbers on the left, then a timeline of today (failed payment, money landed, late payout); right column shows this week, payment mix and the October check-up.",
+      "risk": "The timeline is new to users and needs good event writing; less room for tables on Home.",
+      "comp": "mocks/decision/option-3-desktop.png",
+      "hero": "mocks/decision/option-3-phone.png"
+    }
+  ],
+  "steer": true,
+  "buildPath": {"value": "code"}
+}
