@@ -13,7 +13,7 @@ Two primary audiences, designed for equally:
 - **Small merchants (e.g. a hawker with one stall):** often not tech-savvy, often older, frequently on a phone at the stall between customers. Job: "Did I get paid, how is business, is anything wrong?"
 - **Multi-outlet merchants and their accountants (e.g. a 3-outlet retailer with an online shop):** usually on desktop. Job: find and filter payments, check settlements against sales and the monthly invoice, export for the books.
 
-Secondary audience: NETS and RP (Republic Polytechnic) evaluators at the Touchpoint demos, who judge the prototype against NETS's brief.
+Secondary audience: NETS and RP evaluators at the Touchpoint demos, who judge the prototype against NETS's brief.
 
 ## Product Purpose
 
