@@ -4,7 +4,7 @@ Final Year Project with industry partner **NETS** (Singapore payments): an enhan
 
 ## Where we left off (update this section at the end of every session)
 
-**Last updated:** 2026-11-14
+**Last updated:** 2026-11-15
 **Current phase: BUILDING.** The user approved building (database switched to MySQL 8 on 2026-11-14, see ADR-001). MVP feature tasks 1-13 are done and task 14a (Playwright e2e tests, GitHub Actions CI, README, feature docs, test-plan results) is done, all on branch `mvp`. The deployment part, 14b (hosted MySQL, `git push`, Vercel), is **waiting on the user's OK**: do not create hosted databases, push or deploy until they say so.
 **Next deadline:** Touchpoint 1 MVP demo to NETS & RP, about 2026-11-25.
 
@@ -21,7 +21,7 @@ Waiting on the user:
 
 Next steps:
 1. 14b deploy (after the user's OK): hosted MySQL 8 with app and admin users, `npm run migrate` and `npm run seed` against it, push, Vercel, smoke-test both demo logins
-2. Final whole-branch review of `mvp`
+2. ~~Final whole-branch review of `mvp`~~ Done 2026-11-15: verdict "with fixes", all fixes applied (REST `/api/v1` endpoints, computed overdue, TLS + pool settings for hosted MySQL) and re-reviewed clean. Tests: 224 unit, 91 integration, 26 e2e
 3. Open a PR from `mvp` to `main`
 4. Cut list if behind is in "Decisions made"
 5. **Before every demo: run `npm run seed` that morning** (and against the hosted DB). Pending/late/today figures are set relative to the seed day and nothing refreshes them
