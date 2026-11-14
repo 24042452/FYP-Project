@@ -87,12 +87,12 @@ async function seedMerchant(conn, demo, password, nowIso, today) {
     await bulk(conn, 'invoices', ['id', 'merchant_id', 'period', 'total_cents', 'status', 'due_date'],
       data.invoices.map((v) => [v.id, m, v.period, v.total_cents, v.status, v.due_date]))
     await bulk(conn, 'invoice_lines',
-      ['id', 'merchant_id', 'invoice_id', 'charge_type', 'description', 'qty', 'unit_price_cents', 'amount_cents'],
+      ['id', 'merchant_id', 'invoice_id', 'charge_type', 'channel', 'description', 'qty', 'unit_price_cents', 'amount_cents'],
       data.invoiceLines.map((l) => {
         const rental = l.description === 'Terminal rental'
         const type = l.channel ? 'mdr' : rental ? 'terminal_rental' : 'portal_fee'
         const qty = rental ? data.terminals.length : 1
-        return [l.id, m, l.invoice_id, type, l.description, qty, rental ? l.amount_cents / qty : null, l.amount_cents]
+        return [l.id, m, l.invoice_id, type, l.channel ?? null, l.description, qty, rental ? l.amount_cents / qty : null, l.amount_cents]
       }))
     await conn.commit()
   } catch (err) {

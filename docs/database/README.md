@@ -62,7 +62,7 @@ Ids are `CHAR(36)` UUIDs. Money is `BIGINT` cents. Times are `DATETIME(3)` in UT
 | `transactions` | id, merchant_id, outlet_id, terminal_id, channel, status (success/failed/refunded), amount_cents, fee_cents, customer_ref, failure_code, settlement_id, created_at |
 | `settlements` | id, merchant_id, business_date (DATE), channel, gross_cents, fee_cents, net_cents, status (pending/paid/delayed), expected_date, paid_date, bank_ref |
 | `invoices` | id, merchant_id, period (DATE, first of month), total_cents, status (unpaid/paid/overdue), due_date, pdf_path |
-| `invoice_lines` | id, merchant_id, invoice_id, charge_type, description, qty, unit_price_cents, amount_cents |
+| `invoice_lines` | id, merchant_id, invoice_id, charge_type, channel (set for MDR lines, NULL for terminal rental / portal fee; migration 0003), description, qty, unit_price_cents, amount_cents |
 | `recon_runs` | id, merchant_id, period, run_at, matched_count, exception_count |
 | `recon_exceptions` | id, merchant_id, run_id, type (amount_mismatch/missing_settlement/settlement_delay/failed_payment/fee_mismatch), settlement_id, transaction_id, expected_cents, actual_cents, status (open/resolved), note |
 | `notifications` | id, merchant_id, kind, title, body, link, created_at, read_at |

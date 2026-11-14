@@ -53,6 +53,19 @@ describe('composite merchant foreign keys', () => {
     )
   })
 
+  it('stores a channel (or NULL) on invoice lines', async () => {
+    const withChannel = randomUUID()
+    const without = randomUUID()
+    await adminExecute(
+      `INSERT INTO invoice_lines (id, merchant_id, invoice_id, charge_type, channel, description, amount_cents)
+       VALUES (?, ?, ?, 'mdr', 'card', 'MDR fees', 100), (?, ?, ?, 'portal_fee', NULL, 'Portal fee', 0)`,
+      [withChannel, A, INVOICE_A, without, A, INVOICE_A],
+    )
+    const rows = await query('SELECT id, channel FROM invoice_lines WHERE merchant_id = ? AND id IN (?, ?)', [A, withChannel, without])
+    expect(rows.find((r) => r.id === withChannel).channel).toBe('card')
+    expect(rows.find((r) => r.id === without).channel).toBeNull()
+  })
+
   it('rejects a transaction pointing at another merchant\'s settlement', async () => {
     await expect(
       adminExecute(
