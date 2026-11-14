@@ -1,7 +1,7 @@
 "use client";
 import * as React from "react";
 import { cva } from "class-variance-authority";
-import { cn } from "cn";
+import { cn } from "@/lib/utils";
 import { Tabs as TabsPrimitive } from "radix-ui";
 function Tabs({ className, orientation = "horizontal", ...props }) {
     return (<TabsPrimitive.Root data-slot="tabs" data-orientation={orientation} className={cn("group/tabs flex gap-2 data-horizontal:flex-col", className)} {...props}/>);

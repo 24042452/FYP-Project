@@ -49,13 +49,13 @@ Extra e2e rows: TC-AUTH-01b (wrong password, Pass), TC-AUTH-03 (the "Try as Tan 
 
 **TC-AUTH-03 with DEMO_MODE off:** the e2e server's environment is fixed for a run, so e2e only tests the DEMO_MODE=true path. The off branch (no demo buttons, demo login refused) is covered by unit `tests/unit/login-form.test.jsx` and integration `tests/integration/demo-login.test.js`.
 
-## 4. Results (2026-11-14)
+## 4. Results (2026-11-15)
 
 | Suite | Command | Result |
 |---|---|---|
-| Unit (Vitest) | `npm test` | 22 files, 209 tests passed |
-| Integration (Vitest + MySQL 8, `nets_portal_test`) | `npm run test:integration` | 10 files, 80 tests passed |
-| End-to-end (Playwright, Microsoft Edge, desktop 1280x800 and iPhone 13) | `npm run test:e2e` | 22 tests passed (11 per project), against `npm run build && npm start` |
+| Unit (Vitest) | `npm test` | 25 files, 224 tests passed |
+| Integration (Vitest + MySQL 8, `nets_portal_test`) | `npm run test:integration` | 11 files, 91 tests passed |
+| End-to-end (Playwright, Microsoft Edge, desktop 1280x800 and iPhone 13) | `npm run test:e2e` | 26 tests passed (13 per project), against `npm run build && npm start` |
 | Lint | `npm run lint` | no problems |
 
 Not yet done: AI evaluation set against a live model, accessibility scan (axe), usability sessions, UAT. GitHub Actions (`.github/workflows/ci.yml`) runs lint, unit and integration tests; e2e is run locally only because it needs a seeded database and a browser.
