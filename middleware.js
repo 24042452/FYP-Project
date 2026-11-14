@@ -7,7 +7,10 @@ export function middleware(request) {
   if (!request.cookies.get('portal_session')?.value) {
     return NextResponse.redirect(new URL('/login', request.url))
   }
-  return NextResponse.next()
+  // Logged-in portal pages must never be stored, so the back button after sign-out shows nothing.
+  const res = NextResponse.next()
+  res.headers.set('Cache-Control', 'private, no-store')
+  return res
 }
 
 export const config = {

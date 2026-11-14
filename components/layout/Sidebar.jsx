@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { NAV } from '@/lib/nav'
+import { NAV, ASK_HREF } from '@/lib/nav'
 import { NavIcon } from './nav-icons'
 
 /** @param {string} pathname @param {string} href */
@@ -17,7 +17,7 @@ function isActive(pathname, href) {
  */
 export function SidebarContent({ merchantName, onNavigate }) {
   const pathname = usePathname()
-  const askActive = isActive(pathname, '/assistant')
+  const askActive = isActive(pathname, ASK_HREF)
 
   return (
     <div className="flex h-full min-h-0 flex-col gap-3.5 p-3">
@@ -79,7 +79,7 @@ export function SidebarContent({ merchantName, onNavigate }) {
       </div>
 
       <Link
-        href="/assistant"
+        href={ASK_HREF}
         onClick={onNavigate}
         aria-current={askActive ? 'page' : undefined}
         className="flex min-h-12 flex-none items-center gap-2.5 rounded-lg bg-nets-blue px-3.5 text-[15px] font-semibold text-white no-underline hover:bg-nets-blue-hover aria-[current=page]:bg-nets-blue-hover"
