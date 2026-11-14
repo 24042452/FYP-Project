@@ -8,7 +8,7 @@ Each item says where it is and why it matters. Tick items off (or delete them) i
 
 - [ ] **Re-seed the demo data on demo morning** (local and Azure: `node --env-file=.env.azure scripts/seed.mjs`). "Today", "this week", pending and late figures are fixed to the day the seed ran.
 - [ ] **Change the Azure database password** (it was exposed once outside the repo), then update `.env.azure` and Vercel.
-- [ ] **Health score wording** (`lib/metrics/health.js`): it shows a low red score ("21 · Needs attention") next to "Business is good this week" because the plan's formula takes off 1,000 × failed rate and 5 per late payout. Soften the formula or rename it (e.g. "Things to check").
+- [x] **Health score wording** (`lib/metrics/health.js`): it shows a low red score ("21 · Needs attention") next to "Business is good this week" because the plan's formula takes off 1,000 × failed rate and 5 per late payout. Soften the formula or rename it (e.g. "Things to check"). (done: new rule and explanation panel)
 - [ ] **AI mode has never run against the live Anthropic API** (no key). Test it before showing it, or keep rules mode for the demo.
 - [ ] Desktop top-bar search box does nothing yet (the phone search icon opens Sales & payments with search focused).
 
@@ -38,7 +38,7 @@ Each item says where it is and why it matters. Tick items off (or delete them) i
 - [ ] Deleting an outlet, terminal or settlement would delete its payments (cascade). The app never does this; keep it that way or switch to soft deletes before adding any delete feature.
 - [ ] `recon_exceptions.settlement_id` / `transaction_id` are loose references (no foreign keys).
 - [ ] `withTransaction` hides the original error if the rollback itself fails.
-- [ ] `healthScore` isn't guarded against a NaN growth figure (callers never pass one today).
+- [x] `healthScore` isn't guarded against a NaN growth figure (callers never pass one today). (done: non-finite inputs count as 0)
 - [ ] Refunds: channel mix ignores negative totals and `txnCount` includes refunded rows. Revisit when refunds are built (Phase 1).
 - [ ] Assistant: `get_settlement_status` has no maximum date range; the "unknown tool" check matches error text.
 - [ ] `getLatestRunSummary` returns the stored exception count (incl. failed payments) next to the open count (excl. them). Only the open count is shown; don't render both.

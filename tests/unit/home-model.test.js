@@ -63,7 +63,13 @@ describe('buildHomeModel: nothing at all', () => {
     const labels = m.tags.map((t) => t.label)
     expect(labels.some((l) => /last week|same as|Up |Down /.test(l))).toBe(false)
     expect(labels.some((l) => /Busiest/.test(l))).toBe(false)
-    expect(labels.some((l) => /Health/.test(l))).toBe(true)
+    expect(labels).toContain('Business health: 75 · Healthy')
+    const tag = m.tags.find((t) => t.health)
+    expect(tag.tone).toBe('ok')
+    expect(tag.health.score).toBe(75)
+    expect(tag.health.factors).toHaveLength(3)
+    expect(tag.health.factors[0].label).toBe('Sales compared with last week')
+    expect(tag.health.factors[0].detail).toBe('No sales to compare yet')
   })
   it('still draws the full week on the chart with zero bars', () => {
     expect(m.chart.series).toHaveLength(7)
@@ -148,6 +154,26 @@ describe('buildHomeModel: growth, previous period empty', () => {
       prevRows: [row('2026-11-02', 'nets_qr', 10000)],
     })
     expect(m.tags.map((t) => t.label)).toContain('Up 10% on last week')
+    // +5 for the 10 % growth, nothing else: 80
+    expect(m.tags.map((t) => t.label)).toContain('Business health: 80 · Healthy')
+  })
+  it('no sales yet this period: health says no sales to compare, not Down 100 %', () => {
+    const m = buildHomeModel({ ...EMPTY_INPUT, prevRows: [row('2026-11-02', 'nets_qr', 10000)] })
+    const h = m.tags.find((t) => t.health).health
+    expect(h.factors[0]).toEqual({ label: 'Sales compared with last week', detail: 'No sales to compare yet', points: 0 })
+    expect(h.score).toBe(75)
+  })
+  it('health explanation follows the period wording and the late count', () => {
+    const m = buildHomeModel({
+      ...EMPTY_INPUT,
+      kind: 'month',
+      settlementSummary: { pendingCents: 0, nextExpectedDate: null, lateCount: 2, lateCents: 100 },
+    })
+    const h = m.tags.find((t) => t.health).health
+    expect(h.factors[0].label).toBe('Sales compared with last month')
+    expect(h.factors[2]).toEqual({ label: 'Late money to your bank', detail: '2 late payouts', points: -6 })
+    expect(h.score).toBe(69)
+    expect(noBad(m)).toBe(true)
   })
 })
 
