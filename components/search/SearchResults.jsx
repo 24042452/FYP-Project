@@ -18,21 +18,17 @@ const PILL = {
  *   highlight: number,
  *   idPrefix: string,
  *   large?: boolean,
+ *   showOutlet?: boolean,
  *   onPick: (id: string) => void,
  *   onSeeAll: () => void,
  *   onHover?: (index: number) => void
  * }} props
  */
-export function SearchResults({ q, state, rows, highlight, idPrefix, large = false, onPick, onSeeAll, onHover }) {
+export function SearchResults({ q, state, rows, highlight, idPrefix, large = false, showOutlet = true, onPick, onSeeAll, onHover }) {
   const text = q.trim()
-  const live = state === 'ok' ? `${rows.length} ${rows.length === 1 ? 'result' : 'results'}` : state === 'empty' ? 'No results' : ''
 
   return (
     <div>
-      <div role="status" aria-live="polite" className="sr-only">
-        {live}
-      </div>
-
       {state === 'loading' ? (
         <p className="flex items-center gap-2 px-4 py-4 text-[15px] text-ink-2">
           <Loader2 className="size-4 animate-spin motion-reduce:animate-none" aria-hidden="true" />
@@ -70,7 +66,7 @@ export function SearchResults({ q, state, rows, highlight, idPrefix, large = fal
               <span className="min-w-0 text-[15px] font-semibold text-ink">{r.when}</span>
               <span className="text-right text-[15px] font-semibold whitespace-nowrap tabular-nums text-ink">{r.amount}</span>
               <span className="min-w-0 truncate text-[13px] text-ink-2">
-                {r.how} · {r.outlet}
+                {r.how}{showOutlet ? ` · ${r.outlet}` : ''}
               </span>
               <span className="text-right">
                 <span
@@ -88,7 +84,11 @@ export function SearchResults({ q, state, rows, highlight, idPrefix, large = fal
             onMouseDown={(e) => e.preventDefault()}
             onMouseMove={() => onHover?.(rows.length)}
             onClick={onSeeAll}
-            className="flex min-h-11 cursor-pointer items-center px-4 text-[15px] font-semibold text-nets-blue aria-selected:bg-nets-blue-soft"
+            className={
+              large
+                ? 'm-3 flex min-h-12 cursor-pointer items-center justify-center rounded-lg border border-line-strong bg-white px-4 text-[15px] font-semibold text-nets-blue'
+                : 'flex min-h-11 cursor-pointer items-center px-4 text-[15px] font-semibold text-nets-blue aria-selected:bg-nets-blue-soft'
+            }
           >
             See all results for &lsquo;{text}&rsquo;
           </li>

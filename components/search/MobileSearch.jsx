@@ -4,7 +4,7 @@ import { useEffect, useId, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Search } from 'lucide-react'
 import { Sheet, SheetContent, SheetDescription, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
-import { rowHref, searchHref, shouldSearch } from '@/lib/search/nav'
+import { liveMessage, rowHref, searchHref, shouldSearch } from '@/lib/search/nav'
 import { SearchResults } from './SearchResults'
 import { useTxnSearch } from './useTxnSearch'
 
@@ -12,9 +12,9 @@ import { useTxnSearch } from './useTxnSearch'
  * Phones: the search icon opens a full-screen search sheet with live results.
  * The Back button closes it (it adds one history entry while open); picking a result replaces that
  * entry, so Back afterwards does not land on a closed sheet.
- * @param {{outletId: string | null, triggerClassName: string}} props
+ * @param {{outletId: string | null, showOutlet?: boolean, triggerClassName: string}} props
  */
-export function MobileSearch({ outletId, triggerClassName }) {
+export function MobileSearch({ outletId, showOutlet = true, triggerClassName }) {
   const router = useRouter()
   const id = useId()
   const input = useRef(/** @type {HTMLInputElement | null} */ (null))
@@ -120,6 +120,10 @@ export function MobileSearch({ outletId, triggerClassName }) {
           </button>
         </form>
 
+        <div role="status" aria-live="polite" className="sr-only">
+          {shouldSearch(text) ? liveMessage(state, rows.length, text) : ''}
+        </div>
+
         <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
           {shouldSearch(text) ? (
             <SearchResults
@@ -129,6 +133,7 @@ export function MobileSearch({ outletId, triggerClassName }) {
               highlight={-1}
               idPrefix={id}
               large
+              showOutlet={showOutlet}
               onPick={(rid) => go(rowHref(rid))}
               onSeeAll={() => go(searchHref(text))}
             />
@@ -137,17 +142,6 @@ export function MobileSearch({ outletId, triggerClassName }) {
           )}
         </div>
 
-        {shouldSearch(text) && state === 'ok' ? (
-          <div className="border-t border-line p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
-            <button
-              type="button"
-              onClick={() => go(searchHref(text))}
-              className="inline-flex min-h-12 w-full items-center justify-center rounded-lg bg-nets-red px-4 text-[15px] font-semibold text-white hover:bg-nets-red-hover"
-            >
-              See all results
-            </button>
-          </div>
-        ) : null}
       </SheetContent>
     </Sheet>
   )

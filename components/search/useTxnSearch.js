@@ -47,6 +47,8 @@ export function useTxnSearch(text, outletId) {
     return () => {
       clearTimeout(timer)
       ctrl.abort()
+      // Forget this answer so typing the same text again shows loading, not an old result.
+      setResult({ key: '', state: 'idle', rows: [] })
     }
   }, [q, active, outletId, key, router])
 

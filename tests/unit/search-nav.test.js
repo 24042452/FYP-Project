@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { moveHighlight, searchHref, rowHref, suggestionView, shouldSearch, rangeLine } from '../../lib/search/nav.js'
+import { moveHighlight, searchHref, rowHref, suggestionView, shouldSearch, rangeLine, liveMessage } from '../../lib/search/nav.js'
 
 describe('moveHighlight (rows + the "See all" footer, wrapping)', () => {
   // 3 rows => 4 stops: 0,1,2 are rows, 3 is "See all". -1 means nothing highlighted.
@@ -57,5 +57,16 @@ describe('rangeLine', () => {
     expect(rangeLine({ q: 'x', from: 'a', to: 'b', explicitDates: true, formatDay })).toBe("Payments matching 'x' from Da to Db.")
     expect(rangeLine({ from: 'a', to: 'b', explicitDates: false, formatDay })).toBe('Payments from Da to Db (the last 7 days).')
     expect(rangeLine({ from: 'a', to: 'b', explicitDates: true, formatDay })).toBe('Payments from Da to Db.')
+  })
+})
+
+describe('liveMessage', () => {
+  it('says what a screen reader should hear', () => {
+    expect(liveMessage('idle', 0, 'x')).toBe('')
+    expect(liveMessage('loading', 0, 'x')).toBe('Searching…')
+    expect(liveMessage('ok', 5, 'x')).toBe('5 results')
+    expect(liveMessage('ok', 1, 'x')).toBe('1 result')
+    expect(liveMessage('empty', 0, ' zz ')).toBe('No payments match ‘zz’.')
+    expect(liveMessage('error', 0, 'x')).toMatch(/isn't working/)
   })
 })

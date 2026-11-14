@@ -1,18 +1,18 @@
 'use client'
 
 import { useCallback, useEffect, useId, useRef, useState } from 'react'
-import { usePathname, useRouter } from 'next/navigation'
+import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { Search } from 'lucide-react'
-import { moveHighlight, rowHref, searchHref, shouldSearch } from '@/lib/search/nav'
+import { moveHighlight, liveMessage, rowHref, searchHref, shouldSearch } from '@/lib/search/nav'
 import { SearchResults } from './SearchResults'
 import { useTxnSearch } from './useTxnSearch'
 
 /**
  * The top-bar search box on tablets and desktops: a combobox with live payment suggestions.
  * A real GET form, so Enter still works before JavaScript loads.
- * @param {{outletId: string | null}} props
+ * @param {{outletId: string | null, showOutlet?: boolean}} props
  */
-export function DesktopSearch({ outletId }) {
+export function DesktopSearch({ outletId, showOutlet = true }) {
   const router = useRouter()
   const pathname = usePathname()
   const id = useId()
@@ -21,10 +21,20 @@ export function DesktopSearch({ outletId }) {
   const [text, setText] = useState('')
   const [open, setOpen] = useState(false)
   const [highlight, setHighlight] = useState(-1)
+
+  // On Sales & payments the box shows the current search (and empties when the chip is cleared).
+  const sp = useSearchParams()
+  const urlQ = pathname === '/transactions' ? (sp.get('q') ?? '') : null
+  const [seenUrlQ, setSeenUrlQ] = useState(urlQ)
+  if (urlQ !== seenUrlQ) {
+    setSeenUrlQ(urlQ)
+    if (urlQ !== null) setText(urlQ)
+  }
   const { state, rows } = useTxnSearch(text, outletId)
 
   const panelOpen = open && shouldSearch(text)
   const stops = state === 'ok' ? rows.length + 1 : 0
+  const expanded = panelOpen && state === 'ok' && rows.length > 0
   const active = panelOpen && highlight >= 0 && highlight < stops ? `${id}-opt-${highlight}` : undefined
 
   const close = useCallback(() => {
@@ -49,6 +59,7 @@ export function DesktopSearch({ outletId }) {
   useEffect(() => {
     /** @param {KeyboardEvent} e */
     const onKey = (e) => {
+      if (document.querySelector('[role=dialog][data-state=open]')) return // a sheet or drawer is open
       const el = /** @type {HTMLElement | null} */ (document.activeElement)
       const typing = el && (el.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(el.tagName))
       const k = e.key.toLowerCase()
@@ -123,8 +134,8 @@ export function DesktopSearch({ outletId }) {
           maxLength={40}
           value={text}
           placeholder="Search payments, amounts, references"
-          aria-expanded={panelOpen}
-          aria-controls={panelOpen && state === 'ok' ? `${id}-list` : undefined}
+          aria-expanded={expanded}
+          aria-controls={expanded ? `${id}-list` : undefined}
           aria-activedescendant={active}
           aria-autocomplete="list"
           onChange={(e) => {
@@ -133,6 +144,7 @@ export function DesktopSearch({ outletId }) {
             setOpen(true)
           }}
           onFocus={() => setOpen(true)}
+          onClick={() => setOpen(true)}
           onKeyDown={onKeyDown}
           className="min-w-0 flex-1 border-0 bg-transparent text-[15px] text-ink outline-none placeholder:text-ink-3 [&::-webkit-search-cancel-button]:appearance-none"
         />
@@ -141,14 +153,19 @@ export function DesktopSearch({ outletId }) {
         </kbd>
       </form>
 
+      <div role="status" aria-live="polite" className="sr-only">
+        {shouldSearch(text) ? liveMessage(state, rows.length, text) : ''}
+      </div>
+
       {panelOpen ? (
-        <div className="absolute top-full left-0 z-30 mt-2 w-full min-w-[min(420px,calc(100vw-2rem))] overflow-hidden rounded-[12px] border border-line bg-white shadow-lg">
+        <div className="absolute top-full left-0 z-30 mt-2 w-full min-w-[min(420px,calc(100vw-2rem))] overflow-hidden rounded-[12px] border border-line bg-white shadow-panel">
           <SearchResults
             q={text}
             state={state}
             rows={rows}
             highlight={highlight}
             idPrefix={id}
+            showOutlet={showOutlet}
             onPick={(rid) => go(rowHref(rid))}
             onSeeAll={() => go(searchHref(text))}
             onHover={setHighlight}

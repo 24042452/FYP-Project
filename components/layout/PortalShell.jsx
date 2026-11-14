@@ -35,6 +35,7 @@ export function PortalShell({ merchant, alerts, outlets, selectedId, children })
           merchantName={merchant.tradingName}
           onOpenMenu={() => setOpen(true)}
           outletId={selectedId}
+          showOutlet={outlets.length > 1}
           alerts={alerts}
         />
         <main className="mx-auto w-full max-w-[1240px] flex-1 px-4 pt-6 pb-24 md:px-9 md:pb-16">{children}</main>

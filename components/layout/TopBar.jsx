@@ -1,5 +1,6 @@
 'use client'
 
+import { Suspense } from 'react'
 import { Menu, LogOut } from 'lucide-react'
 import { DesktopSearch } from '@/components/search/DesktopSearch'
 import { MobileSearch } from '@/components/search/MobileSearch'
@@ -18,9 +19,9 @@ const iconBtn =
   'relative grid size-11 flex-none place-items-center rounded-lg border border-line bg-white text-ink-2 hover:border-line-strong hover:text-ink md:size-[42px]'
 
 /**
- * @param {{userName: string, role: string, merchantName: string, onOpenMenu: () => void, outletId?: string | null, alerts?: {unread: number, items: import('./NotificationBell').BellItem[]}}} props
+ * @param {{userName: string, role: string, merchantName: string, onOpenMenu: () => void, outletId?: string | null, showOutlet?: boolean, alerts?: {unread: number, items: import('./NotificationBell').BellItem[]}}} props
  */
-export function TopBar({ userName, role, merchantName, onOpenMenu, outletId = null, alerts = { unread: 0, items: [] } }) {
+export function TopBar({ userName, role, merchantName, onOpenMenu, outletId = null, showOutlet = true, alerts = { unread: 0, items: [] } }) {
   return (
     <header className="sticky top-0 z-10 flex items-center gap-3 border-b border-line bg-page/90 px-4 py-2.5 backdrop-blur md:px-9">
       <button type="button" aria-label="Open menu" onClick={onOpenMenu} className={iconBtn + ' md:hidden'}>
@@ -28,8 +29,10 @@ export function TopBar({ userName, role, merchantName, onOpenMenu, outletId = nu
       </button>
 
       {/* Phones: a search icon that opens a full-screen search sheet. Larger screens: the search box. */}
-      <MobileSearch outletId={outletId} triggerClassName={iconBtn + ' md:hidden'} />
-      <DesktopSearch outletId={outletId} />
+      <MobileSearch outletId={outletId} showOutlet={showOutlet} triggerClassName={iconBtn + ' md:hidden'} />
+      <Suspense fallback={null}>
+        <DesktopSearch outletId={outletId} showOutlet={showOutlet} />
+      </Suspense>
 
       <div className="flex-1" />
 
