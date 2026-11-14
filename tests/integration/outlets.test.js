@@ -167,3 +167,36 @@ describe('getLatestRunSummary with an outlet', () => {
     expect((await getLatestRunSummary(A, OUT_B)).openCount).toBe(0)
   })
 })
+
+describe('check-up problems are tied by successful payments only', () => {
+  it('an outlet whose only payment in a settlement failed is not tied to its problem', async () => {
+    const M = randomUUID()
+    const O_OK = randomUUID()
+    const O_FAIL = randomUUID()
+    const S = randomUUID()
+    const R = randomUUID()
+    await insertFixture({
+      merchants: [{ id: M }],
+      transactions: [
+        { id: idOf(701), merchantId: M, amountCents: 1000, createdAt: `${DAY}T04:00:00.000Z` },
+        { id: idOf(702), merchantId: M, amountCents: 500, status: 'failed', createdAt: `${DAY}T05:00:00.000Z` },
+      ],
+    })
+    await adminExecute(`INSERT INTO outlets (id, merchant_id, name) VALUES (?, ?, 'Pays')`, [O_OK, M])
+    await adminExecute(`INSERT INTO outlets (id, merchant_id, name) VALUES (?, ?, 'Only failed')`, [O_FAIL, M])
+    await adminExecute(
+      `INSERT INTO settlements (id, merchant_id, business_date, channel, gross_cents, fee_cents, net_cents, status, expected_date) VALUES (?, ?, ?, 'nets_qr', 1000, 0, 1000, 'pending', '2026-11-05')`,
+      [S, M, DAY],
+    )
+    await adminExecute(`UPDATE transactions SET outlet_id = ?, settlement_id = ? WHERE id = ?`, [O_OK, S, idOf(701)])
+    await adminExecute(`UPDATE transactions SET outlet_id = ?, settlement_id = ? WHERE id = ?`, [O_FAIL, S, idOf(702)])
+    await adminExecute(`INSERT INTO recon_runs (id, merchant_id, period, run_at, matched_count, exception_count) VALUES (?, ?, '2026-10-01', '2026-11-03 04:00:00.000', 0, 1)`, [R, M])
+    await adminExecute(`INSERT INTO recon_exceptions (id, merchant_id, run_id, type, settlement_id, status) VALUES (?, ?, ?, 'amount_mismatch', ?, 'open')`, [randomUUID(), M, R, S])
+
+    expect((await getLatestRunSummary(M, O_OK)).openCount).toBe(1)
+    const failedOnly = await getLatestRunSummary(M, O_FAIL)
+    expect(failedOnly.openCount).toBe(0)
+    // and its bank share agrees: it has none in that settlement
+    expect(await getOutletSettlementShares(M, O_FAIL, { since: '2000-01-01' })).toEqual([])
+  })
+})

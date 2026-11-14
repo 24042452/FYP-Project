@@ -43,9 +43,11 @@ export function OutletPicker({ outlets, selectedId, idSuffix = '' }) {
       <select
         id={id}
         value={selectedId ?? 'all'}
-        disabled={pending}
+        aria-disabled={pending}
         aria-busy={pending}
         onChange={(e) => {
+          // aria-disabled (not disabled) keeps keyboard focus on the menu while it works.
+          if (pending) return
           const choice = e.target.value
           const name = choice === 'all' ? null : (outlets.find((o) => o.id === choice)?.name ?? null)
           startTransition(async () => {
@@ -57,7 +59,7 @@ export function OutletPicker({ outlets, selectedId, idSuffix = '' }) {
             router.refresh()
           })
         }}
-        className="min-h-11 w-full rounded-lg border border-line-strong bg-white px-3 text-[15px] font-medium text-ink shadow-panel disabled:opacity-60"
+        className="min-h-11 w-full rounded-lg border border-line-strong bg-white px-3 text-[15px] font-medium text-ink shadow-panel aria-disabled:opacity-60"
       >
         <option value="all">All outlets</option>
         {outlets.map((o) => (

@@ -21,9 +21,17 @@ export function SwitchFx({ fxKey, variant, className = '', children }) {
     }
     if (last.current === fxKey) return
     last.current = fxKey
-    setPlaying(true)
-    const t = setTimeout(() => setPlaying(false), variant === 'ring' ? 900 : 350)
-    return () => clearTimeout(t)
+    // Drop the class for a frame first so a switch during a running animation restarts it.
+    setPlaying(false)
+    let end = 0
+    const raf = requestAnimationFrame(() => {
+      setPlaying(true)
+      end = window.setTimeout(() => setPlaying(false), variant === 'ring' ? 900 : 350)
+    })
+    return () => {
+      cancelAnimationFrame(raf)
+      window.clearTimeout(end)
+    }
   }, [fxKey, variant])
 
   return <div className={`${className} ${playing ? (variant === 'ring' ? 'fx-ring' : 'fx-in') : ''}`}>{children}</div>
