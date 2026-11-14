@@ -1,7 +1,9 @@
 import { beforeAll, describe, expect, it } from 'vitest'
 import { randomUUID } from 'node:crypto'
-import { insertFixture, resetTestDb } from './helpers.js'
-import { getDailySales, getHeatmap } from '../../lib/data/sales.js'
+import { adminExecute, insertFixture, resetTestDb } from './helpers.js'
+import { getDailySales, getFeeTotals, getHeatmap } from '../../lib/data/sales.js'
+import { getRecentSettlements, getSettlementSummary } from '../../lib/data/settlements.js'
+import { getLatestRunSummary } from '../../lib/data/recon.js'
 
 // Merchant isolation: for every data function, A's call must never return B's rows.
 // Each later data task adds one line to CASES: [name, call(merchantId), total(rows)].
@@ -18,6 +20,10 @@ const TO = '2026-11-07'
 const CASES = [
   ['getDailySales', (id) => getDailySales(id, FROM, TO), (rows) => rows.reduce((s, r) => s + r.grossCents, 0)],
   ['getHeatmap', (id) => getHeatmap(id, FROM, TO), (rows) => rows.reduce((s, r) => s + r.grossCents, 0)],
+  ['getFeeTotals', async (id) => { const r = await getFeeTotals(id, FROM, TO); return r.grossCents > 0 ? [r] : [] }, (rows) => rows.reduce((s, r) => s + r.grossCents, 0)],
+  ['getRecentSettlements', (id) => getRecentSettlements(id, 5), (rows) => rows.reduce((s, r) => s + r.netCents, 0)],
+  ['getSettlementSummary', async (id) => { const r = await getSettlementSummary(id, '2026-11-04'); return r.pendingCents > 0 ? [r] : [] }, (rows) => rows.reduce((s, r) => s + r.pendingCents, 0)],
+  ['getLatestRunSummary', async (id) => { const r = await getLatestRunSummary(id); return r ? [r] : [] }, (rows) => rows.reduce((s, r) => s + r.matchedCount, 0)],
 ]
 
 beforeAll(async () => {
@@ -29,6 +35,22 @@ beforeAll(async () => {
       { merchantId: B, amountCents: B_CENTS, createdAt: `${DAY}T04:00:00.000Z` },
     ],
   })
+  for (const [id, cents] of [[A, A_CENTS], [B, B_CENTS]]) {
+    await adminExecute(
+      `INSERT INTO settlements (id, merchant_id, business_date, channel, gross_cents, fee_cents, net_cents, status, expected_date)
+       VALUES (?, ?, ?, 'nets_qr', ?, 0, ?, 'pending', '2026-11-05')`,
+      [randomUUID(), id, DAY, cents, cents],
+    )
+    const runId = randomUUID()
+    await adminExecute(
+      `INSERT INTO recon_runs (id, merchant_id, period, run_at, matched_count, exception_count) VALUES (?, ?, '2026-10-01', '2026-11-03 04:00:00.000', ?, 1)`,
+      [runId, id, cents],
+    )
+    await adminExecute(
+      `INSERT INTO recon_exceptions (id, merchant_id, run_id, type, status) VALUES (?, ?, ?, 'amount_mismatch', 'open')`,
+      [randomUUID(), id, runId],
+    )
+  }
 })
 
 describe('merchant isolation', () => {
