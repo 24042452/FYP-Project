@@ -23,18 +23,18 @@ export function MoneyFlow({ flow }) {
             {flow.feeCents > 0 ? <i className="block min-w-2.5 bg-nets-red" style={{ flex: flow.feeCents }} /> : null}
           </div>
           <div className="mt-3 grid grid-cols-3 gap-3 text-[14px] text-ink-2 sm:gap-6">
-            <div>
-              <b className="block text-[18px] font-semibold text-ink tabular-nums sm:text-[20px]">{formatSGD(flow.grossCents)}</b>
+            <div className="min-w-0">
+              <b className="block text-base font-semibold text-ink tabular-nums sm:text-lg break-words">{formatSGD(flow.grossCents)}</b>
               Your sales
             </div>
-            <div>
-              <b className="block text-[18px] font-semibold text-bad tabular-nums sm:text-[20px]">
+            <div className="min-w-0">
+              <b className="block text-base font-semibold text-bad tabular-nums sm:text-lg break-words">
                 {flow.feeCents > 0 ? `−${formatSGD(flow.feeCents)}` : formatSGD(0)}
               </b>
               NETS fees
             </div>
-            <div>
-              <b className="block text-[18px] font-semibold text-ink tabular-nums sm:text-[20px]">{formatSGD(flow.netCents)}</b>
+            <div className="min-w-0">
+              <b className="block text-base font-semibold text-ink tabular-nums sm:text-lg break-words">{formatSGD(flow.netCents)}</b>
               To your bank
             </div>
           </div>

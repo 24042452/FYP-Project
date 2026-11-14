@@ -34,9 +34,9 @@ describe('getRecentSettlements', () => {
 })
 
 describe('getSettlementSummary', () => {
-  it('sums pending money, finds the next date and counts late days', async () => {
+  it('sums money truly on the way, finds the next date and counts late days', async () => {
     expect(await getSettlementSummary(M, '2026-11-11')).toEqual({
-      pendingCents: 700, // 500 + 200
+      pendingCents: 500, // only the not-yet-due one; the 200 is overdue
       nextExpectedDate: '2026-11-13',
       lateCount: 2, // delayed 9 Nov, and pending 7 Nov past 9 Nov
       lateCents: 900,

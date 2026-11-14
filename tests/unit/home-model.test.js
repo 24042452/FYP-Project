@@ -36,9 +36,10 @@ describe('small helpers', () => {
     expect(formatDayLabel('2026-11-05')).toBe('Thu 5 Nov')
   })
   it('greets by Singapore hour', () => {
-    expect(greetingFor(9, 'Ah Hock Lim')).toBe('Good morning, Ah')
+    expect(greetingFor(9, 'Ah Hock Lim')).toBe('Good morning, Ah Hock Lim')
     expect(greetingFor(14, 'Mei')).toBe('Good afternoon, Mei')
     expect(greetingFor(20, '')).toBe('Good evening')
+    expect(greetingFor(20, '  Mr Tan ')).toBe('Good evening, Mr Tan')
   })
 })
 
@@ -60,7 +61,7 @@ describe('buildHomeModel: nothing at all', () => {
   })
   it('has no change or busiest tag, but still a health score', () => {
     const labels = m.tags.map((t) => t.label)
-    expect(labels.some((l) => /vs last/.test(l))).toBe(false)
+    expect(labels.some((l) => /last week|same as|Up |Down /.test(l))).toBe(false)
     expect(labels.some((l) => /Busiest/.test(l))).toBe(false)
     expect(labels.some((l) => /Health/.test(l))).toBe(true)
   })
@@ -72,6 +73,8 @@ describe('buildHomeModel: nothing at all', () => {
     expect(m.tiles.map((t) => t.label)).toEqual(['Money in today', 'Coming to your bank', 'Needs your attention'])
     expect(m.tiles[0].value).toBe('$0.00')
     expect(m.tiles[1].value).toBe('$0.00')
+    expect(m.tiles[1].hint).toBe('Nothing on the way right now')
+    expect(m.tiles[1].note).toBeUndefined()
     expect(m.tiles[2].value).toBe('Nothing')
     expect(m.tiles[2].tone).toBe('default')
   })
@@ -181,6 +184,15 @@ describe('buildHomeModel: settlements and attention', () => {
   it('coming-to-bank tile', () => {
     expect(m.tiles[1].value).toBe('$693.40')
     expect(m.tiles[1].hint).toBe('Next: Fri 13 Nov')
+    expect(m.tiles[1].note).toBe('Plus $608.70 late — see Needs your attention')
+  })
+  it('coming-to-bank tile: on the way only, late only', () => {
+    const base = { ...EMPTY_INPUT }
+    const onWay = buildHomeModel({ ...base, settlementSummary: { pendingCents: 50000, nextExpectedDate: '2026-11-13', lateCount: 0, lateCents: 0 } })
+    expect(onWay.tiles[1]).toMatchObject({ value: '$500.00', hint: 'Next: Fri 13 Nov' })
+    expect(onWay.tiles[1].note).toBeUndefined()
+    const late = buildHomeModel({ ...base, settlementSummary: { pendingCents: 0, nextExpectedDate: null, lateCount: 1, lateCents: 70000 } })
+    expect(late.tiles[1]).toMatchObject({ value: '$0.00', hint: 'Nothing on the way right now', note: 'Plus $700.00 late — see Needs your attention' })
   })
   it('check-up card', () => {
     expect(m.checkup.hasRun).toBe(true)

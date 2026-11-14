@@ -2,9 +2,9 @@ import Link from 'next/link'
 
 /**
  * One cell of the summary strip.
- * @param {{label: string, value: string, hint?: string, tone?: 'default' | 'attention', href?: string, linkLabel?: string}} props
+ * @param {{label: string, value: string, hint?: string, note?: string, tone?: 'default' | 'attention', href?: string, linkLabel?: string}} props
  */
-export function StatTile({ label, value, hint, tone = 'default', href, linkLabel }) {
+export function StatTile({ label, value, hint, note, tone = 'default', href, linkLabel }) {
   const attention = tone === 'attention'
   return (
     <div className="flex flex-col gap-1 px-[18px] py-4 sm:px-[22px] sm:py-5">
@@ -15,6 +15,7 @@ export function StatTile({ label, value, hint, tone = 'default', href, linkLabel
         {value}
       </span>
       {hint ? <span className="text-[14px] text-ink-2">{hint}</span> : null}
+      {note ? <span className="text-[14px] font-medium text-bad">{note}</span> : null}
       {href && linkLabel ? (
         <Link href={href} className="inline-flex min-h-11 items-center text-[14px] font-semibold text-bad">
           {linkLabel}
