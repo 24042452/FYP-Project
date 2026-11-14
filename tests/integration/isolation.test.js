@@ -6,6 +6,7 @@ import { getRecentSettlements, getSettlementSummary, getSettlementTotals, listSe
 import { getTransaction, listTransactions, listTransactionsForExport } from '../../lib/data/transactions.js'
 import { getInvoiceLinesForMonth, getInvoiceWithLines, listInvoices } from '../../lib/data/invoices.js'
 import { countUnread, insertNotifications, listNotifications, markAllRead, markRead } from '../../lib/data/notifications.js'
+import { listOutlets } from '../../lib/data/outlets.js'
 import { getLatestRunForMonth, getLatestRunSummary, getReconRun, getReconTransactions, listLatestRunIds } from '../../lib/data/recon.js'
 
 // Merchant isolation: for every data function, A's call must never return B's rows.
@@ -21,6 +22,8 @@ const INV_A = randomUUID()
 const INV_B = randomUUID()
 const RUN_A = randomUUID()
 const RUN_B = randomUUID()
+const OUT_A = randomUUID()
+const OUT_B = randomUUID()
 const NOTE_A = randomUUID()
 const NOTE_B = randomUUID()
 const DAY = '2026-11-03'
@@ -48,6 +51,7 @@ const CASES = [
   ['getReconRun', async (id) => { const r = await getReconRun(id, id === A ? RUN_A : RUN_B); return r ? [r] : [] }, (rows) => rows.reduce((s, r) => s + r.matchedCount, 0)],
   ['listNotifications', (id) => listNotifications(id), (rows) => (rows.length === 0 ? 0 : rows[0].id === NOTE_A ? A_CENTS : B_CENTS)],
   ['countUnread', async (id) => { const n = await countUnread(id); return n > 0 ? [{ n }] : [] }, (rows) => (rows.length === 0 ? 0 : rows[0].n === 1 ? A_CENTS : B_CENTS)],
+  ['listOutlets', (id) => listOutlets(id), (rows) => (rows.length === 0 ? 0 : rows[0].id === OUT_A ? A_CENTS : B_CENTS)],
   ['listLatestRunIds', (id) => listLatestRunIds(id), (rows) => (rows.length === 0 ? 0 : rows[0].id === RUN_A ? A_CENTS : B_CENTS)],
 ]
 
@@ -61,6 +65,7 @@ beforeAll(async () => {
     ],
   })
   for (const [id, cents] of [[A, A_CENTS], [B, B_CENTS]]) {
+    await adminExecute(`INSERT INTO outlets (id, merchant_id, name) VALUES (?, ?, 'Outlet')`, [id === A ? OUT_A : OUT_B, id])
     await adminExecute(
       `INSERT INTO settlements (id, merchant_id, business_date, channel, gross_cents, fee_cents, net_cents, status, expected_date)
        VALUES (?, ?, ?, 'nets_qr', ?, 0, ?, 'pending', '2026-11-05')`,
