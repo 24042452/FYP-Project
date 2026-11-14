@@ -3,9 +3,9 @@ import { randomUUID } from 'node:crypto'
 import { adminExecute, insertFixture, resetTestDb } from './helpers.js'
 import { getDailySales, getFeeTotals, getHeatmap } from '../../lib/data/sales.js'
 import { getRecentSettlements, getSettlementSummary, getSettlementTotals, listSettlements } from '../../lib/data/settlements.js'
-import { getTransaction, listTransactions } from '../../lib/data/transactions.js'
-import { getInvoiceWithLines, listInvoices } from '../../lib/data/invoices.js'
-import { getLatestRunSummary } from '../../lib/data/recon.js'
+import { getTransaction, listTransactions, listTransactionsForExport } from '../../lib/data/transactions.js'
+import { getInvoiceLinesForMonth, getInvoiceWithLines, listInvoices } from '../../lib/data/invoices.js'
+import { getLatestRunForMonth, getLatestRunSummary, getReconRun, getReconTransactions, listLatestRunIds } from '../../lib/data/recon.js'
 
 // Merchant isolation: for every data function, A's call must never return B's rows.
 // Each later data task adds one line to CASES: [name, call(merchantId), total(rows)].
@@ -18,6 +18,8 @@ const TXN_A = randomUUID()
 const TXN_B = randomUUID()
 const INV_A = randomUUID()
 const INV_B = randomUUID()
+const RUN_A = randomUUID()
+const RUN_B = randomUUID()
 const DAY = '2026-11-03'
 const FROM = '2026-11-01'
 const TO = '2026-11-07'
@@ -36,6 +38,12 @@ const CASES = [
   ['getLatestRunSummary', async (id) => { const r = await getLatestRunSummary(id); return r ? [r] : [] }, (rows) => rows.reduce((s, r) => s + r.matchedCount, 0)],
   ['listInvoices', (id) => listInvoices(id), (rows) => rows.reduce((s, r) => s + r.totalCents, 0)],
   ['getInvoiceWithLines', async (id) => { const r = await getInvoiceWithLines(id, id === A ? INV_A : INV_B); return r ? [r] : [] }, (rows) => rows.reduce((s, r) => s + r.lines.reduce((t, l) => t + l.amountCents, 0), 0)],
+  ['getReconTransactions', (id) => getReconTransactions(id, '2026-11'), (rows) => rows.reduce((s, r) => s + r.grossCents, 0)],
+  ['getInvoiceLinesForMonth', (id) => getInvoiceLinesForMonth(id, '2026-10'), (rows) => rows.reduce((s, r) => s + r.amountCents, 0)],
+  ['listTransactionsForExport', (id) => listTransactionsForExport(id, FROM, TO), (rows) => rows.reduce((s, r) => s + r.amountCents, 0)],
+  ['getLatestRunForMonth', async (id) => { const r = await getLatestRunForMonth(id, '2026-10'); return r ? [r] : [] }, (rows) => rows.reduce((s, r) => s + r.matchedCount, 0)],
+  ['getReconRun', async (id) => { const r = await getReconRun(id, id === A ? RUN_A : RUN_B); return r ? [r] : [] }, (rows) => rows.reduce((s, r) => s + r.matchedCount, 0)],
+  ['listLatestRunIds', (id) => listLatestRunIds(id), (rows) => (rows.length === 0 ? 0 : rows[0].id === RUN_A ? A_CENTS : B_CENTS)],
 ]
 
 beforeAll(async () => {
@@ -62,7 +70,7 @@ beforeAll(async () => {
       `INSERT INTO invoice_lines (id, merchant_id, invoice_id, charge_type, description, qty, amount_cents) VALUES (?, ?, ?, 'portal_fee', 'Portal fee', 1, ?)`,
       [randomUUID(), id, invId, cents],
     )
-    const runId = randomUUID()
+    const runId = id === A ? RUN_A : RUN_B
     await adminExecute(
       `INSERT INTO recon_runs (id, merchant_id, period, run_at, matched_count, exception_count) VALUES (?, ?, '2026-10-01', '2026-11-03 04:00:00.000', ?, 1)`,
       [runId, id, cents],
@@ -95,5 +103,12 @@ describe('merchant isolation: single payment', () => {
   it('getTransaction never returns another merchants payment', async () => {
     expect(await getTransaction(A, TXN_B)).toBeNull()
     expect(await getTransaction(B, TXN_A)).toBeNull()
+  })
+})
+
+describe('merchant isolation: single check-up', () => {
+  it('getReconRun never returns another merchants check-up', async () => {
+    expect(await getReconRun(A, RUN_B)).toBeNull()
+    expect(await getReconRun(B, RUN_A)).toBeNull()
   })
 })
