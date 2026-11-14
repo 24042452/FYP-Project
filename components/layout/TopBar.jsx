@@ -1,7 +1,8 @@
 'use client'
 
-import Link from 'next/link'
-import { Menu, Search, LogOut } from 'lucide-react'
+import { Menu, LogOut } from 'lucide-react'
+import { DesktopSearch } from '@/components/search/DesktopSearch'
+import { MobileSearch } from '@/components/search/MobileSearch'
 import { signOut } from '@/app/login/actions'
 import { NotificationBell } from './NotificationBell'
 
@@ -17,29 +18,18 @@ const iconBtn =
   'relative grid size-11 flex-none place-items-center rounded-lg border border-line bg-white text-ink-2 hover:border-line-strong hover:text-ink md:size-[42px]'
 
 /**
- * @param {{userName: string, role: string, merchantName: string, onOpenMenu: () => void, alerts?: {unread: number, items: import('./NotificationBell').BellItem[]}}} props
+ * @param {{userName: string, role: string, merchantName: string, onOpenMenu: () => void, outletId?: string | null, alerts?: {unread: number, items: import('./NotificationBell').BellItem[]}}} props
  */
-export function TopBar({ userName, role, merchantName, onOpenMenu, alerts = { unread: 0, items: [] } }) {
+export function TopBar({ userName, role, merchantName, onOpenMenu, outletId = null, alerts = { unread: 0, items: [] } }) {
   return (
     <header className="sticky top-0 z-10 flex items-center gap-3 border-b border-line bg-page/90 px-4 py-2.5 backdrop-blur md:px-9">
       <button type="button" aria-label="Open menu" onClick={onOpenMenu} className={iconBtn + ' md:hidden'}>
         <Menu className="size-5" aria-hidden="true" />
       </button>
 
-      {/* Phones: just a search icon (the long placeholder did not fit); it opens the payments list with its search box ready to type in. */}
-      <Link href="/transactions?focus=search" aria-label="Search payments" className={iconBtn + ' md:hidden'}>
-        <Search className="size-5" aria-hidden="true" />
-      </Link>
-
-      <label className="hidden min-h-11 max-w-[460px] min-w-0 flex-1 items-center gap-2 rounded-lg border border-line bg-white px-3 text-ink-3 focus-within:border-nets-blue focus-within:ring-3 focus-within:ring-nets-blue-soft md:flex md:min-h-[42px]">
-        <span className="sr-only">Search</span>
-        <Search className="size-4 flex-none" aria-hidden="true" />
-        <input
-          type="search"
-          placeholder="Search payments, amounts, references"
-          className="min-w-0 flex-1 border-0 bg-transparent text-[15px] text-ink outline-none placeholder:text-ink-3"
-        />
-      </label>
+      {/* Phones: a search icon that opens a full-screen search sheet. Larger screens: the search box. */}
+      <MobileSearch outletId={outletId} triggerClassName={iconBtn + ' md:hidden'} />
+      <DesktopSearch outletId={outletId} />
 
       <div className="flex-1" />
 

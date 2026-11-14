@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { moveHighlight, searchHref, rowHref, suggestionView, shouldSearch } from '../../lib/search/nav.js'
+import { moveHighlight, searchHref, rowHref, suggestionView, shouldSearch, rangeLine } from '../../lib/search/nav.js'
 
 describe('moveHighlight (rows + the "See all" footer, wrapping)', () => {
   // 3 rows => 4 stops: 0,1,2 are rows, 3 is "See all". -1 means nothing highlighted.
@@ -45,5 +45,17 @@ describe('suggestionView', () => {
     })
     expect(v).toMatchObject({ id: 'x', when: 'Sat 14 Nov, 12:41 pm', amount: '$12.50', outlet: 'Not recorded', pill: { label: 'Failed', tone: 'bad' } })
     expect(typeof v.how).toBe('string')
+  })
+})
+
+describe('rangeLine', () => {
+  const formatDay = (d) => `D${d}`
+  it('says 12 months for a search with no dates', () => {
+    expect(rangeLine({ q: '12.50', from: 'a', to: 'b', explicitDates: false, formatDay })).toBe("Payments matching '12.50' in the last 12 months.")
+  })
+  it('uses the chosen dates for a search, and keeps the 7-day wording without q', () => {
+    expect(rangeLine({ q: 'x', from: 'a', to: 'b', explicitDates: true, formatDay })).toBe("Payments matching 'x' from Da to Db.")
+    expect(rangeLine({ from: 'a', to: 'b', explicitDates: false, formatDay })).toBe('Payments from Da to Db (the last 7 days).')
+    expect(rangeLine({ from: 'a', to: 'b', explicitDates: true, formatDay })).toBe('Payments from Da to Db.')
   })
 })

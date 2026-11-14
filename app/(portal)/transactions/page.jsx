@@ -5,6 +5,8 @@ import { getTransaction, listTransactions } from '@/lib/data/transactions'
 import { sgtDate } from '@/lib/dates'
 import { buildHref, parseTxnParams } from '@/lib/transactions/params'
 import { formatDay, toDetailView, toRowView } from '@/lib/transactions/format'
+import { rangeLine } from '@/lib/search/nav'
+import { X } from 'lucide-react'
 import { TxnFilters } from '@/components/transactions/TxnFilters'
 import { TxnTable } from '@/components/transactions/TxnTable'
 import { TxnDrawer } from '@/components/transactions/TxnDrawer'
@@ -54,10 +56,23 @@ export default async function TransactionsPage({ searchParams }) {
           </Link>
         </div>
       ) : null}
-      <p className="text-lg text-ink-2">
-        Payments from {formatDay(p.from)} to {formatDay(p.to)}
-        {p.explicit.from ? '' : ' (the last 7 days)'}.
-      </p>
+      {p.q ? (
+        <div className="flex flex-wrap items-center gap-3">
+          <span className="inline-flex min-h-11 max-w-full items-center gap-2 rounded-full border border-line-strong bg-white py-1 pr-1 pl-4 text-[15px] shadow-panel">
+            <span className="min-w-0 truncate">
+              Search: <strong className="font-semibold">&lsquo;{p.q}&rsquo;</strong>
+            </span>
+            <Link
+              href={buildHref(p, { q: null, id: null })}
+              aria-label={`Clear search ${p.q}`}
+              className="grid size-9 flex-none place-items-center rounded-full text-ink-2 no-underline hover:bg-page hover:text-ink"
+            >
+              <X className="size-4" aria-hidden="true" />
+            </Link>
+          </span>
+        </div>
+      ) : null}
+      <p className="text-lg text-ink-2">{rangeLine({ q: p.q, from: p.from, to: p.to, explicitDates: Boolean(p.explicit.from), formatDay })}</p>
 
       <section className="min-w-0 overflow-hidden rounded-[12px] border border-line bg-white shadow-panel">
         <TxnFilters params={p} today={today} focusSearch={sp?.focus === 'search'} />
