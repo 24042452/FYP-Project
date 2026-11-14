@@ -1,0 +1,57 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+# End-to-end tests (npm run test:e2e) are NOT run here: they need a seeded database, a production
+# build and the Microsoft Edge browser. Run them locally before a release.
+
+jobs:
+  unit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm test
+
+  integration:
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8
+        env:
+          MYSQL_ROOT_PASSWORD: root-ci-password
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -proot-ci-password"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+    env:
+      TEST_DATABASE_URL: mysql://portal_app:app-ci-password@127.0.0.1:3306/nets_portal_test
+      TEST_DATABASE_ADMIN_URL: mysql://portal_admin:admin-ci-password@127.0.0.1:3306/nets_portal_test
+      DATABASE_SSL: "false"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Create the test database and its two users
+        run: |
+          mysql -h 127.0.0.1 -uroot -proot-ci-password <<'SQL'
+          CREATE DATABASE nets_portal_test CHARACTER SET utf8mb4;
+          CREATE USER 'portal_admin'@'%' IDENTIFIED BY 'admin-ci-password';
+          GRANT ALL ON nets_portal_test.* TO 'portal_admin'@'%';
+          CREATE USER 'portal_app'@'%' IDENTIFIED BY 'app-ci-password';
+          GRANT SELECT, INSERT, UPDATE, DELETE ON nets_portal_test.* TO 'portal_app'@'%';
+          SQL
+      - run: npm run test:integration

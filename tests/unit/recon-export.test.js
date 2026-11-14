@@ -1,0 +1,63 @@
+import { describe, expect, it } from 'vitest'
+import ExcelJS from 'exceljs'
+import { buildReconWorkbook, buildTransactionsWorkbook } from '../../lib/export/xlsx.js'
+import { buildRunView } from '../../lib/recon/view.js'
+
+const exceptions = [
+  { id: 'e1', type: 'amount_mismatch', settlementId: 's2', transactionId: null, day: '2026-10-18', channel: 'card', expectedCents: 50000, actualCents: 45790, status: 'open', note: null, message: 'Short by $42.10 · Cards sales on 18 Oct' },
+  { id: 'e2', type: 'fee_mismatch', settlementId: null, transactionId: null, day: null, channel: 'card', expectedCents: 1500, actualCents: 1860, status: 'resolved', note: 'Asked NETS', message: 'Cards fees on your October bill are $3.60 more than your payments add up to' },
+  { id: 'e3', type: 'failed_payment', settlementId: null, transactionId: 't1', day: '2026-10-20', channel: 'card', expectedCents: 800, actualCents: null, status: 'open', note: null, message: "$8.00 payment didn't go through" },
+]
+const settlements = [
+  { id: 's1', businessDate: '2026-10-17', channel: 'card', grossCents: 10000, feeCents: 250, netCents: 9750, status: 'paid', expectedDate: '2026-10-19', paidDate: '2026-10-19' },
+  { id: 's2', businessDate: '2026-10-18', channel: 'card', grossCents: 45790, feeCents: 1145, netCents: 44645, status: 'paid', expectedDate: '2026-10-20', paidDate: '2026-10-20' },
+]
+
+describe('check-up view', () => {
+  it('groups open problems and keeps resolved ones apart', () => {
+    const v = buildRunView({ id: 'r', period: '2026-10-01', runAt: '2026-11-01T00:00:00.000Z', checkedCount: 6, matchedCount: 4, exceptionCount: 3, exceptions })
+    expect(v.headline).toBe('We checked 6 items. 2 need a look.')
+    expect(v.failed.text).toBe("1 payment didn't go through this month ($8.00)")
+    expect(v.failed.href).toBe('/transactions?status=failed&from=2026-10-01&to=2026-10-31')
+    expect(v.groups.map((g) => g.type)).toEqual(['amount_mismatch'])
+    expect(v.resolved).toHaveLength(1)
+    expect(v.openCount).toBe(1)
+    expect(Number.isFinite(v.matchRate)).toBe(true)
+  })
+  it('an empty month has no NaN', () => {
+    const v = buildRunView({ id: 'r', period: '2026-09-01', runAt: '2026-11-01T00:00:00.000Z', checkedCount: 0, matchedCount: 0, exceptionCount: 0, exceptions: [] })
+    expect(v).toMatchObject({ checked: 0, matchRate: 1, isEmpty: true })
+  })
+})
+
+describe('Excel exports', () => {
+  it('the check-up workbook has 3 sheets, a frozen header and currency cells that add up', async () => {
+    const buf = await buildReconWorkbook({
+      merchantName: 'Ah Hock', period: '2026-10-01', runAt: '2026-11-01T00:00:00.000Z', checked: 6, matchedCount: 4,
+      exceptionCount: 2, openCount: 1, matchRate: 4 / 6, exceptions, settlements,
+    })
+    const wb = new ExcelJS.Workbook()
+    await wb.xlsx.load(buf)
+    expect(wb.worksheets.map((w) => w.name)).toEqual(['Summary', 'Exceptions', 'Settlements'])
+    const st = wb.getWorksheet('Settlements')
+    expect(st.views[0]).toMatchObject({ state: 'frozen', ySplit: 1 })
+    expect(st.getCell('C2').numFmt).toBe('"$"#,##0.00')
+    expect(st.getCell('C3').value).toBe(457.9)
+    const gross = (st.getCell('C2').value + st.getCell('C3').value) * 100
+    expect(Math.round(gross)).toBe(55790)
+    expect(wb.getWorksheet('Summary').getCell('B10').value).toBe(557.9)
+    expect(wb.getWorksheet('Exceptions').getCell('G2').value).toBe(-42.1)
+  })
+  it('the payments workbook formats amounts in dollars', async () => {
+    const buf = await buildTransactionsWorkbook([
+      { id: 'a', createdAt: '2026-10-01T04:00:00.000Z', amountCents: 1250, feeCents: 31, channel: 'card', status: 'failed', failureCode: '51', customerRef: null, outletName: 'Stall', terminalSerial: 'T1', settlementDate: null },
+    ])
+    const wb = new ExcelJS.Workbook()
+    await wb.xlsx.load(buf)
+    const ws = wb.getWorksheet('Payments')
+    expect(ws.getCell('E2').value).toBe(12.5)
+    expect(ws.getCell('E2').numFmt).toBe('"$"#,##0.00')
+    expect(ws.getCell('G2').value).toMatch(/declined/)
+    expect(ws.views[0]).toMatchObject({ state: 'frozen', ySplit: 1 })
+  })
+})

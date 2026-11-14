@@ -7,9 +7,34 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-inter), system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
   --font-heading: var(--font-sans);
+
+  /* Clean Console tokens (from design/assets/portal.css) */
+  --color-page: var(--page);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-ink-3: var(--ink-3);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-nets-blue: var(--nets-blue);
+  --color-nets-blue-hover: var(--nets-blue-hover);
+  --color-nets-blue-soft: var(--nets-blue-soft);
+  --color-nets-red: var(--nets-red);
+  --color-nets-red-hover: var(--nets-red-hover);
+  --color-nets-red-soft: var(--nets-red-soft);
+  --color-ok: var(--ok);
+  --color-ok-bg: var(--ok-bg);
+  --color-warn: var(--warn);
+  --color-warn-bg: var(--warn-bg);
+  --color-bad: var(--bad);
+  --color-bad-bg: var(--bad-bg);
+  --color-info: var(--info);
+  --color-info-bg: var(--info-bg);
+  --color-mute: var(--mute);
+  --color-mute-bg: var(--mute-bg);
+  --shadow-panel: 0 1px 2px rgba(26, 34, 51, 0.06), 0 1px 1px rgba(26, 34, 51, 0.03);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -49,38 +74,57 @@
 }
 
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
+  --page: #F5F7FA;
+  --ink: #14213D;
+  --ink-2: #46536A;
+  --ink-3: #5C6980;
+  --line: #E2E7EE;
+  --line-strong: #CBD3DE;
+  --nets-blue: #0B4DB8;
+  --nets-blue-hover: #08398A;
+  --nets-blue-soft: #EAF1FD;
+  --nets-red: #D3162B;
+  --nets-red-hover: #B01224;
+  --nets-red-soft: #FDE9EB;
+  --ok: #0E7A3E;   --ok-bg: #E3F5EA;
+  --warn: #8A5300; --warn-bg: #FFF1D6;
+  --bad: #B01224;  --bad-bg: #FDE9EB;
+  --info: #08398A; --info-bg: #EAF1FD;
+  --mute: #46536A; --mute-bg: #EEF1F5;
+
+  /* shadcn tokens mapped to the design: red = main action, blue = focus and navigation */
+  --background: var(--page);
+  --foreground: var(--ink);
+  --card: #FFFFFF;
+  --card-foreground: var(--ink);
+  --popover: #FFFFFF;
+  --popover-foreground: var(--ink);
+  --primary: var(--nets-red);
+  --primary-foreground: #FFFFFF;
+  --secondary: var(--mute-bg);
+  --secondary-foreground: var(--ink);
+  --muted: var(--mute-bg);
+  --muted-foreground: var(--ink-3);
+  --accent: var(--mute-bg);
+  --accent-foreground: var(--ink);
+  --destructive: var(--nets-red);
+  --border: var(--line);
+  --input: var(--line-strong);
+  --ring: var(--nets-blue);
+  --chart-1: #0B4DB8;
+  --chart-2: #A8C3F0;
+  --chart-3: #46536A;
+  --chart-4: #D3162B;
+  --chart-5: #0E7A3E;
   --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --sidebar: #FFFFFF;
+  --sidebar-foreground: var(--ink);
+  --sidebar-primary: var(--nets-blue);
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: var(--nets-blue-soft);
+  --sidebar-accent-foreground: var(--nets-blue-hover);
+  --sidebar-border: var(--line);
+  --sidebar-ring: var(--nets-blue);
 }
 
 .dark {
