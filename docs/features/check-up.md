@@ -22,7 +22,11 @@ Compares a month's payments with the money NETS paid into the bank and with the 
 - "Mark as sorted" stores an optional note (500 characters max) and moves the item to "Sorted".
 - Seeded October 2026 has exactly 3 money problems for the demo.
 
+## Progress bar
+- Running the check-up shows a progress bar, the current step in plain words and "About N seconds left". It is an estimate (the check-up is one request): it eases to 90% using the last run's real time (`localStorage` `checkupDurationMs`, 6 seconds by default) and fills to 100% only when the answer returns. The results card then says "Checked in N seconds". Maths in `lib/recon/progress.js`, UI in `components/recon/RunProgress.jsx`.
+
 ## Tests
 - Unit: `tests/unit/reconcile.test.js`, `recon-export.test.js`
 - Integration: `tests/integration/recon.test.js`, `isolation.test.js`
+- Unit: `tests/unit/recon-progress.test.js`; end-to-end: `tests/e2e/ui-polish.spec.js` (TC-REC-02)
 - End-to-end: `tests/e2e/recon.spec.js` (TC-REC-01, TC-EXP-01)

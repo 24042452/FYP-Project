@@ -10,7 +10,9 @@ import { CHANNEL_LABELS } from '@/lib/channels'
 import { Pill } from '@/components/dashboard/Pill'
 import { Panel, EmptyState } from '@/components/dashboard/Panel'
 import { RunButton } from '@/components/recon/RunButton'
+import { CheckedIn, RunProgress } from '@/components/recon/RunProgress'
 import { markAsSorted, runReconciliation } from './actions'
+import { MerchantWideNote } from '@/components/layout/MerchantWideNote'
 
 export const metadata = { title: 'Check-up · Merchant Portal' }
 
@@ -119,6 +121,7 @@ export default async function ReconciliationPage({ searchParams }) {
         <h1 className="text-[28px] leading-tight font-bold">Check-up</h1>
         <p className="mt-1 text-[14px] text-ink-3">Reconciliation · we compare your payments, your bank deposits and your NETS bill</p>
       </div>
+      <MerchantWideNote />
 
       {sp?.notice === 'month' ? (
         <p role="alert" className="rounded-lg bg-bad-bg px-4 py-3 text-[15px] font-medium text-bad">
@@ -126,7 +129,7 @@ export default async function ReconciliationPage({ searchParams }) {
         </p>
       ) : null}
 
-      <section aria-label="Choose a month" className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+      <section aria-label="Choose a month" className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <form method="get" className="flex flex-wrap items-end gap-2">
           <div className="flex flex-col gap-1">
             <label htmlFor="month" className="text-[14px] font-medium text-ink-2">Month</label>
@@ -138,9 +141,10 @@ export default async function ReconciliationPage({ searchParams }) {
           </div>
           <button type="submit" className={linkBtn}>Show</button>
         </form>
-        <form action={runReconciliation}>
+        <form action={runReconciliation} className="flex w-full flex-col gap-3 sm:w-[26rem] sm:items-end sm:pt-[26px]">
           <input type="hidden" name="month" value={month} />
           <RunButton>{run ? 'Check again' : 'Run check-up'}</RunButton>
+          <RunProgress />
         </form>
       </section>
 
@@ -160,6 +164,7 @@ export default async function ReconciliationPage({ searchParams }) {
                 <p className="text-[20px] leading-snug font-semibold">{view.headline}</p>
                 <p className="mt-1 text-[14px] text-ink-2">
                   {run.matchedCount} of {view.checked} matched ({view.matchPercent}). Last checked {formatWhen(run.runAt)}.
+                  {sp?.run === run.id ? <CheckedIn /> : null}
                   {view.openCount > 0 ? ` ${view.openCount} still open.` : ' Everything is sorted.'}
                 </p>
               </div>
