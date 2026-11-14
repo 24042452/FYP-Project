@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "test": "vitest run --project unit",
-    "seed": "node scripts/seed.js",
+    "seed": "node --env-file=.env.local scripts/seed.mjs",
     "migrate": "node --env-file=.env.local scripts/migrate.mjs",
     "test:integration": "vitest run --project integration"
   },
