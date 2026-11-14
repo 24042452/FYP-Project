@@ -291,6 +291,17 @@ describe('healthScore', () => {
     }
     expect(hs(-23, 0.019, 2).score).toBe(47) // -12 - 10 - 6
   })
+  it('"About the same" is decided on the raw growth', () => {
+    expect(hs(1.6).factors[0].detail).toBe('About the same')
+    expect(hs(-1.9).factors[0].detail).toBe('About the same')
+    expect(hs(2.4).factors[0].detail).toBe('Up 2 %')
+    expect(hs(-2.4).factors[0].detail).toBe('Down 2 %')
+  })
+  it('a tiny failed rate is not shown as 0.0 %', () => {
+    expect(hs(0, 0.0004).factors[1].detail).toBe('Less than 0.1 % of payments')
+    expect(hs(0, 0).factors[1].detail).toBe('None')
+    expect(hs(0, 0.001).factors[1].detail).toBe('0.1 % of payments')
+  })
   it('points are whole numbers and never -0', () => {
     for (const f of hs(0.4, 0.0005, 0).factors) {
       expect(Number.isInteger(f.points)).toBe(true)

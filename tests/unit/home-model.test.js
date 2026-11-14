@@ -157,6 +157,12 @@ describe('buildHomeModel: growth, previous period empty', () => {
     // +5 for the 10 % growth, nothing else: 80
     expect(m.tags.map((t) => t.label)).toContain('Business health: 80 · Healthy')
   })
+  it('no sales yet this period: health says no sales to compare, not Down 100 %', () => {
+    const m = buildHomeModel({ ...EMPTY_INPUT, prevRows: [row('2026-11-02', 'nets_qr', 10000)] })
+    const h = m.tags.find((t) => t.health).health
+    expect(h.factors[0]).toEqual({ label: 'Sales compared with last week', detail: 'No sales to compare yet', points: 0 })
+    expect(h.score).toBe(75)
+  })
   it('health explanation follows the period wording and the late count', () => {
     const m = buildHomeModel({
       ...EMPTY_INPUT,

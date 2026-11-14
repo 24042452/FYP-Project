@@ -57,7 +57,7 @@ export function HealthTag({ label, tone, health }) {
         ref={btn}
         type="button"
         aria-expanded={open}
-        aria-controls={id}
+        aria-controls={open ? id : undefined}
         onClick={() => setOpen((o) => !o)}
         className="inline-flex min-h-11 cursor-pointer items-center rounded-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-nets-blue"
       >
