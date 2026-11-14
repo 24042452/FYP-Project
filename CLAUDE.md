@@ -5,36 +5,42 @@ Final Year Project with industry partner **NETS** (Singapore payments): an enhan
 ## Where we left off (update this section at the end of every session)
 
 **Last updated:** 2026-11-15
-**Current phase: BUILDING.** The user approved building (database switched to MySQL 8 on 2026-11-14, see ADR-001). MVP feature tasks 1-13 are done and task 14a (Playwright e2e tests, GitHub Actions CI, README, feature docs, test-plan results) is done, all on branch `mvp`. The deployment part, 14b (hosted MySQL, `git push`, Vercel), is **waiting on the user's OK**: do not create hosted databases, push or deploy until they say so.
+**Current phase: MVP LIVE, polishing for Touchpoint 1.** The MVP is built, reviewed, merged into `main` and deployed.
 **Next deadline:** Touchpoint 1 MVP demo to NETS & RP, about 2026-11-25.
 
 Where things are:
-- Branch `mvp` (local; GitHub has `main` and an older `mvp`). Execution ledger: `.superpowers/sdd/2026-11-11-mvp/progress.md`. Build plan: `docs/superpowers/plans/2026-11-11-mvp.md`
-- Tests: `npm test` (unit), `npm run test:integration` (MySQL `nets_portal_test`), `npm run test:e2e` (Playwright in installed Edge; builds and starts the app itself, so run `npm run seed` first). Results in `docs/04-documentation-and-test-plan.md`
-- CI: `.github/workflows/ci.yml` (lint, unit, integration with a `mysql:8` service; e2e is local only)
-- Feature docs: `docs/features/`
-- Local setup: `.env.local` (git-ignored) has the MySQL URLs, `DEMO_MODE=true`, `DEMO_PASSWORD`, `ASSISTANT_MODE=rules`. The old Supabase keys in it are unused
+- **Live site:** https://fyp-project-taupe.vercel.app (Vercel Hobby, deploys from `main`; every PR gets a preview link, which needs a Vercel login)
+- **Repo:** https://github.com/24042452/FYP-Project (moved from `Rampy2122/FYP-Project`; the old URL redirects). `main` is protected by a ruleset: changes go in through pull requests, no force pushes or deletion
+- **Database (live):** the school's shared Azure MySQL 8.0 server, schema `SOI-2026-0021-sherwin` (the server shows it in lower case). Other schemas on that server belong to other people: only ever touch ours. Host and login live only in the git-ignored `.env.azure`. The schema came from `db/export/SOI-2026-0021-sherwin.sql` (`node scripts/export-schema.mjs <name>` regenerates it). Re-seed it with `node --env-file=.env.azure scripts/seed.mjs`
+- **Database (local):** MySQL 8 on this PC (`nets_portal`, `nets_portal_test`); settings in git-ignored `.env.local`
+- Tests: `npm test` (unit), `npm run test:integration` (MySQL `nets_portal_test`), `npm run test:e2e` (Playwright in installed Edge; builds and starts the app itself, so run `npm run seed` first). Results in `docs/04-documentation-and-test-plan.md`. CI (`.github/workflows/ci.yml`) runs lint, unit and integration on every PR
+- Docs: feature pages in `docs/features/`, open small issues and ideas in `docs/backlog.md`, build plan in `docs/superpowers/plans/2026-11-11-mvp.md`
+
+Merged so far:
+- PR #1 (2026-11-15): the whole MVP (tasks 1-14a plus the final-review fixes)
+- PR #2: schema export for the school Azure database
+- PR #3: working outlet menu (Home and Sales & payments follow the chosen outlet, with each outlet's share of NETS payouts, animations and a "Now showing" message), red "Log out" button with words, check-up progress bar
 
 Waiting on the user:
-- 14b hosting: database = **school Azure MySQL 8.0** (host dft-fyp.mysql.database.azure.com, schema `SOI-2026-0021-sherwin`, which the server shows in lower case; shared server owned by the school, other schemas belong to others: only ever touch ours). Schema imported from `db/export/SOI-2026-0021-sherwin.sql`, demo data seeded 2026-11-15 via `node --env-file=.env.azure scripts/seed.mjs`. Connection details live in git-ignored `.env.azure`. Still waiting on the school owner to allow all IPs through the firewall so Vercel can connect; website goes on Vercel Hobby (free). The DB password appeared once in a session log on 2026-11-15, so ask the owner to rotate it
+- Ask the school owner to **change the Azure database password** (it was exposed once in a session log on 2026-11-15), then update `.env.azure` and `DATABASE_URL` in Vercel
 - An Anthropic API key (optional; without it the assistant stays in rules mode)
 
 Next steps:
-1. 14b deploy (after the user's OK): hosted MySQL 8 with app and admin users, `npm run migrate` and `npm run seed` against it, push, Vercel, smoke-test both demo logins
-2. ~~Final whole-branch review of `mvp`~~ Done 2026-11-15: verdict "with fixes", all fixes applied (REST `/api/v1` endpoints, computed overdue, TLS + pool settings for hosted MySQL) and re-reviewed clean. Tests: 224 unit, 91 integration, 26 e2e
-3. ~~Open a PR from `mvp` to `main`~~ Done 2026-11-15: https://github.com/Rampy2122/FYP-Project/pull/1
-4. Cut list if behind is in "Decisions made"
-5. **Before every demo: run `npm run seed` that morning** (and against the hosted DB). Pending/late/today figures are set relative to the seed day and nothing refreshes them
+1. **Before every demo: re-seed that morning**, locally and on Azure (`node --env-file=.env.azure scripts/seed.mjs`). Pending/late/"today" figures are set relative to the seed day and nothing refreshes them
+2. Decide on the health-score wording (it shows a low red score next to "Business is good"); see `docs/backlog.md`
+3. Full run-through on a phone and a laptop, a backup screen recording, and the demo script and slides
+4. Quick usability test with 3-5 non-technical users (user-centred design evidence)
+5. After Touchpoint 1: Phase 1 in `docs/01-project-plan.md`
 
 Done:
-- [x] Planning docs 01-04, design (Option 1 · Clean Console) and `PRODUCT.md`, GitHub repo https://github.com/Rampy2122/FYP-Project
-- [x] 2026-11-14: MVP feature tasks 1-13 and 14a built on `mvp`
+- [x] Planning docs 01-04, design (Option 1 · Clean Console) and `PRODUCT.md`
+- [x] 2026-11-14/15: MVP built (tasks 1-14a), final whole-branch review and fixes, deployed to Vercel with the school Azure database, PRs #1-3 merged
 
 ## Decisions made
 
 - Project requirements (firm, confirmed 2026-11-14): **JavaScript / Node.js, a React framework, building and consuming REST APIs (front and back end); MySQL and/or MongoDB for transactions, invoices and user data**
-- Hosting: **Vercel**. Database: **MySQL 8** via `mysql2` with prepared statements, no ORM, `.sql` migrations (decided 2026-11-14, ADR-001; replaced Supabase Postgres). MongoDB not used. Own login (bcrypt + `sessions` table). No row-level security in MySQL, so **merchant isolation = every query in `lib/data/` filters by the merchant id from the server session**, with an isolation test per data function. Vercel Cron for jobs, Vercel Blob for files. Hosted MySQL provider to be picked in Sprint 1
-- Frontend: Next.js 15 App Router in **plain JavaScript (no TypeScript; decided 2026-11-12, the team has not learned TS)**, Tailwind, shadcn/ui, Recharts, TanStack Table, RHF + Zod. Python was considered and not chosen
+- Hosting: **Vercel**. Database: **MySQL 8** via `mysql2` with prepared statements, no ORM, `.sql` migrations (decided 2026-11-14, ADR-001; replaced Supabase Postgres). MongoDB not used. Own login (bcrypt + `sessions` table). No row-level security in MySQL, so **merchant isolation = every query in `lib/data/` filters by the merchant id from the server session**, with an isolation test per data function. Vercel Cron for jobs, Vercel Blob for files. Hosted MySQL: the school's Azure MySQL 8.0 server (decided 2026-11-15; Aiven's free MySQL closed to new sign-ups, Railway is trial-only)
+- Frontend: Next.js 15 App Router in **plain JavaScript (no TypeScript; decided 2026-11-12, the team has not learned TS)**, Tailwind, shadcn/ui, Recharts, RHF + Zod (TanStack Table was planned but a plain table was enough). Python was considered and not chosen
 - AI copilot: Anthropic `@anthropic-ai/sdk`, model `claude-opus-5-5`, tool use with **fixed read-only query tools; the AI never writes SQL**. help centre in `kb_chunks` (MVP: MySQL FULLTEXT search; Phase 2: embeddings stored as JSON, similarity computed in Node). Rules mode (no AI) is the MVP default; AI mode = RAG
 - Exports: ExcelJS (xlsx), @react-pdf/renderer (PDF)
 - Tests: Vitest (unit + integration tests against a test MySQL database, incl. merchant isolation), Playwright

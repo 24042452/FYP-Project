@@ -16,9 +16,11 @@ Today, most merchants open the portal about once a month to look at an invoice. 
 
 ---
 
+**Live demo:** https://fyp-project-taupe.vercel.app (use the "Try as…" buttons on the login page)
+
 ## Current status
 
-**Phase: building** (14 Nov 2026). All MVP feature screens are built and tested on the `mvp` branch. Left for the MVP: deploying to Vercel with a hosted MySQL database, a final review, and a pull request into `main`.
+**Phase: MVP live** (15 Nov 2026). The MVP is built, reviewed, merged into `main` and deployed on Vercel with a MySQL database on the school's Azure server. We are now polishing it for the demo. Open small issues and ideas are listed in [docs/backlog.md](docs/backlog.md).
 **Next milestone:** Touchpoint 1, an MVP demo to NETS and RP, around **25 Nov 2026**.
 
 | Area | Status |
@@ -30,8 +32,10 @@ Today, most merchants open the portal about once a month to look at an invoice. 
 | Visual design and clickable mockups | ✅ Done: [design/](design/), [DESIGN.md](DESIGN.md) |
 | App in plain JavaScript, MySQL database, synthetic data generator and seed | ✅ Built |
 | Login (form and demo buttons), Home, Sales & payments, Money to my bank, Bills & charges (with PDF), Check-up, Reports (Excel), NETS Assistant (quick answers), alerts bell | ✅ Built: one page per feature in [docs/features/](docs/features/) |
-| Tests: unit, integration (MySQL) and end-to-end (desktop and phone) | ✅ Passing, and unit and integration run on GitHub Actions |
-| Deployment on Vercel with hosted MySQL | ⬜ Not started (needs the team's OK) |
+| Outlet menu (Home and Sales & payments follow the chosen outlet), check-up progress bar, clear "Log out" button | ✅ Built |
+| REST API `/api/v1` (payments, settlements, sales summary) | ✅ Built: [docs/features/api.md](docs/features/api.md) |
+| Tests: unit, integration (MySQL) and end-to-end (desktop and phone) | ✅ Passing; lint, unit and integration run on GitHub Actions for every pull request |
+| Deployment: Vercel + MySQL on the school's Azure server | ✅ Live: https://fyp-project-taupe.vercel.app |
 | NETS Assistant AI mode (needs an Anthropic API key) | ⬜ Later |
 
 ### MVP (Touchpoint 1) scope
@@ -41,8 +45,9 @@ Today, most merchants open the portal about once a month to look at an invoice. 
   - **Tan & Sons Retail:** 3 outlets including an online shop, with an accountant
 - Login with email and password, plus one-click **"Try as…"** demo buttons
 - Home dashboard, Sales & payments, Money to my bank, Bills & charges, Check-up, Reports (Excel)
+- An **outlet menu** for multi-outlet merchants: Home and Sales & payments switch to one outlet (including that outlet's share of NETS payouts); pages that NETS handles per business (payouts, bills, check-up) say they cover all outlets
 - NETS Assistant in "quick answers" mode (no AI key needed); AI mode is added later
-- Modules planned for later phases appear in the menu, greyed out with a **"Soon"** tag
+- Modules planned for later phases appear in the menu with a **"Soon"** tag and a short "coming soon" page
 
 ---
 
@@ -72,7 +77,7 @@ We chose **"Clean Console"**: a professional, light merchant portal in red, blue
 | Back end and REST API | Next.js route handlers on **Node.js**; public REST API `/api/v1` (read-only endpoints for payments, settlements and a sales summary: [docs/features/api.md](docs/features/api.md)) |
 | Database | **MySQL 8** (transactions, invoices and user data). Every query is filtered by the logged-in merchant, so each merchant only sees their own data |
 | Login | Our own email + password login (bcrypt, sessions stored in MySQL) |
-| Hosting | **Vercel** (planned) |
+| Hosting | **Vercel** (free Hobby plan; every pull request gets a preview link). Live database: MySQL 8 on the school's Azure server |
 | Assistant | Rules mode now (no key needed); AI mode (Claude, Anthropic API) uses the same fixed, read-only tools. The AI never writes database queries |
 | Exports | Excel (ExcelJS) and PDF (@react-pdf/renderer) |
 | Tests | Vitest (unit, and integration tests against MySQL), Playwright (end-to-end) |
@@ -80,12 +85,12 @@ We chose **"Clean Console"**: a professional, light merchant portal in red, blue
 ## Repository layout
 
 ```
-docs/          Plan, technical design, feature catalogue, test plan, MVP build plan
+docs/          Plan, technical design, feature catalogue, test plan, feature pages, backlog, MVP build plan
 design/        Clickable mockups (open design/index.html)
 DESIGN.md      Design system: colours, type, components, rules
 PRODUCT.md     Short product brief (users, purpose, principles)
-app/, lib/, components/, db/   The Next.js app and the SQL migrations
-scripts/       Migrate and seed commands
+app/, lib/, components/, db/   The Next.js app, the SQL migrations and db/export/ (one-file schema for importing)
+scripts/       Migrate, seed and export-schema commands
 tests/         unit/, integration/ (MySQL) and e2e/ (Playwright)
 .github/       GitHub Actions: lint, unit and integration tests
 .impeccable/   Notes and screenshots from the design process
@@ -108,7 +113,9 @@ npm run seed       # creates the two demo merchants and their sample data (run a
 npm run dev        # http://localhost:3000
 ```
 
-**Before a demo: run `npm run seed` that morning** (and against the hosted database as well). The seed sets pending, late and "today" figures relative to the day it runs and nothing refreshes them, so old data looks stale.
+**Before a demo: run `npm run seed` that morning, and re-seed the live database too** (`node --env-file=.env.azure scripts/seed.mjs`, with the school database's connection details in a git-ignored `.env.azure`). The seed sets pending, late and "today" figures relative to the day it runs and nothing refreshes them, so old data looks stale.
+
+**Using a hosted database** (such as the school's Azure server): if you can only use MySQL Workbench there, import the one-file schema from `db/export/` instead of running `npm run migrate`. See "Importing the schema into a hosted database" in [docs/database/README.md](docs/database/README.md). For the live site, put the same settings in Vercel's environment variables (`DATABASE_URL`, `DATABASE_SSL=true`, `DB_CONNECTION_LIMIT=3`, `DEMO_MODE`, `DEMO_PASSWORD`, `ASSISTANT_MODE`); the admin URL is only needed on your own computer.
 
 `.env.local` holds secrets. It is ignored by git and must never be committed.
 
