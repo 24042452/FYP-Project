@@ -16,7 +16,7 @@ Where things are:
 - Local setup: `.env.local` (git-ignored) has the MySQL URLs, `DEMO_MODE=true`, `DEMO_PASSWORD`, `ASSISTANT_MODE=rules`. The old Supabase keys in it are unused
 
 Waiting on the user:
-- OK for 14b: hosted MySQL 8 provider and Vercel project + env vars (site goes on Vercel Hobby, free). Free MySQL options checked 2026-11-15: Aiven closed new free MySQL services on 2026-11-06 (existing ones deleted 2026-12-21); Railway = one-off $5 trial credit (~30 days), then paid; TiDB risky (FK cascades, FULLTEXT syntax). Recommended: Railway trial for Touchpoint 1, then decide on a $5/month plan
+- 14b hosting: database = **school Azure MySQL 8.0** (host dft-fyp.mysql.database.azure.com, schema `SOI-2026-0021-sherwin`, which the server shows in lower case; shared server owned by the school, other schemas belong to others: only ever touch ours). Schema imported from `db/export/SOI-2026-0021-sherwin.sql`, demo data seeded 2026-11-15 via `node --env-file=.env.azure scripts/seed.mjs`. Connection details live in git-ignored `.env.azure`. Still waiting on the school owner to allow all IPs through the firewall so Vercel can connect; website goes on Vercel Hobby (free). The DB password appeared once in a session log on 2026-11-15, so ask the owner to rotate it
 - An Anthropic API key (optional; without it the assistant stays in rules mode)
 
 Next steps:
