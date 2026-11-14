@@ -77,9 +77,9 @@ CREATE TABLE transactions (
   KEY idx_txn_terminal (terminal_id, merchant_id),
   KEY idx_txn_settlement (settlement_id, merchant_id),
   CONSTRAINT fk_txn_merchant FOREIGN KEY (merchant_id) REFERENCES merchants (id) ON DELETE CASCADE,
-  CONSTRAINT fk_txn_outlet FOREIGN KEY (outlet_id, merchant_id) REFERENCES outlets (id, merchant_id),
-  CONSTRAINT fk_txn_terminal FOREIGN KEY (terminal_id, merchant_id) REFERENCES terminals (id, merchant_id),
-  CONSTRAINT fk_txn_settlement FOREIGN KEY (settlement_id, merchant_id) REFERENCES settlements (id, merchant_id)
+  CONSTRAINT fk_txn_outlet FOREIGN KEY (outlet_id, merchant_id) REFERENCES outlets (id, merchant_id) ON DELETE CASCADE,
+  CONSTRAINT fk_txn_terminal FOREIGN KEY (terminal_id, merchant_id) REFERENCES terminals (id, merchant_id) ON DELETE CASCADE,
+  CONSTRAINT fk_txn_settlement FOREIGN KEY (settlement_id, merchant_id) REFERENCES settlements (id, merchant_id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE invoices (
