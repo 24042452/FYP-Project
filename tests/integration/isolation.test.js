@@ -3,6 +3,7 @@ import { randomUUID } from 'node:crypto'
 import { adminExecute, insertFixture, resetTestDb } from './helpers.js'
 import { getDailySales, getFeeTotals, getHeatmap } from '../../lib/data/sales.js'
 import { getRecentSettlements, getSettlementSummary } from '../../lib/data/settlements.js'
+import { getTransaction, listTransactions } from '../../lib/data/transactions.js'
 import { getLatestRunSummary } from '../../lib/data/recon.js'
 
 // Merchant isolation: for every data function, A's call must never return B's rows.
@@ -12,6 +13,8 @@ const A = randomUUID()
 const B = randomUUID()
 const A_CENTS = 1111
 const B_CENTS = 99999
+const TXN_A = randomUUID()
+const TXN_B = randomUUID()
 const DAY = '2026-11-03'
 const FROM = '2026-11-01'
 const TO = '2026-11-07'
@@ -23,6 +26,8 @@ const CASES = [
   ['getFeeTotals', async (id) => { const r = await getFeeTotals(id, FROM, TO); return r.grossCents > 0 ? [r] : [] }, (rows) => rows.reduce((s, r) => s + r.grossCents, 0)],
   ['getRecentSettlements', (id) => getRecentSettlements(id, 5), (rows) => rows.reduce((s, r) => s + r.netCents, 0)],
   ['getSettlementSummary', async (id) => { const r = await getSettlementSummary(id, '2026-11-04'); return r.pendingCents > 0 ? [r] : [] }, (rows) => rows.reduce((s, r) => s + r.pendingCents, 0)],
+  ['listTransactions', async (id) => (await listTransactions(id, {})).rows, (rows) => rows.reduce((s, r) => s + r.amountCents, 0)],
+  ['getTransaction', async (id) => { const r = await getTransaction(id, id === A ? TXN_A : TXN_B); return r ? [r] : [] }, (rows) => rows.reduce((s, r) => s + r.amountCents, 0)],
   ['getLatestRunSummary', async (id) => { const r = await getLatestRunSummary(id); return r ? [r] : [] }, (rows) => rows.reduce((s, r) => s + r.matchedCount, 0)],
 ]
 
@@ -31,8 +36,8 @@ beforeAll(async () => {
   await insertFixture({
     merchants: [{ id: A }, { id: B }],
     transactions: [
-      { merchantId: A, amountCents: A_CENTS, createdAt: `${DAY}T04:00:00.000Z` },
-      { merchantId: B, amountCents: B_CENTS, createdAt: `${DAY}T04:00:00.000Z` },
+      { id: TXN_A, merchantId: A, amountCents: A_CENTS, createdAt: `${DAY}T04:00:00.000Z` },
+      { id: TXN_B, merchantId: B, amountCents: B_CENTS, createdAt: `${DAY}T04:00:00.000Z` },
     ],
   })
   for (const [id, cents] of [[A, A_CENTS], [B, B_CENTS]]) {
@@ -61,4 +66,11 @@ describe('merchant isolation', () => {
       expect(await call(randomUUID())).toEqual([])
     })
   }
+})
+
+describe('merchant isolation: single payment', () => {
+  it('getTransaction never returns another merchants payment', async () => {
+    expect(await getTransaction(A, TXN_B)).toBeNull()
+    expect(await getTransaction(B, TXN_A)).toBeNull()
+  })
 })
