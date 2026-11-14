@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { generateDataset } from '@/lib/synthetic/generate'
-import { sgtDate } from '@/lib/dates'
+import { sgtDate, sgtToIso } from '@/lib/dates'
 import { CHANNELS } from '@/lib/channels'
 import { feeFor } from '@/lib/fees'
 
@@ -12,6 +12,12 @@ describe('sgtDate', () => {
   it('buckets a UTC timestamp into the Singapore calendar day', () => {
     expect(sgtDate('2026-10-31T16:30:00Z')).toBe('2026-11-01')
     expect(sgtDate('2026-10-31T15:59:59Z')).toBe('2026-10-31')
+  })
+
+  it('assigns a transaction at SGT 00:30 to that Singapore business date', () => {
+    const iso = sgtToIso('2026-10-18', 0, 30)
+    expect(iso).toBe('2026-10-17T16:30:00.000Z')
+    expect(sgtDate(iso)).toBe('2026-10-18')
   })
 })
 
