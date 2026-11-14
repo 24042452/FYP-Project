@@ -10,6 +10,7 @@ import { buildHomeModel, chartRange, parsePeriod } from '@/lib/dashboard/home-mo
 import { Headline } from '@/components/dashboard/Headline'
 import { PeriodSwitcher } from '@/components/dashboard/PeriodSwitcher'
 import { Pill } from '@/components/dashboard/Pill'
+import { HealthTag } from '@/components/dashboard/HealthTag'
 import { StatTile } from '@/components/dashboard/StatTile'
 import { MoneyFlow } from '@/components/dashboard/MoneyFlow'
 import { WeekBars } from '@/components/dashboard/WeekBars'
@@ -95,11 +96,15 @@ export default async function HomePage({ searchParams }) {
 
       <SwitchFx fxKey={fxKey} variant="panels" className="flex flex-col gap-5 sm:gap-6">
       <div className="flex flex-wrap items-center gap-2">
-        {m.tags.map((t) => (
-          <Pill key={t.label} tone={t.tone}>
-            {t.label}
-          </Pill>
-        ))}
+        {m.tags.map((t) =>
+          t.health ? (
+            <HealthTag key="health" label={t.label} tone={t.tone} health={t.health} />
+          ) : (
+            <Pill key={t.label} tone={t.tone}>
+              {t.label}
+            </Pill>
+          ),
+        )}
       </div>
 
       <section aria-label="Summary" className="grid grid-cols-1 divide-y divide-line rounded-[12px] border border-line bg-white shadow-panel sm:grid-cols-3 sm:divide-x sm:divide-y-0">

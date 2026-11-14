@@ -213,27 +213,80 @@ describe('buildHeadline', () => {
 })
 
 describe('healthScore', () => {
-  it('matches the brief example', () => {
-    expect(healthScore({ growthPct: 12, failedRate: 0.012, delayedSettlements: 2 })).toEqual({
-      score: 60,
-      label: 'Okay',
-    })
+  const hs = (growthPct, failedRate = 0, delayedSettlements = 0, prevWord) =>
+    healthScore({ growthPct, failedRate, delayedSettlements }, prevWord)
+
+  it('starts at 75 with nothing to report', () => {
+    expect(hs(0)).toMatchObject({ score: 75, label: 'Healthy', tone: 'ok' })
   })
-  it('Good at >= 75, Needs attention below 50', () => {
-    expect(healthScore({ growthPct: 20, failedRate: 0, delayedSettlements: 0 })).toEqual({
-      score: 90,
-      label: 'Good',
-    })
-    expect(healthScore({ growthPct: -20, failedRate: 0.05, delayedSettlements: 3 })).toEqual({
-      score: 0,
-      label: 'Needs attention',
-    })
+  it('combines the three factors', () => {
+    // +6 (12 %), -6 (1.2 %), -6 (2 late) = 69
+    expect(hs(12, 0.012, 2)).toMatchObject({ score: 69, label: 'Okay', tone: 'warn' })
   })
-  it('null growth counts as 0, growth is clamped, score rounded and clamped', () => {
-    expect(healthScore({ growthPct: null, failedRate: 0, delayedSettlements: 0 }).score).toBe(70)
-    expect(healthScore({ growthPct: 500, failedRate: 0, delayedSettlements: 0 }).score).toBe(90)
-    expect(healthScore({ growthPct: 0, failedRate: 0.0123, delayedSettlements: 0 }).score).toBe(58)
-    expect(healthScore({ growthPct: 20, failedRate: 0, delayedSettlements: -5 }).score).toBe(100)
+  it('label boundaries: 70 Healthy, 69 Okay, 50 Okay, 49 Needs a look', () => {
+    expect(hs(-10)).toMatchObject({ score: 70, label: 'Healthy', tone: 'ok' })
+    expect(hs(-12)).toMatchObject({ score: 69, label: 'Okay', tone: 'warn' })
+    expect(hs(-30, 0.01, 0)).toMatchObject({ score: 55, label: 'Okay' }) // 75-15-5
+    expect(hs(-30, 0.02, 0)).toMatchObject({ score: 50, label: 'Okay', tone: 'warn' })
+    expect(hs(-30, 0.022, 0)).toMatchObject({ score: 49, label: 'Needs a look', tone: 'bad' })
+  })
+  it('growth is capped at plus or minus 30 (15 points)', () => {
+    expect(hs(30).score).toBe(90)
+    expect(hs(500).score).toBe(90)
+    expect(hs(-30).score).toBe(60)
+    expect(hs(-500).score).toBe(60)
+  })
+  it('failed payments: 1 % is -5, capped at -15 from 3 %', () => {
+    expect(hs(0, 0.01).score).toBe(70)
+    expect(hs(0, 0.03).score).toBe(60)
+    expect(hs(0, 0.5).score).toBe(60)
+  })
+  it('late payouts: -3 each, capped at -12 from 4', () => {
+    expect(hs(0, 0, 1).score).toBe(72)
+    expect(hs(0, 0, 3).score).toBe(66)
+    expect(hs(0, 0, 4).score).toBe(63)
+    expect(hs(0, 0, 40).score).toBe(63)
+  })
+  it('the worst case is gentle, not zero', () => {
+    expect(hs(-30, 0.5, 40)).toMatchObject({ score: 33, label: 'Needs a look', tone: 'bad' })
+  })
+  it('null growth counts as no change', () => {
+    expect(hs(null).score).toBe(75)
+    expect(hs(null).factors[0].detail).toBe('No sales to compare yet')
+    expect(hs(null).factors[0].points).toBe(0)
+  })
+  it('NaN and Infinity count as zero', () => {
+    expect(hs(NaN, NaN, NaN).score).toBe(75)
+    expect(hs(Infinity, Infinity, Infinity).score).toBe(75)
+    expect(hs(-Infinity, 0, 0).score).toBe(75)
+  })
+  it('a negative late count counts as none', () => {
+    expect(hs(0, 0, -5).score).toBe(75)
+    expect(hs(0, 0, -5).factors[2]).toEqual({ label: 'Late money to your bank', detail: 'None', points: 0 })
+  })
+  it('explains each factor in plain words', () => {
+    const r = hs(-23, 0.015, 2)
+    expect(r.factors).toEqual([
+      { label: 'Sales compared with last week', detail: 'Down 23 %', points: -12 },
+      { label: 'Payments that didn’t go through', detail: '1.5 % of payments', points: -8 },
+      { label: 'Late money to your bank', detail: '2 late payouts', points: -6 },
+    ])
+    expect(r.score).toBe(50) // 75 - 11.5 - 7.5 - 6
+  })
+  it('wording: up, same, none, singular, prevWord', () => {
+    expect(hs(3).factors[0]).toEqual({ label: 'Sales compared with last week', detail: 'Up 3 %', points: 2 })
+    expect(hs(1).factors[0].detail).toBe('About the same')
+    expect(hs(-1.4).factors[0].detail).toBe('About the same')
+    expect(hs(10, 0, 0, 'yesterday').factors[0].label).toBe('Sales compared with yesterday')
+    expect(hs(10, 0, 0, 'last month').factors[0].label).toBe('Sales compared with last month')
+    expect(hs(0, 0).factors[1].detail).toBe('None')
+    expect(hs(0, 0, 1).factors[2].detail).toBe('1 late payout')
+  })
+  it('points are whole numbers and never -0', () => {
+    for (const f of hs(0.4, 0.0005, 0).factors) {
+      expect(Number.isInteger(f.points)).toBe(true)
+      expect(Object.is(f.points, -0)).toBe(false)
+    }
   })
 })
 

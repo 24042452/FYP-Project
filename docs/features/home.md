@@ -20,7 +20,8 @@ The answer first: one plain sentence about how business is ("You took $4,309.00 
 - **Needs your attention** counts each problem once: a late settlement that the check-up also lists as a "settlement delay" is counted only as late. The late figure covers all time, the same rule as the Money to my bank tiles.
 - **Before a demo: run `npm run seed` that morning** (and against the hosted database too). The seed sets the pending, late and "today" figures relative to the day it runs, and nothing refreshes them afterwards, so old seed data shows stale numbers.
 - Money is integer cents everywhere and formatted only for display. No `NaN`: empty periods show "No sales yet for this period".
-- Health score (0-100) uses growth, failed-payment rate and delayed settlements.
+- **Business health** (0-100, `lib/metrics/health.js`): start at 75, then three factors. Sales vs the previous period: half a point per 1 % change, capped at 30 % (so -15 to +15). Payments that didn't go through: -5 per 1 % of payments, capped at -15 (3 % or more). Late payouts: -3 each, capped at -12 (4 or more). Anything not a number counts as no change. The score is rounded and kept between 0 and 100. **70 or more = "Healthy"** (green), **50 to 69 = "Okay"** (amber), **below 50 = "Needs a look"** (red). The tag reads "Business health: 75 · Healthy".
+- The tag is a button (`components/dashboard/HealthTag.jsx`). It opens a panel "How we worked this out": "We start at 75.", one row per factor (what it is, the detail such as "Down 23 %", and the signed points in red, green or grey), then "= 75 out of 100 · Healthy" and "Scores of 70 or more are healthy." It closes with Escape, a click outside or the Close button, and focus returns to the tag. Each factor's points are rounded for display, so the rows can differ from the score by 1.
 - Greeting uses the signed-in person's name and the Singapore hour.
 
 ## Outlet menu
@@ -33,4 +34,4 @@ The answer first: one plain sentence about how business is ("You took $4,309.00 
 - Unit: `tests/unit/home-model.test.js`, `metrics.test.js`
 - Integration: `tests/integration/sales.test.js`, `isolation.test.js`
 - End-to-end: `tests/e2e/ui-polish.spec.js` (TC-OUT-01 to 04 outlet menu); also `tests/unit/outlet-selection.test.js`, `tests/integration/outlets.test.js`
-- End-to-end: `tests/e2e/dashboard.spec.js` (TC-DASH-01 headline and no NaN, TC-MOB-01 no sideways scroll at 375px)
+- End-to-end: `tests/e2e/dashboard.spec.js` (TC-DASH-01 headline and no NaN, TC-DASH-02 health panel opens and Escape closes it, TC-MOB-01 no sideways scroll at 375px)

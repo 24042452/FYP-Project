@@ -182,8 +182,9 @@
   60% { box-shadow: 0 0 0 8px rgba(11, 77, 184, 0); }
   100% { box-shadow: 0 0 0 0 rgba(11, 77, 184, 0); }
 }
+.health-panel { animation: fx-in 180ms ease-out both; }
 .fx-in { animation: fx-in 250ms ease-out both; }
 .fx-ring { animation: fx-ring 800ms ease-out 1; border-radius: 12px; }
 @media (prefers-reduced-motion: reduce) {
-  .fx-in, .fx-ring { animation: none; }
+  .fx-in, .fx-ring, .health-panel { animation: none; }
 }
