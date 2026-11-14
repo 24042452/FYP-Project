@@ -271,7 +271,7 @@ describe('healthScore', () => {
       { label: 'Payments that didn’t go through', detail: '1.5 % of payments', points: -8 },
       { label: 'Late money to your bank', detail: '2 late payouts', points: -6 },
     ])
-    expect(r.score).toBe(50) // 75 - 11.5 - 7.5 - 6
+    expect(r.score).toBe(49) // 75 - 12 - 8 - 6
   })
   it('wording: up, same, none, singular, prevWord', () => {
     expect(hs(3).factors[0]).toEqual({ label: 'Sales compared with last week', detail: 'Up 3 %', points: 2 })
@@ -281,6 +281,15 @@ describe('healthScore', () => {
     expect(hs(10, 0, 0, 'last month').factors[0].label).toBe('Sales compared with last month')
     expect(hs(0, 0).factors[1].detail).toBe('None')
     expect(hs(0, 0, 1).factors[2].detail).toBe('1 late payout')
+  })
+  it('the rows always add up: 75 + sum of points = score (clamped)', () => {
+    const cases = [[-23, 0.019, 2], [-23, 0.015, 2], [12, 0.012, 2], [3.3, 0.0149, 1], [-7.5, 0.0075, 0], [null, 0, 0], [500, 0, 0], [-500, 0.5, 40], [0.5, 0.0001, 0]]
+    for (const [g, f, d] of cases) {
+      const r = hs(g, f, d)
+      const sum = r.factors.reduce((a, x) => a + x.points, 0)
+      expect(r.score).toBe(Math.min(100, Math.max(0, 75 + sum)))
+    }
+    expect(hs(-23, 0.019, 2).score).toBe(47) // -12 - 10 - 6
   })
   it('points are whole numbers and never -0', () => {
     for (const f of hs(0.4, 0.0005, 0).factors) {
