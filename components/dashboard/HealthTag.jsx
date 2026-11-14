@@ -134,7 +134,7 @@ export function HealthTag({ tags }) {
               aria-labelledby={`${id}-title`}
               tabIndex={-1}
               data-testid="health-panel"
-              className="rounded-[12px] border border-line bg-white p-4 shadow-panel outline-none focus-visible:ring-2 focus-visible:ring-nets-blue sm:p-5"
+              className="rounded-[12px] border border-line bg-white p-4 shadow-panel outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-nets-blue sm:p-5"
             >
               <div className="flex items-start justify-between gap-3">
                 <h2 id={`${id}-title`} className="text-[16px] leading-snug font-semibold text-ink">
@@ -220,7 +220,7 @@ function Visible({ label, detail, value, valueClass, prefix = '', detailBelow = 
       </div>
       <p
         aria-hidden="true"
-        className={`shrink-0 text-[17px] leading-none font-semibold tabular-nums sm:order-2 sm:mt-1 sm:text-2xl ${valueClass}`}
+        className={`shrink-0 text-[17px] leading-none font-semibold tabular-nums sm:order-2 sm:mt-auto sm:pt-1 sm:text-2xl ${valueClass}`}
       >
         {prefix ? <span className="xl:hidden">{prefix}</span> : null}
         {value}
