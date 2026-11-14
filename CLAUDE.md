@@ -16,13 +16,13 @@ Where things are:
 - Local setup: `.env.local` (git-ignored) has the MySQL URLs, `DEMO_MODE=true`, `DEMO_PASSWORD`, `ASSISTANT_MODE=rules`. The old Supabase keys in it are unused
 
 Waiting on the user:
-- OK for 14b: hosted MySQL 8 provider, push to GitHub, Vercel project and env vars
+- OK for 14b: hosted MySQL 8 provider and Vercel project + env vars (site goes on Vercel Hobby, free). Free MySQL options checked 2026-11-15: Aiven closed new free MySQL services on 2026-11-06 (existing ones deleted 2026-12-21); Railway = one-off $5 trial credit (~30 days), then paid; TiDB risky (FK cascades, FULLTEXT syntax). Recommended: Railway trial for Touchpoint 1, then decide on a $5/month plan
 - An Anthropic API key (optional; without it the assistant stays in rules mode)
 
 Next steps:
 1. 14b deploy (after the user's OK): hosted MySQL 8 with app and admin users, `npm run migrate` and `npm run seed` against it, push, Vercel, smoke-test both demo logins
 2. ~~Final whole-branch review of `mvp`~~ Done 2026-11-15: verdict "with fixes", all fixes applied (REST `/api/v1` endpoints, computed overdue, TLS + pool settings for hosted MySQL) and re-reviewed clean. Tests: 224 unit, 91 integration, 26 e2e
-3. Open a PR from `mvp` to `main`
+3. ~~Open a PR from `mvp` to `main`~~ Done 2026-11-15: https://github.com/Rampy2122/FYP-Project/pull/1
 4. Cut list if behind is in "Decisions made"
 5. **Before every demo: run `npm run seed` that morning** (and against the hosted DB). Pending/late/today figures are set relative to the seed day and nothing refreshes them
 
