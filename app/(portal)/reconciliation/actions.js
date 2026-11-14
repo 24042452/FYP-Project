@@ -7,6 +7,7 @@ import { markExceptionSorted } from '@/lib/data/recon'
 import { runAndSaveReconciliation } from '@/lib/recon/run'
 import { sgtDate } from '@/lib/dates'
 
+const FIRST_MONTH = '2026-05'
 const MONTH_RE = /^(\d{4})-(0[1-9]|1[0-2])$/
 
 /**
@@ -18,7 +19,7 @@ export async function runReconciliation(input) {
   const merchant = await getCurrentMerchant()
   const month = String(input instanceof FormData ? input.get('month') : input)
   const today = sgtDate(new Date().toISOString())
-  if (!MONTH_RE.test(month) || month > today.slice(0, 7)) throw new Error('Please pick a valid month.')
+  if (!MONTH_RE.test(month) || month < FIRST_MONTH || month > today.slice(0, 7)) redirect('/reconciliation?notice=month')
   const runId = await runAndSaveReconciliation(merchant.id, month, today)
   revalidatePath('/reconciliation')
   revalidatePath('/')

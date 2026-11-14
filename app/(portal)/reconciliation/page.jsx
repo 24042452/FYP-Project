@@ -120,6 +120,12 @@ export default async function ReconciliationPage({ searchParams }) {
         <p className="mt-1 text-[14px] text-ink-3">Reconciliation · we compare your payments, your bank deposits and your NETS bill</p>
       </div>
 
+      {sp?.notice === 'month' ? (
+        <p role="alert" className="rounded-lg bg-bad-bg px-4 py-3 text-[15px] font-medium text-bad">
+          That month is not available. Please pick a month from the list.
+        </p>
+      ) : null}
+
       <section aria-label="Choose a month" className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <form method="get" className="flex flex-wrap items-end gap-2">
           <div className="flex flex-col gap-1">
@@ -153,7 +159,7 @@ export default async function ReconciliationPage({ searchParams }) {
               <div>
                 <p className="text-[20px] leading-snug font-semibold">{view.headline}</p>
                 <p className="mt-1 text-[14px] text-ink-2">
-                  {run.matchedCount} matched ({view.matchPercent}). Last checked {formatWhen(run.runAt)}.
+                  {run.matchedCount} of {view.checked} matched ({view.matchPercent}). Last checked {formatWhen(run.runAt)}.
                   {view.openCount > 0 ? ` ${view.openCount} still open.` : ' Everything is sorted.'}
                 </p>
               </div>
@@ -188,6 +194,15 @@ export default async function ReconciliationPage({ searchParams }) {
                   </li>
                 ))}
               </ul>
+            </Panel>
+          ) : null}
+
+          {view.failed ? (
+            <Panel title="Failed payments" tech="Not a bank problem">
+              <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+                <p className="text-[15px] text-ink-2">{view.failed.text}</p>
+                <Link href={view.failed.href} className={linkBtn}>See failed payments</Link>
+              </div>
             </Panel>
           ) : null}
 

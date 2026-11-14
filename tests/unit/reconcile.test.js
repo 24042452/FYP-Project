@@ -85,7 +85,9 @@ describe('reconcile', () => {
     })
     expect(r.exceptions.filter((e) => e.type === 'missing_settlement').map((e) => e.ref)).toEqual(['2026-11-03|card'])
     expect(r.exceptions.find((e) => e.type === 'failed_payment').message).toBe("A payment didn't go through · The customer's bank declined it.")
-    expect(r.checked).toBe(0)
+    expect(r.checked).toBe(1)
+    expect(r.matched).toBe(0)
+    expect(r.matchRate).toBe(0)
   })
 
   it('a pending settlement is late only when its expected date has passed', () => {

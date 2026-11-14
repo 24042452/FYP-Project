@@ -72,7 +72,7 @@ describe('storing a check-up', () => {
   it('writes the run and its exceptions together', async () => {
     const runId = await runAndSaveReconciliation(A, '2026-10', TODAY)
     const run = await getReconRun(A, runId)
-    expect(run).toMatchObject({ period: '2026-10-01', matchedCount: 1, exceptionCount: 3 })
+    expect(run).toMatchObject({ period: '2026-10-01', checkedCount: 3, matchedCount: 1, exceptionCount: 3 })
     expect(run.exceptions).toHaveLength(3)
     expect(run.exceptions.every((e) => e.status === 'open' && e.message.length > 0)).toBe(true)
     expect((await getLatestRunForMonth(A, '2026-10')).id).toBe(runId)
@@ -81,7 +81,7 @@ describe('storing a check-up', () => {
 
   it('a failure part-way leaves no run row', async () => {
     const before = (await query('SELECT COUNT(*) AS n FROM recon_runs WHERE merchant_id = ?', [A]))[0].n
-    const bad = { matched: 0, exceptions: [{ type: 'not_a_real_type', ref: 'x', message: 'x' }] }
+    const bad = { checked: 0, matched: 0, exceptions: [{ type: 'not_a_real_type', ref: 'x', message: 'x' }] }
     await expect(saveReconRun(A, '2026-08', bad)).rejects.toThrow()
     const after = (await query('SELECT COUNT(*) AS n FROM recon_runs WHERE merchant_id = ?', [A]))[0].n
     expect(after).toBe(before)

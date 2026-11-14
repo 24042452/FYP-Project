@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import ExcelJS from 'exceljs'
 import { buildReconWorkbook, buildTransactionsWorkbook } from '../../lib/export/xlsx.js'
-import { buildRunView, itemsChecked } from '../../lib/recon/view.js'
+import { buildRunView } from '../../lib/recon/view.js'
 
 const exceptions = [
   { id: 'e1', type: 'amount_mismatch', settlementId: 's2', transactionId: null, day: '2026-10-18', channel: 'card', expectedCents: 50000, actualCents: 45790, status: 'open', note: null, message: 'Short by $42.10 · Cards sales on 18 Oct' },
@@ -14,20 +14,18 @@ const settlements = [
 ]
 
 describe('check-up view', () => {
-  it('counts items checked once per problem item', () => {
-    expect(itemsChecked(4, exceptions)).toBe(6)
-    expect(itemsChecked(0, [])).toBe(0)
-  })
   it('groups open problems and keeps resolved ones apart', () => {
-    const v = buildRunView({ id: 'r', period: '2026-10-01', runAt: '2026-11-01T00:00:00.000Z', matchedCount: 4, exceptionCount: 3, exceptions })
-    expect(v.headline).toBe('We checked 6 items. 3 need a look.')
-    expect(v.groups.map((g) => g.type)).toEqual(['amount_mismatch', 'failed_payment'])
+    const v = buildRunView({ id: 'r', period: '2026-10-01', runAt: '2026-11-01T00:00:00.000Z', checkedCount: 6, matchedCount: 4, exceptionCount: 3, exceptions })
+    expect(v.headline).toBe('We checked 6 items. 2 need a look.')
+    expect(v.failed.text).toBe("1 payment didn't go through this month ($8.00)")
+    expect(v.failed.href).toBe('/transactions?status=failed&from=2026-10-01&to=2026-10-31')
+    expect(v.groups.map((g) => g.type)).toEqual(['amount_mismatch'])
     expect(v.resolved).toHaveLength(1)
-    expect(v.openCount).toBe(2)
+    expect(v.openCount).toBe(1)
     expect(Number.isFinite(v.matchRate)).toBe(true)
   })
   it('an empty month has no NaN', () => {
-    const v = buildRunView({ id: 'r', period: '2026-09-01', runAt: '2026-11-01T00:00:00.000Z', matchedCount: 0, exceptionCount: 0, exceptions: [] })
+    const v = buildRunView({ id: 'r', period: '2026-09-01', runAt: '2026-11-01T00:00:00.000Z', checkedCount: 0, matchedCount: 0, exceptionCount: 0, exceptions: [] })
     expect(v).toMatchObject({ checked: 0, matchRate: 1, isEmpty: true })
   })
 })
@@ -36,7 +34,7 @@ describe('Excel exports', () => {
   it('the check-up workbook has 3 sheets, a frozen header and currency cells that add up', async () => {
     const buf = await buildReconWorkbook({
       merchantName: 'Ah Hock', period: '2026-10-01', runAt: '2026-11-01T00:00:00.000Z', checked: 6, matchedCount: 4,
-      exceptionCount: 3, openCount: 2, matchRate: 4 / 6, exceptions, settlements,
+      exceptionCount: 2, openCount: 1, matchRate: 4 / 6, exceptions, settlements,
     })
     const wb = new ExcelJS.Workbook()
     await wb.xlsx.load(buf)
