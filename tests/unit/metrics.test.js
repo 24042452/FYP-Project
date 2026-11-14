@@ -21,35 +21,58 @@ const row = (day, channel, grossCents, txnCount = 1, failedCount = 0) => ({
 const noBadValues = (v) => !/NaN|Infinity|undefined/.test(JSON.stringify(v) + String(v))
 
 describe('periodRange', () => {
-  it('week is Mon-Sun with an equal-length previous week', () => {
+  it('week is Mon-Sun with the previous Mon-Sun week', () => {
     expect(periodRange('week', '2026-11-11')).toEqual({
       from: '2026-11-09',
       to: '2026-11-15',
+      toDate: '2026-11-11',
       prevFrom: '2026-11-02',
       prevTo: '2026-11-08',
+      prevToDate: '2026-11-04',
       label: 'this week',
     })
   })
   it('week on a Sunday and a Monday stays in the same Mon-Sun week', () => {
     expect(periodRange('week', '2026-11-15').from).toBe('2026-11-09')
+    expect(periodRange('week', '2026-11-15').toDate).toBe('2026-11-15')
+    expect(periodRange('week', '2026-11-15').prevToDate).toBe('2026-11-08')
     expect(periodRange('week', '2026-11-09').to).toBe('2026-11-15')
+    expect(periodRange('week', '2026-11-09').toDate).toBe('2026-11-09')
+    expect(periodRange('week', '2026-11-09').prevToDate).toBe('2026-11-02')
   })
   it('today compares with yesterday', () => {
-    expect(periodRange('today', '2026-11-11')).toEqual({
-      from: '2026-11-11',
-      to: '2026-11-11',
-      prevFrom: '2026-11-10',
-      prevTo: '2026-11-10',
+    expect(periodRange('today', '2026-11-14')).toEqual({
+      from: '2026-11-14',
+      to: '2026-11-14',
+      toDate: '2026-11-14',
+      prevFrom: '2026-11-13',
+      prevTo: '2026-11-13',
+      prevToDate: '2026-11-13',
       label: 'today',
     })
   })
-  it('month covers the whole month; previous period has the same length', () => {
-    const r = periodRange('month', '2026-11-11')
-    expect(r.from).toBe('2026-11-01')
-    expect(r.to).toBe('2026-11-30')
-    expect(r.prevTo).toBe('2026-10-31')
-    expect(r.prevFrom).toBe('2026-10-02')
-    expect(r.label).toBe('this month')
+  it('month previous period is the true previous calendar month', () => {
+    expect(periodRange('month', '2026-11-14')).toEqual({
+      from: '2026-11-01',
+      to: '2026-11-30',
+      toDate: '2026-11-14',
+      prevFrom: '2026-10-01',
+      prevTo: '2026-10-31',
+      prevToDate: '2026-10-14',
+      label: 'this month',
+    })
+  })
+  it('month prevToDate is capped at the end of a shorter previous month', () => {
+    const r = periodRange('month', '2027-03-31')
+    expect(r.prevFrom).toBe('2027-02-01')
+    expect(r.prevTo).toBe('2027-02-28')
+    expect(r.prevToDate).toBe('2027-02-28')
+  })
+  it('crosses year boundaries', () => {
+    const r = periodRange('month', '2027-01-10')
+    expect(r.prevFrom).toBe('2026-12-01')
+    expect(r.prevTo).toBe('2026-12-31')
+    expect(r.prevToDate).toBe('2026-12-10')
   })
 })
 
