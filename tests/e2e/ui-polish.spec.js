@@ -131,12 +131,11 @@ test('TC-REC-02: the check-up shows a progress bar (steps, not the results) whil
   await expect(page.getByTestId('checked-in')).toHaveCount(0)
 })
 
-test('TC-SEARCH-01: on a phone the top-bar search icon opens Payments with the search box ready', async ({ page }) => {
+test('TC-UI-SEARCH: on a phone the top-bar search icon opens the search sheet with the box ready', async ({ page }) => {
   test.skip(!isPhone(page), 'phone only')
   await loginWithForm(page, 'retail@demo.local')
-  await page.getByRole('link', { name: 'Search payments' }).click()
-  await page.waitForURL((url) => url.pathname === '/transactions' && url.searchParams.get('focus') === 'search')
-  await expect(page.getByLabel('Find a payment')).toBeFocused()
+  await page.getByRole('button', { name: 'Search payments' }).click()
+  await expect(page.getByRole('searchbox', { name: 'Search payments' })).toBeFocused()
 })
 
 test('TC-OUT-05: with an outlet picked the headline names it, the bank tile changes, and a message says what changed', async ({ page }) => {

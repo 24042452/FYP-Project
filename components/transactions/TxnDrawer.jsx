@@ -1,8 +1,13 @@
 'use client'
 
+import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet'
+import { useReducedMotion } from '@/components/dashboard/use-reduced-motion'
+
+/** How long the drawer takes to slide in or out (keep in step with the duration classes below). */
+const SLIDE_MS = 300
 
 const PILL = {
   ok: 'bg-ok-bg text-ok',
@@ -18,13 +23,41 @@ const BOX = {
 /**
  * Payment details. Open whenever the address has ?id=; closing goes to `closeHref` (same page
  * without id). The page only renders this for a payment that belongs to the merchant.
+ *
+ * Closing first lets the drawer slide out to the right, and only then changes the address
+ * (changing it straight away would remove the drawer before its exit animation could play).
+ * With reduced motion the drawer closes at once.
  * @param {{detail: ReturnType<import('@/lib/transactions/format').toDetailView>, closeHref: string}} props
  */
 export function TxnDrawer({ detail, closeHref }) {
   const router = useRouter()
+  const reduceMotion = useReducedMotion()
+  const [open, setOpen] = useState(true)
+  const timer = useRef(/** @type {ReturnType<typeof setTimeout> | null} */ (null))
+
+  // A different payment opened while this one is showing: show it open again.
+  const [shownId, setShownId] = useState(detail.id)
+  if (shownId !== detail.id) {
+    setShownId(detail.id)
+    setOpen(true)
+  }
+
+  useEffect(() => () => { if (timer.current) clearTimeout(timer.current) }, [])
+
+  /** @param {boolean} next */
+  function onOpenChange(next) {
+    if (next || !open) return
+    setOpen(false)
+    if (timer.current) clearTimeout(timer.current)
+    timer.current = setTimeout(() => router.push(closeHref, { scroll: false }), reduceMotion ? 0 : SLIDE_MS)
+  }
+
   return (
-    <Sheet open onOpenChange={(open) => { if (!open) router.push(closeHref, { scroll: false }) }}>
-      <SheetContent side="right" className="data-[side=right]:w-full data-[side=right]:sm:max-w-md overflow-y-auto">
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent
+        side="right"
+        className="overflow-y-auto data-[side=right]:w-full data-[side=right]:sm:max-w-md data-[side=right]:data-open:slide-in-from-right-full data-[side=right]:data-closed:slide-out-to-right-full data-open:duration-300 data-closed:duration-300 motion-reduce:data-open:animate-none motion-reduce:data-closed:animate-none"
+      >
         <>
             <SheetHeader className="gap-2 border-b border-line p-5 pr-14">
               <span className={`inline-flex w-fit items-center rounded-full px-3 py-[3px] text-[13px] font-semibold ${PILL[detail.pill.tone]}`}>

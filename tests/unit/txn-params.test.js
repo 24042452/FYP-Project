@@ -40,6 +40,18 @@ describe('parseTxnParams', () => {
     expect(parseTxnParams({ status: ['refunded', 'failed'] }, TODAY).status).toBe('refunded')
   })
 
+  it('searches the last 365 days when q is given without dates', () => {
+    const p = parseTxnParams({ q: '12.50' }, TODAY)
+    expect(p).toMatchObject({ from: '2025-11-15', to: '2026-11-14', q: '12.50' })
+    expect(p.explicit.from).toBeUndefined()
+  })
+
+  it('explicit dates win over the search default; no q keeps 7 days; blank q is no q', () => {
+    expect(parseTxnParams({ q: '12', from: '2026-11-01', to: '2026-11-05' }, TODAY)).toMatchObject({ from: '2026-11-01', to: '2026-11-05' })
+    expect(parseTxnParams({}, TODAY).from).toBe('2026-11-08')
+    expect(parseTxnParams({ q: '   ' }, TODAY).from).toBe('2026-11-08')
+  })
+
   it('keeps the raw id (the data layer decides if it exists)', () => {
     expect(parseTxnParams({ id: 'abc' }, TODAY).id).toBe('abc')
   })

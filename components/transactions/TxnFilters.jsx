@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { CHANNELS, CHANNEL_LABELS } from '@/lib/channels'
-import { monthStart } from '@/lib/dates'
+import { addDays, monthStart } from '@/lib/dates'
 import { buildHref } from '@/lib/transactions/params'
 
 const RESULTS = [
@@ -20,11 +20,16 @@ const field =
 export function TxnFilters({ params: p, today, focusSearch = false }) {
   const presets = [
     { label: 'Today', from: today, to: today },
-    { label: 'Last 7 days', from: null, to: null },
+    // While searching, no dates means 12 months, so this preset names its dates.
+    { label: 'Last 7 days', from: p.q ? addDays(today, -6) : null, to: p.q ? today : null },
     { label: 'This month', from: monthStart(today), to: today },
   ]
   const activePreset = !p.explicit.from
-    ? 'Last 7 days'
+    ? p.q
+      ? null
+      : 'Last 7 days'
+    : p.q && p.from === addDays(today, -6) && p.to === today
+      ? 'Last 7 days'
     : p.from === today && p.to === today
       ? 'Today'
       : p.from === monthStart(today) && p.to === today
