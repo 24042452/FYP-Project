@@ -69,7 +69,7 @@ We chose **"Clean Console"**: a professional, light merchant portal in red, blue
 | Part | Choice |
 |---|---|
 | Web app | **Next.js 15** (App Router) in **plain JavaScript** (no TypeScript), Tailwind CSS, shadcn/ui, Recharts |
-| Back end and REST API | Next.js route handlers on **Node.js**; public REST API `/api/v1` |
+| Back end and REST API | Next.js route handlers on **Node.js**; public REST API `/api/v1` (read-only endpoints for payments, settlements and a sales summary: [docs/features/api.md](docs/features/api.md)) |
 | Database | **MySQL 8** (transactions, invoices and user data). Every query is filtered by the logged-in merchant, so each merchant only sees their own data |
 | Login | Our own email + password login (bcrypt, sessions stored in MySQL) |
 | Hosting | **Vercel** (planned) |

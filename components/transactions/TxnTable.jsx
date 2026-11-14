@@ -2,7 +2,8 @@
 
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import { loadMoreTransactions } from '@/app/(portal)/transactions/actions'
+import { fromApiTransaction } from '@/lib/transactions/api'
+import { toRowView } from '@/lib/transactions/format'
 
 const PILL = {
   ok: 'bg-ok-bg text-ok',
@@ -12,7 +13,7 @@ const PILL = {
 
 /**
  * The payments list. A row (or Enter on it) opens the details drawer by adding ?id= to the address.
- * "Show more" fetches the next page through a server action and appends it. The parent gives this
+ * "Show more" fetches the next page from GET /api/v1/transactions (same filters) and appends it. The parent gives this
  * component a `key` built from the filters, so changing a filter starts it afresh.
  * @param {{
  *   initialRows: ReturnType<import('@/lib/transactions/format').toRowView>[],
@@ -36,12 +37,22 @@ export function TxnTable({ initialRows, initialCursor, filters, baseQuery, selec
     setError(false)
     start(async () => {
       try {
-        const res = await loadMoreTransactions(filters, cursor)
+        const usp = new URLSearchParams(filters)
+        usp.set('cursor', cursor)
+        const res = await fetch(`/api/v1/transactions?${usp}`, { headers: { Accept: 'application/json' } })
+        if (res.status === 401) {
+          // Session ended: go to the login page like any other portal page would.
+          router.push('/login')
+          return
+        }
+        if (!res.ok) throw new Error(`status ${res.status}`)
+        const body = await res.json()
+        const next = body.data.map((/** @type {any} */ r) => toRowView(fromApiTransaction(r)))
         setRows((prev) => {
           const seen = new Set(prev.map((r) => r.id))
-          return [...prev, ...res.rows.filter((r) => !seen.has(r.id))]
+          return [...prev, ...next.filter((/** @type {{id: string}} */ r) => !seen.has(r.id))]
         })
-        setCursor(res.nextCursor)
+        setCursor(body.next_cursor)
       } catch {
         setError(true)
       }

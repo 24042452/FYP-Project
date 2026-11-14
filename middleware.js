@@ -5,9 +5,16 @@ import { NextResponse } from 'next/server'
 // layout and in every route.
 export function middleware(request) {
   if (!request.cookies.get('portal_session')?.value) {
-    // The assistant's fetch must get a plain 401 it can show, not the login page.
-    if (request.nextUrl.pathname === '/api/assistant') {
+    // API callers (the assistant's fetch, /api/v1) must get a plain 401 JSON, not the login page.
+    const path = request.nextUrl.pathname
+    if (path === '/api/assistant') {
       return NextResponse.json({ error: 'signed_out' }, { status: 401, headers: { 'Cache-Control': 'private, no-store' } })
+    }
+    if (path === '/api' || path.startsWith('/api/')) {
+      return NextResponse.json(
+        { error: { code: 'signed_out', message: 'Please log in first. This API uses your portal session.' } },
+        { status: 401, headers: { 'Cache-Control': 'private, no-store' } },
+      )
     }
     return NextResponse.redirect(new URL('/login', request.url))
   }
