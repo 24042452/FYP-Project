@@ -4,6 +4,7 @@ import { adminExecute, insertFixture, resetTestDb } from './helpers.js'
 import { getDailySales, getFeeTotals, getHeatmap } from '../../lib/data/sales.js'
 import { getRecentSettlements, getSettlementSummary, getSettlementTotals, listSettlements } from '../../lib/data/settlements.js'
 import { getTransaction, listTransactions } from '../../lib/data/transactions.js'
+import { getInvoiceWithLines, listInvoices } from '../../lib/data/invoices.js'
 import { getLatestRunSummary } from '../../lib/data/recon.js'
 
 // Merchant isolation: for every data function, A's call must never return B's rows.
@@ -15,6 +16,8 @@ const A_CENTS = 1111
 const B_CENTS = 99999
 const TXN_A = randomUUID()
 const TXN_B = randomUUID()
+const INV_A = randomUUID()
+const INV_B = randomUUID()
 const DAY = '2026-11-03'
 const FROM = '2026-11-01'
 const TO = '2026-11-07'
@@ -31,6 +34,8 @@ const CASES = [
   ['listTransactions', async (id) => (await listTransactions(id, {})).rows, (rows) => rows.reduce((s, r) => s + r.amountCents, 0)],
   ['getTransaction', async (id) => { const r = await getTransaction(id, id === A ? TXN_A : TXN_B); return r ? [r] : [] }, (rows) => rows.reduce((s, r) => s + r.amountCents, 0)],
   ['getLatestRunSummary', async (id) => { const r = await getLatestRunSummary(id); return r ? [r] : [] }, (rows) => rows.reduce((s, r) => s + r.matchedCount, 0)],
+  ['listInvoices', (id) => listInvoices(id), (rows) => rows.reduce((s, r) => s + r.totalCents, 0)],
+  ['getInvoiceWithLines', async (id) => { const r = await getInvoiceWithLines(id, id === A ? INV_A : INV_B); return r ? [r] : [] }, (rows) => rows.reduce((s, r) => s + r.lines.reduce((t, l) => t + l.amountCents, 0), 0)],
 ]
 
 beforeAll(async () => {
@@ -47,6 +52,15 @@ beforeAll(async () => {
       `INSERT INTO settlements (id, merchant_id, business_date, channel, gross_cents, fee_cents, net_cents, status, expected_date)
        VALUES (?, ?, ?, 'nets_qr', ?, 0, ?, 'pending', '2026-11-05')`,
       [randomUUID(), id, DAY, cents, cents],
+    )
+    const invId = id === A ? INV_A : INV_B
+    await adminExecute(
+      `INSERT INTO invoices (id, merchant_id, period, total_cents, status, due_date) VALUES (?, ?, '2026-10-01', ?, 'unpaid', '2026-11-15')`,
+      [invId, id, cents],
+    )
+    await adminExecute(
+      `INSERT INTO invoice_lines (id, merchant_id, invoice_id, charge_type, description, qty, amount_cents) VALUES (?, ?, ?, 'portal_fee', 'Portal fee', 1, ?)`,
+      [randomUUID(), id, invId, cents],
     )
     const runId = randomUUID()
     await adminExecute(
@@ -68,6 +82,13 @@ describe('merchant isolation', () => {
       expect(await call(randomUUID())).toEqual([])
     })
   }
+})
+
+describe('merchant isolation: single invoice', () => {
+  it('getInvoiceWithLines never returns another merchants invoice', async () => {
+    expect(await getInvoiceWithLines(A, INV_B)).toBeNull()
+    expect(await getInvoiceWithLines(B, INV_A)).toBeNull()
+  })
 })
 
 describe('merchant isolation: single payment', () => {
