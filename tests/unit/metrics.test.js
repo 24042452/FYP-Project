@@ -236,3 +236,38 @@ describe('healthScore', () => {
     expect(healthScore({ growthPct: 20, failedRate: 0, delayedSettlements: -5 }).score).toBe(100)
   })
 })
+
+describe('buildHeadline with an outlet', () => {
+  const subject = 'Tampines Mall'
+  it('doing well', () => {
+    expect(buildHeadline({ currCents: 421000, prevCents: 375000, periodLabel: 'this week', subject })).toBe(
+      'Tampines Mall is doing well this week. It made $4,210.00, which is $460.00 more than last week.',
+    )
+  })
+  it('slower', () => {
+    expect(buildHeadline({ currCents: 300000, prevCents: 400000, periodLabel: 'this month', subject })).toBe(
+      'Tampines Mall is slower this month. It made $3,000.00, which is $1,000.00 less than last month.',
+    )
+  })
+  it('steady, and today compares with yesterday', () => {
+    expect(buildHeadline({ currCents: 100500, prevCents: 100000, periodLabel: 'this week', subject })).toBe(
+      'Tampines Mall is steady this week. It made $1,005.00, about the same as last week.',
+    )
+    expect(buildHeadline({ currCents: 20000, prevCents: 10000, periodLabel: 'today', subject })).toBe(
+      'Tampines Mall is doing well today. It made $200.00, which is $100.00 more than yesterday.',
+    )
+  })
+  it('no sales yet', () => {
+    expect(buildHeadline({ currCents: 0, prevCents: 5000, periodLabel: 'this week', subject })).toBe(
+      'No sales yet at Tampines Mall this week. Your figures will appear here as payments come in.',
+    )
+  })
+  it('no previous sales', () => {
+    expect(buildHeadline({ currCents: 12345, prevCents: 0, periodLabel: 'this month', subject })).toBe(
+      'Tampines Mall made $123.45 this month.',
+    )
+  })
+  it('a blank subject means no outlet', () => {
+    expect(buildHeadline({ currCents: 12345, prevCents: 0, periodLabel: 'this month', subject: '  ' })).toBe('You made $123.45 this month.')
+  })
+})

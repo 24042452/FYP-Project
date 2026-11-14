@@ -33,7 +33,7 @@ export async function signInAsDemo(profile) {
   redirect('/')
 }
 
-/** Sign out, then go to the login page. */
+/** Log out, then go to the login page. */
 export async function signOut() {
   await destroySession()
   redirect('/login')

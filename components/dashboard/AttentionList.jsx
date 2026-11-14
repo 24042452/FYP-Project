@@ -2,7 +2,7 @@ import Link from 'next/link'
 
 /**
  * The things that need doing, each with a link.
- * @param {{items: {key: string, title: string, detail: string, href: string, linkLabel: string}[]}} props
+ * @param {{items: {key: string, title: string, detail: string, href: string, linkLabel: string, scope?: string}[]}} props
  */
 export function AttentionList({ items }) {
   return (
@@ -11,7 +11,10 @@ export function AttentionList({ items }) {
         <li key={i.key} className="grid grid-cols-[8px_1fr] gap-3 border-t border-line py-3.5 first:border-t-0 first:pt-0">
           <span className="mt-2 size-2 rounded-full bg-nets-red" aria-hidden="true" />
           <div>
-            <b className="block font-semibold">{i.title}</b>
+            <b className="block font-semibold">
+              {i.title}
+              {i.scope ? <span className="ml-2 text-[13px] font-normal text-ink-3">{i.scope}</span> : null}
+            </b>
             <span className="text-[14px] text-ink-2">{i.detail}</span>{' '}
             <Link href={i.href} className="inline-flex min-h-11 items-center text-[14px] font-semibold">
               {i.linkLabel}

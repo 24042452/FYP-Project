@@ -8,13 +8,14 @@ import { Sheet, SheetContent, SheetTitle, SheetDescription } from '@/components/
 import { TABS } from '@/lib/nav'
 import { Sidebar, SidebarContent } from './Sidebar'
 import { TopBar } from './TopBar'
+import { OutletToast } from './OutletToast'
 import { NavIcon } from './nav-icons'
 
 /**
  * The portal frame: sidebar (desktop), top bar, page, and on phones a menu Sheet plus bottom tabs.
- * @param {{merchant: {tradingName: string, role: string, userName: string}, alerts?: {unread: number, items: import('./NotificationBell').BellItem[]}, children: React.ReactNode}} props
+ * @param {{merchant: {tradingName: string, role: string, userName: string}, alerts?: {unread: number, items: import('./NotificationBell').BellItem[]}, outlets: {id: string, name: string}[], selectedId: string | null, children: React.ReactNode}} props
  */
-export function PortalShell({ merchant, alerts, children }) {
+export function PortalShell({ merchant, alerts, outlets, selectedId, children }) {
   const [open, setOpen] = useState(false)
   const pathname = usePathname()
 
@@ -24,7 +25,8 @@ export function PortalShell({ merchant, alerts, children }) {
 
   return (
     <div className="flex min-h-screen">
-      <Sidebar merchantName={merchant.tradingName} />
+      <OutletToast />
+      <Sidebar outlets={outlets} selectedId={selectedId} />
 
       <div className="flex min-w-0 flex-1 flex-col">
         <TopBar
@@ -41,7 +43,7 @@ export function PortalShell({ merchant, alerts, children }) {
         <SheetContent side="left" showCloseButton={false} className="w-[300px] max-w-[85vw] gap-0 bg-white p-0 sm:max-w-[300px]">
           <SheetTitle className="sr-only">Menu</SheetTitle>
           <SheetDescription className="sr-only">All the pages in the portal</SheetDescription>
-          <SidebarContent merchantName={merchant.tradingName} onNavigate={() => setOpen(false)} />
+          <SidebarContent outlets={outlets} selectedId={selectedId} idSuffix="-menu" onNavigate={() => setOpen(false)} />
         </SheetContent>
       </Sheet>
 

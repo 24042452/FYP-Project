@@ -20,6 +20,8 @@ Lets a merchant sign in with their email and password. For demos, one-click "Try
 - Signed-in portal pages are sent with `Cache-Control: private, no-store`, so the back button after sign-out shows nothing.
 - The merchant always comes from the session, never from the address.
 
+- The top bar has a red "Log out" button (icon and words).
+
 ## Tests
 - Unit: `tests/unit/password.test.js`, `rate-limit.test.js`, `login-form.test.jsx` (no demo buttons when demo mode is off)
 - Integration: `tests/integration/auth.test.js`, `demo-login.test.js`

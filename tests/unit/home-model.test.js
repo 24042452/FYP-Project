@@ -236,3 +236,76 @@ describe('buildHomeModel: other periods', () => {
     expect(m.flow.title).toBe('Where your money went this month')
   })
 })
+
+describe('buildHomeModel: with an outlet selected', () => {
+  const rows = [row('2026-11-10', 'nets_qr', 5000)]
+  it('names the outlet (the full headline wording is tested in metrics)', () => {
+    const all = buildHomeModel({ ...EMPTY_INPUT, currRows: rows })
+    const one = buildHomeModel({ ...EMPTY_INPUT, currRows: rows, outletName: 'Tampines Mall' })
+    expect(all.outletName).toBe('')
+    expect(one.outletName).toBe('Tampines Mall')
+    expect(one.headline).toContain('Tampines Mall')
+    expect(all.headline).not.toContain('Tampines Mall')
+    expect(one.subline).toBe(all.subline)
+    expect(noBad(one)).toBe(true)
+  })
+  it('treats a blank name as all outlets', () => {
+    expect(buildHomeModel({ ...EMPTY_INPUT, outletName: '  ' }).outletName).toBe('')
+  })
+  it('shows only that outlets figures (the model just uses the rows it is given)', () => {
+    const m = buildHomeModel({
+      ...EMPTY_INPUT,
+      outletName: 'Online',
+      todayRows: [row('2026-11-11', 'card', 1234, 3, 1)],
+      fees: { grossCents: 1234, feeCents: 12 },
+    })
+    expect(m.tiles[0].value).toBe('$12.34')
+    expect(m.flow.feeCents).toBe(12)
+    expect(m.attention.items.some((i) => i.key === 'failed')).toBe(true)
+  })
+})
+
+describe('buildHomeModel: everything follows the outlet', () => {
+  const input = {
+    ...EMPTY_INPUT,
+    currRows: [row('2026-11-10', 'card', 12000)],
+    prevRows: [row('2026-11-03', 'card', 6000)],
+    todayRows: [row('2026-11-11', 'card', 1000, 2, 1)],
+    settlementSummary: { pendingCents: 500, nextExpectedDate: '2026-11-12', lateCount: 1, lateCents: 300 },
+    recon: { runAt: '2026-11-11T01:00:00.000Z', period: '2026-10-01', matchedCount: 50, exceptionCount: 3, openCount: 2, wholeBusinessCount: 2 },
+  }
+  const m = buildHomeModel({ ...input, outletName: 'Tampines Mall' })
+  const all = buildHomeModel(input)
+
+  it('names the outlet in the headline, and leaves the all-outlets copy alone', () => {
+    expect(m.headline.startsWith('Tampines Mall is doing well this week. It made $120.00')).toBe(true)
+    expect(all.headline).toMatch(/^Business is good this week. You made/)
+  })
+  it('labels the bank tile as the outlet share', () => {
+    expect(m.payoutNote).toBe('This outlet’s share of NETS payouts')
+    expect(m.tiles[1].scope).toBe(m.payoutNote)
+    expect(all.payoutNote).toBe('')
+    expect(all.tiles[1].scope).toBeUndefined()
+  })
+  it('counts only the outlet items in the tile, and adds one muted whole-business line', () => {
+    expect(m.attention.items.map((i) => i.key).sort()).toEqual(['failed', 'late', 'recon'])
+    expect(m.tiles[2].value).toBe('4 things') // 2 check-up + 1 failed + 1 late day
+    expect(m.attention.wholeBusiness).toEqual({ text: 'Plus 2 check-up items for the whole business', href: '/reconciliation' })
+    expect(all.attention.wholeBusiness).toBeUndefined()
+  })
+  it('one whole-business item reads in the singular, none adds no line', () => {
+    const one = buildHomeModel({ ...input, outletName: 'X', recon: { ...input.recon, wholeBusinessCount: 1 } })
+    expect(one.attention.wholeBusiness.text).toBe('Plus 1 check-up item for the whole business')
+    const none = buildHomeModel({ ...input, outletName: 'X', recon: { ...input.recon, wholeBusinessCount: 0 } })
+    expect(none.attention.wholeBusiness).toBeUndefined()
+  })
+  it('the check-up card talks about this outlet only', () => {
+    expect(m.checkup.summary).toBe('2 things need a look at this outlet')
+    const clear = buildHomeModel({ ...input, outletName: 'X', recon: { ...input.recon, openCount: 0 } })
+    expect(clear.checkup.summary).toBe('Nothing needs a look at this outlet')
+    expect(all.checkup.summary).toBe('50 payments matched · 2 need a look')
+  })
+  it('has no bad values', () => {
+    expect(noBad(m)).toBe(true)
+  })
+})

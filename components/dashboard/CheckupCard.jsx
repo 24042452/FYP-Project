@@ -3,11 +3,11 @@ import { Panel } from './Panel'
 
 /**
  * Where the latest check-up (reconciliation) stands.
- * @param {{checkup: {hasRun: boolean, lastRun: string, summary: string, openCount: number}}} props
+ * @param {{checkup: {hasRun: boolean, lastRun: string, summary: string, openCount: number}, caption?: string}} props
  */
-export function CheckupCard({ checkup }) {
+export function CheckupCard({ checkup, caption }) {
   return (
-    <Panel title="Your latest check-up" tech="Reconciliation">
+    <Panel title="Your latest check-up" tech="Reconciliation" caption={caption}>
       {checkup.hasRun ? (
         <div className="flex flex-col gap-1">
           <p className="text-ink-2">{checkup.lastRun}</p>

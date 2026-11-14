@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { getCurrentMerchant } from '@/lib/data/merchant'
+import { getSelectedOutlet } from '@/lib/outlets/server'
 import { getTransaction, listTransactions } from '@/lib/data/transactions'
 import { sgtDate } from '@/lib/dates'
 import { buildHref, parseTxnParams } from '@/lib/transactions/params'
@@ -16,14 +17,17 @@ export default async function TransactionsPage({ searchParams }) {
   const sp = await searchParams
   const today = sgtDate(new Date().toISOString())
   const p = parseTxnParams(sp ?? {}, today)
+  const { selected } = await getSelectedOutlet(merchant)
+  const outletId = selected?.id ?? null
 
   const [list, found] = await Promise.all([
-    listTransactions(merchant.id, p),
+    listTransactions(merchant.id, { ...p, outletId }),
     p.id ? getTransaction(merchant.id, p.id) : Promise.resolve(null),
   ])
 
+  // `outlet` rides along so "Show more" (the API) stays on the same outlet.
   const filters = Object.fromEntries(
-    Object.entries({ from: p.from, to: p.to, channel: p.channel, status: p.status, q: p.q }).filter(([, v]) => v),
+    Object.entries({ from: p.from, to: p.to, channel: p.channel, status: p.status, q: p.q, outlet: outletId }).filter(([, v]) => v),
   )
   const baseQuery = buildHref(p, {}).split('?')[1] ?? ''
   const tableKey = JSON.stringify(filters)
@@ -32,7 +36,7 @@ export default async function TransactionsPage({ searchParams }) {
     <div className="flex flex-col gap-5 sm:gap-6">
       <div>
         <h1 className="text-[28px] leading-tight font-bold">Sales &amp; payments</h1>
-        <p className="mt-1 text-[14px] text-ink-3">Transactions · every payment at every outlet</p>
+        <p className="mt-1 text-[14px] text-ink-3">Transactions · every payment at {selected ? selected.name : 'every outlet'}</p>
       </div>
       {p.id && !found ? (
         <div role="alert" className="flex flex-wrap items-center justify-between gap-3 rounded-[12px] border border-line bg-white p-4 shadow-panel sm:p-5">
@@ -56,7 +60,7 @@ export default async function TransactionsPage({ searchParams }) {
       </p>
 
       <section className="min-w-0 overflow-hidden rounded-[12px] border border-line bg-white shadow-panel">
-        <TxnFilters params={p} today={today} />
+        <TxnFilters params={p} today={today} focusSearch={sp?.focus === 'search'} />
         <TxnTable
           key={tableKey}
           initialRows={list.rows.map(toRowView)}

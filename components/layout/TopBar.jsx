@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { Menu, Search, LogOut } from 'lucide-react'
 import { signOut } from '@/app/login/actions'
 import { NotificationBell } from './NotificationBell'
@@ -25,7 +26,12 @@ export function TopBar({ userName, role, merchantName, onOpenMenu, alerts = { un
         <Menu className="size-5" aria-hidden="true" />
       </button>
 
-      <label className="flex min-h-11 max-w-[460px] min-w-0 flex-1 items-center gap-2 rounded-lg border border-line bg-white px-3 text-ink-3 focus-within:border-nets-blue focus-within:ring-3 focus-within:ring-nets-blue-soft md:min-h-[42px]">
+      {/* Phones: just a search icon (the long placeholder did not fit); it opens the payments list with its search box ready to type in. */}
+      <Link href="/transactions?focus=search" aria-label="Search payments" className={iconBtn + ' md:hidden'}>
+        <Search className="size-5" aria-hidden="true" />
+      </Link>
+
+      <label className="hidden min-h-11 max-w-[460px] min-w-0 flex-1 items-center gap-2 rounded-lg border border-line bg-white px-3 text-ink-3 focus-within:border-nets-blue focus-within:ring-3 focus-within:ring-nets-blue-soft md:flex md:min-h-[42px]">
         <span className="sr-only">Search</span>
         <Search className="size-4 flex-none" aria-hidden="true" />
         <input
@@ -56,8 +62,12 @@ export function TopBar({ userName, role, merchantName, onOpenMenu, alerts = { un
       </div>
 
       <form action={signOut}>
-        <button type="submit" aria-label="Sign out" title="Sign out" className={iconBtn}>
+        <button
+          type="submit"
+          className="inline-flex min-h-11 flex-none items-center justify-center gap-2 rounded-lg bg-nets-red px-3.5 text-[15px] font-semibold whitespace-nowrap text-white hover:bg-nets-red-hover focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-nets-red/40 focus-visible:ring-offset-2"
+        >
           <LogOut className="size-5" aria-hidden="true" />
+          Log out
         </button>
       </form>
     </header>

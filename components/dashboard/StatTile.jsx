@@ -1,18 +1,24 @@
+'use client'
+
 import Link from 'next/link'
+import { AnimatedMoney } from './AnimatedMoney'
 
 /**
  * One cell of the summary strip.
- * @param {{label: string, value: string, hint?: string, note?: string, tone?: 'default' | 'attention', href?: string, linkLabel?: string}} props
+ * @param {{label: string, value: string, hint?: string, scope?: string, note?: string, tone?: 'default' | 'attention', href?: string, linkLabel?: string}} props
  */
-export function StatTile({ label, value, hint, note, tone = 'default', href, linkLabel }) {
+export function StatTile({ label, value, hint, scope, note, tone = 'default', href, linkLabel }) {
   const attention = tone === 'attention'
   return (
     <div className="flex flex-col gap-1 px-[18px] py-4 sm:px-[22px] sm:py-5">
-      <span className="text-[14px] font-medium text-ink-2">{label}</span>
+      <span className="text-[14px] font-medium text-ink-2">
+        {label}
+        {scope ? <span className="ml-2 text-[13px] font-normal text-ink-3">{scope}</span> : null}
+      </span>
       <span
         className={`text-[28px] leading-[1.15] font-semibold tracking-[-0.025em] tabular-nums sm:text-[32px] ${attention ? 'text-bad' : 'text-ink'}`}
       >
-        {value}
+        <AnimatedMoney text={value} />
       </span>
       {hint ? <span className="text-[14px] text-ink-2">{hint}</span> : null}
       {note ? <span className="text-[14px] font-medium text-bad">{note}</span> : null}

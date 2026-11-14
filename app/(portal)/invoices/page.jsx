@@ -5,6 +5,7 @@ import { buildInvoicesModel } from '@/lib/invoices/model'
 import { Pill } from '@/components/dashboard/Pill'
 import { EmptyState } from '@/components/dashboard/Panel'
 import { PayNowButton } from '@/components/invoices/PayNowButton'
+import { MerchantWideNote } from '@/components/layout/MerchantWideNote'
 
 export const metadata = { title: 'Bills & charges · Merchant Portal' }
 
@@ -30,6 +31,7 @@ export default async function InvoicesPage({ searchParams }) {
         <h1 className="text-[28px] leading-tight font-bold">Bills &amp; charges</h1>
         <p className="mt-1 text-[14px] text-ink-3">Invoices · what NETS charges you each month</p>
       </div>
+      <MerchantWideNote />
 
       <section className="min-w-0 overflow-hidden rounded-[12px] border border-line bg-white shadow-panel">
         {m.isEmpty ? (

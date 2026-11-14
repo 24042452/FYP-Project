@@ -6,6 +6,7 @@ import { buildSettlementsModel, monthBounds, parseMonth, parseSettlementStatus }
 import { Pill } from '@/components/dashboard/Pill'
 import { StatTile } from '@/components/dashboard/StatTile'
 import { EmptyState } from '@/components/dashboard/Panel'
+import { MerchantWideNote } from '@/components/layout/MerchantWideNote'
 
 export const metadata = { title: 'Money to my bank · Merchant Portal' }
 
@@ -33,6 +34,7 @@ export default async function SettlementsPage({ searchParams }) {
         <h1 className="text-[28px] leading-tight font-bold">Money to my bank</h1>
         <p className="mt-1 text-[14px] text-ink-3">Settlements · when your money reaches your bank</p>
       </div>
+      <MerchantWideNote />
 
       <section aria-label="Summary" className="grid grid-cols-1 divide-y divide-line rounded-[12px] border border-line bg-white shadow-panel sm:grid-cols-3 sm:divide-x sm:divide-y-0">
         {m.tiles.map((t) => (

@@ -2,6 +2,7 @@
 
 import { Bar, BarChart, Cell, LabelList, ResponsiveContainer, Tooltip, XAxis } from 'recharts'
 import { formatSGD } from '@/lib/money'
+import { useReducedMotion } from './use-reduced-motion'
 
 const BEST = '#0B4DB8'
 const OTHER = '#A8C3F0'
@@ -11,6 +12,7 @@ const OTHER = '#A8C3F0'
  * @param {{series: {day: string, label: string, grossCents: number, isFuture?: boolean}[], bestIndex: number, ariaLabel: string}} props
  */
 export function WeekBars({ series, bestIndex, ariaLabel }) {
+  const reduced = useReducedMotion()
   const few = series.length <= 7
   const data = series.map((s) => ({
     ...s,
@@ -34,7 +36,7 @@ export function WeekBars({ series, bestIndex, ariaLabel }) {
               formatter={(/** @type {number} */ v) => [formatSGD(Math.round(v * 100)), 'Sales']}
               labelFormatter={(_l, p) => p?.[0]?.payload?.day ?? ''}
             />
-            <Bar dataKey="dollars" radius={[4, 4, 0, 0]} maxBarSize={44} isAnimationActive={false}>
+            <Bar dataKey="dollars" radius={[4, 4, 0, 0]} maxBarSize={44} isAnimationActive={!reduced} animationDuration={500} animationEasing="ease-out">
               {data.map((d, i) => (
                 <Cell key={d.day} fill={i === bestIndex ? BEST : OTHER} />
               ))}

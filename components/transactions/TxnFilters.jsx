@@ -15,9 +15,9 @@ const field =
 
 /**
  * Filters live in the address (GET form + links), so they work without JavaScript and can be bookmarked.
- * @param {{params: import('@/lib/transactions/params').TxnParams, today: string}} props
+ * @param {{params: import('@/lib/transactions/params').TxnParams, today: string, focusSearch?: boolean}} props
  */
-export function TxnFilters({ params: p, today }) {
+export function TxnFilters({ params: p, today, focusSearch = false }) {
   const presets = [
     { label: 'Today', from: today, to: today },
     { label: 'Last 7 days', from: null, to: null },
@@ -40,6 +40,7 @@ export function TxnFilters({ params: p, today }) {
           <input
             type="search"
             name="q"
+            autoFocus={focusSearch}
             defaultValue={p.explicit.q ?? ''}
             maxLength={40}
             placeholder="Amount like 12.50, or a reference"

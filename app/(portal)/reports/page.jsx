@@ -4,6 +4,7 @@ import { listLatestRunIds } from '@/lib/data/recon'
 import { addMonths, monthEnd, monthStart, sgtDate } from '@/lib/dates'
 import { monthName } from '@/lib/recon/reconcile'
 import { Panel } from '@/components/dashboard/Panel'
+import { MerchantWideNote } from '@/components/layout/MerchantWideNote'
 
 export const metadata = { title: 'Reports · Merchant Portal' }
 
@@ -27,6 +28,7 @@ export default async function ReportsPage() {
         <h1 className="text-[28px] leading-tight font-bold">Reports</h1>
         <p className="mt-1 text-[14px] text-ink-3">Finance reporting · files to download for you or your accountant</p>
       </div>
+      <MerchantWideNote />
 
       <Panel title="Monthly downloads">
         <ul className="m-0 list-none p-0">

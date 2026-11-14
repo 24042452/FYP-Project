@@ -1,4 +1,5 @@
 import { getCurrentMerchant } from '@/lib/data/merchant'
+import { MerchantWideNote } from '@/components/layout/MerchantWideNote'
 import { Chat } from '@/components/assistant/Chat'
 
 export const metadata = { title: 'Ask NETS Assistant · Merchant Portal' }
@@ -11,5 +12,10 @@ export default async function AssistantPage({ searchParams }) {
   const sp = await searchParams
   const q = Array.isArray(sp?.q) ? sp.q[0] : sp?.q
   const mode = process.env.ASSISTANT_MODE === 'ai' ? 'ai' : 'rules'
-  return <Chat mode={mode} initialQuestion={typeof q === 'string' ? q.slice(0, 1000) : undefined} />
+  return (
+    <div className="mx-auto flex w-full max-w-[860px] flex-col gap-4">
+      <MerchantWideNote />
+      <Chat mode={mode} initialQuestion={typeof q === 'string' ? q.slice(0, 1000) : undefined} />
+    </div>
+  )
 }
