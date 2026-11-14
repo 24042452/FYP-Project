@@ -84,7 +84,6 @@ test('TC-LOGOUT-01: a red "Log out" button with words, at desktop and phone size
     await page.reload()
     const b2 = await btn.boundingBox()
     expect(b2.x + b2.width).toBeLessThanOrEqual(375)
-    expect(box.x + box.width).toBeLessThanOrEqual(page.viewportSize().width)
     const { scrollWidth, innerWidth } = await page.evaluate(() => ({ scrollWidth: document.documentElement.scrollWidth, innerWidth: window.innerWidth }))
     expect(scrollWidth).toBeLessThanOrEqual(innerWidth)
   }
@@ -92,9 +91,18 @@ test('TC-LOGOUT-01: a red "Log out" button with words, at desktop and phone size
   await page.waitForURL((url) => url.pathname === '/login')
 })
 
-test('TC-REC-02: the check-up shows a progress bar while it runs, then the results and how long it took', async ({ page }) => {
+test('TC-REC-02: the check-up shows a progress bar (steps, not the results) while it runs, then the results and how long it took', async ({ page }) => {
   await loginWithForm(page, 'retail@demo.local')
   await page.goto('/reconciliation?month=2026-10')
+
+  // Hold the server action back about 2 seconds, like a slow connection.
+  await page.route('**/reconciliation*', async (route) => {
+    if (route.request().method() === 'POST' && route.request().headers()['next-action']) {
+      await new Promise((r) => setTimeout(r, 2000))
+    }
+    await route.continue()
+  })
+
   await page.getByRole('button', { name: /Run check-up|Check again/ }).click()
 
   const bar = page.getByRole('progressbar', { name: 'Check-up progress' })
@@ -103,13 +111,30 @@ test('TC-REC-02: the check-up shows a progress bar while it runs, then the resul
   await expect(bar).toHaveAttribute('aria-valuemax', '100')
   const now = Number(await bar.getAttribute('aria-valuenow'))
   expect(now).toBeGreaterThanOrEqual(0)
-  expect(now).toBeLessThanOrEqual(100)
-  await expect(page.getByText(/Adding up your sales|Saving your results|Checking your NETS bill|Matching sales|Looking at payments|Your check-up is ready/).first()).toBeVisible()
+  expect(now).toBeLessThan(100)
+  await expect(page.getByTestId('checkup-step')).toHaveText(/…$/)
+  await expect(page).not.toHaveURL(/run=/) // the results page has not opened yet
+  await expect(page.getByRole('button', { name: 'Checking…' })).toBeDisabled()
 
+  await expect(page).toHaveURL(/month=2026-10&run=/)
   await expect(page.getByText(/3 need a look/).first()).toBeVisible()
-  await expect(page.getByTestId('checked-in')).toContainText(/Checked in/)
-  // The bar goes away again once it has said "Done".
+  await expect(page.getByTestId('checked-in')).toContainText(/^ Checked in/)
   await expect(bar).toHaveCount(0)
-  const stored = await page.evaluate(() => window.localStorage.getItem('checkupDurationMs'))
-  expect(Number(stored)).toBeGreaterThan(0)
+  expect(Number(await page.evaluate(() => window.localStorage.getItem('checkupDurationMs')))).toBeGreaterThan(0)
+
+  // Reload: this tab still knows the time; a different run id shows nothing.
+  await page.reload()
+  await expect(page.getByTestId('checked-in')).toBeVisible()
+  await page.evaluate(() => window.sessionStorage.clear())
+  await page.reload()
+  await expect(page.getByText(/3 need a look/).first()).toBeVisible()
+  await expect(page.getByTestId('checked-in')).toHaveCount(0)
+})
+
+test('TC-SEARCH-01: on a phone the top-bar search icon opens Payments with the search box ready', async ({ page }) => {
+  test.skip(!isPhone(page), 'phone only')
+  await loginWithForm(page, 'retail@demo.local')
+  await page.getByRole('link', { name: 'Search payments' }).click()
+  await page.waitForURL((url) => url.pathname === '/transactions' && url.searchParams.get('focus') === 'search')
+  await expect(page.getByLabel('Find a payment')).toBeFocused()
 })

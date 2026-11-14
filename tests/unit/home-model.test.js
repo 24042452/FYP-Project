@@ -263,3 +263,28 @@ describe('buildHomeModel: with an outlet selected', () => {
     expect(m.attention.items.some((i) => i.key === 'failed')).toBe(true)
   })
 })
+
+describe('buildHomeModel: merchant-wide parts are labelled when an outlet is picked', () => {
+  const input = {
+    ...EMPTY_INPUT,
+    todayRows: [row('2026-11-11', 'card', 1000, 2, 1)],
+    settlementSummary: { pendingCents: 500, nextExpectedDate: '2026-11-12', lateCount: 1, lateCents: 300 },
+    recon: { runAt: '2026-11-11T01:00:00.000Z', period: '2026-10-01', matchedCount: 5, exceptionCount: 2, openCount: 2 },
+  }
+  it('adds "All outlets" to the bank tile and the check-up and late items, not the failed-payments item', () => {
+    const m = buildHomeModel({ ...input, outletName: 'Online' })
+    expect(m.tiles[1].scope).toBe('All outlets')
+    expect(m.tiles[0].scope).toBeUndefined()
+    const byKey = Object.fromEntries(m.attention.items.map((i) => [i.key, i]))
+    expect(byKey.recon.scope).toBe('All outlets')
+    expect(byKey.late.scope).toBe('All outlets')
+    expect(byKey.failed.scope).toBeUndefined()
+    expect(m.mergedScope).toBe('All outlets')
+  })
+  it('adds nothing when all outlets are shown', () => {
+    const m = buildHomeModel(input)
+    expect(m.tiles[1].scope).toBeUndefined()
+    expect(m.attention.items.every((i) => i.scope === undefined)).toBe(true)
+    expect(m.mergedScope).toBe('')
+  })
+})

@@ -9,9 +9,8 @@ import { monthName, shortDay } from '@/lib/recon/reconcile'
 import { CHANNEL_LABELS } from '@/lib/channels'
 import { Pill } from '@/components/dashboard/Pill'
 import { Panel, EmptyState } from '@/components/dashboard/Panel'
-import { RunButton } from '@/components/recon/RunButton'
-import { CheckedIn, RunProgress } from '@/components/recon/RunProgress'
-import { markAsSorted, runReconciliation } from './actions'
+import { CheckedIn, RunCheckup } from '@/components/recon/RunProgress'
+import { markAsSorted } from './actions'
 import { MerchantWideNote } from '@/components/layout/MerchantWideNote'
 
 export const metadata = { title: 'Check-up · Merchant Portal' }
@@ -141,11 +140,7 @@ export default async function ReconciliationPage({ searchParams }) {
           </div>
           <button type="submit" className={linkBtn}>Show</button>
         </form>
-        <form action={runReconciliation} className="flex w-full flex-col gap-3 sm:w-[26rem] sm:items-end sm:pt-[26px]">
-          <input type="hidden" name="month" value={month} />
-          <RunButton>{run ? 'Check again' : 'Run check-up'}</RunButton>
-          <RunProgress />
-        </form>
+        <RunCheckup month={month} label={run ? 'Check again' : 'Run check-up'} />
       </section>
 
       {!view || !run ? (
@@ -164,7 +159,7 @@ export default async function ReconciliationPage({ searchParams }) {
                 <p className="text-[20px] leading-snug font-semibold">{view.headline}</p>
                 <p className="mt-1 text-[14px] text-ink-2">
                   {run.matchedCount} of {view.checked} matched ({view.matchPercent}). Last checked {formatWhen(run.runAt)}.
-                  {sp?.run === run.id ? <CheckedIn /> : null}
+                  <CheckedIn runId={run.id} />
                   {view.openCount > 0 ? ` ${view.openCount} still open.` : ' Everything is sorted.'}
                 </p>
               </div>

@@ -11,19 +11,25 @@ const FIRST_MONTH = '2026-05'
 const MONTH_RE = /^(\d{4})-(0[1-9]|1[0-2])$/
 
 /**
- * "Run check-up": compare the month's payments, deposits and bill, store the result, and show it.
- * The merchant comes from the session only.
- * @param {string | FormData} input a YYYY-MM month, or a form with a `month` field
+ * "Run check-up": compare the month's payments, deposits and bill and store the result. Used with
+ * useActionState, so it answers instead of redirecting: the page shows its progress bar and then opens the
+ * result. The merchant comes from the session only.
+ * @param {unknown} _prev the previous answer (unused)
+ * @param {FormData} formData a form with a `month` field (YYYY-MM)
+ * @returns {Promise<{ok: true, runId: string, month: string, durationMs: number} | {ok: false, message: string}>}
  */
-export async function runReconciliation(input) {
+export async function runReconciliation(_prev, formData) {
   const merchant = await getCurrentMerchant()
-  const month = String(input instanceof FormData ? input.get('month') : input)
+  const month = String(formData.get('month'))
   const today = sgtDate(new Date().toISOString())
-  if (!MONTH_RE.test(month) || month < FIRST_MONTH || month > today.slice(0, 7)) redirect('/reconciliation?notice=month')
+  if (!MONTH_RE.test(month) || month < FIRST_MONTH || month > today.slice(0, 7)) {
+    return { ok: false, message: 'That month is not available. Please pick a month from the list.' }
+  }
+  const started = Date.now()
   const runId = await runAndSaveReconciliation(merchant.id, month, today)
-  revalidatePath('/reconciliation')
+  const durationMs = Date.now() - started
   revalidatePath('/')
-  redirect(`/reconciliation?month=${month}&run=${runId}`)
+  return { ok: true, runId, month, durationMs }
 }
 
 /**

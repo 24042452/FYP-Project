@@ -1,6 +1,8 @@
 import { describe, it, expect } from 'vitest'
 import {
   CHECKUP_STEPS,
+  MIN_DISPLAY_MS,
+  canFinish,
   DEFAULT_ESTIMATE_MS,
   describeDuration,
   estimateFromStored,
@@ -94,5 +96,16 @@ describe('describeDuration', () => {
     expect(describeDuration(NaN)).toBe('')
     expect(describeDuration(-4)).toBe('')
     expect(describeDuration(null)).toBe('')
+  })
+})
+
+describe('canFinish', () => {
+  it('waits for both the answer and the minimum showing time', () => {
+    expect(canFinish(1000, true)).toBe(false)
+    expect(canFinish(MIN_DISPLAY_MS - 1, true)).toBe(false)
+    expect(canFinish(MIN_DISPLAY_MS, false)).toBe(false)
+    expect(canFinish(MIN_DISPLAY_MS, true)).toBe(true)
+    expect(canFinish(NaN, true)).toBe(false)
+    expect(MIN_DISPLAY_MS).toBe(2500)
   })
 })

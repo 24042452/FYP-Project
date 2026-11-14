@@ -118,6 +118,7 @@ export default async function HomePage({ searchParams }) {
         <Panel
           title="Money to your bank"
           tech="Settlements"
+          caption={m.mergedScope || undefined}
           action={
             <Link href="/settlements" className="inline-flex min-h-11 items-center text-[14px] font-semibold">
               See all
@@ -138,7 +139,7 @@ export default async function HomePage({ searchParams }) {
               <EmptyState>Nothing needs your attention right now</EmptyState>
             )}
           </Panel>
-          <CheckupCard checkup={m.checkup} />
+          <CheckupCard checkup={m.checkup} caption={m.mergedScope || undefined} />
         </div>
       </div>
 

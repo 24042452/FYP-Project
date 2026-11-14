@@ -26,8 +26,8 @@ export function TopBar({ userName, role, merchantName, onOpenMenu, alerts = { un
         <Menu className="size-5" aria-hidden="true" />
       </button>
 
-      {/* Phones: just a search icon (the long placeholder did not fit); it opens the payments list, where search lives. */}
-      <Link href="/transactions" aria-label="Search payments" className={iconBtn + ' md:hidden'}>
+      {/* Phones: just a search icon (the long placeholder did not fit); it opens the payments list with its search box ready to type in. */}
+      <Link href="/transactions?focus=search" aria-label="Search payments" className={iconBtn + ' md:hidden'}>
         <Search className="size-5" aria-hidden="true" />
       </Link>
 

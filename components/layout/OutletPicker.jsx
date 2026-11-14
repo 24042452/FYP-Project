@@ -1,6 +1,6 @@
 'use client'
 
-import { useTransition } from 'react'
+import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { selectOutlet } from '@/app/outlet-actions'
 
@@ -12,6 +12,7 @@ import { selectOutlet } from '@/app/outlet-actions'
 export function OutletPicker({ outlets, selectedId, idSuffix = '' }) {
   const router = useRouter()
   const [pending, startTransition] = useTransition()
+  const [failed, setFailed] = useState(false)
   const id = `outlet-select${idSuffix}`
 
   if (outlets.length === 0) return null
@@ -35,7 +36,8 @@ export function OutletPicker({ outlets, selectedId, idSuffix = '' }) {
         onChange={(e) => {
           const choice = e.target.value
           startTransition(async () => {
-            await selectOutlet(choice)
+            const res = await selectOutlet(choice)
+            setFailed(!res.ok)
             router.refresh()
           })
         }}
@@ -46,6 +48,11 @@ export function OutletPicker({ outlets, selectedId, idSuffix = '' }) {
           <option key={o.id} value={o.id}>{o.name}</option>
         ))}
       </select>
+      {failed ? (
+        <p role="alert" className="px-1 text-[13px] font-medium text-bad">
+          Couldn’t switch outlet. Please try again.
+        </p>
+      ) : null}
     </div>
   )
 }

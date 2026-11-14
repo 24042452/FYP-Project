@@ -60,7 +60,7 @@ export default async function TransactionsPage({ searchParams }) {
       </p>
 
       <section className="min-w-0 overflow-hidden rounded-[12px] border border-line bg-white shadow-panel">
-        <TxnFilters params={p} today={today} />
+        <TxnFilters params={p} today={today} focusSearch={sp?.focus === 'search'} />
         <TxnTable
           key={tableKey}
           initialRows={list.rows.map(toRowView)}
