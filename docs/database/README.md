@@ -87,3 +87,14 @@ Ids are `CHAR(36)` UUIDs. Money is `BIGINT` cents. Times are `DATETIME(3)` in UT
 Indexes: `transactions(merchant_id, created_at)`, `transactions(merchant_id, status, created_at)`, `settlements(merchant_id, business_date)`, `invoices(merchant_id, period)`.
 
 `invoice_lines` and `recon_exceptions` carry their own `merchant_id` (not in the Technical Design table) so every query on them can filter by merchant directly.
+
+## Importing the schema into a hosted database (e.g. the school Azure server)
+
+If you can't run `npm run migrate` against a server (for example you only have MySQL Workbench access), import a single SQL file instead:
+
+```bash
+node scripts/export-schema.mjs <schema-name>              # writes db/export/<schema-name>.sql
+node scripts/export-schema.mjs <schema-name> --no-create  # same, without CREATE DATABASE / USE
+```
+
+The file creates every table from `db/migrations/` and fills `schema_migrations`, so a later `npm run migrate` against that schema applies nothing. It contains no data and no users; load the demo data with `npm run seed` (pointing `DATABASE_ADMIN_URL` at the server). Regenerate the file whenever a migration is added. `db/export/SOI-2026-0021-sherwin.sql` is the export for the school server.
