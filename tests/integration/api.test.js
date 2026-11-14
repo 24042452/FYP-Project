@@ -27,6 +27,8 @@ beforeAll(async () => {
       txn(6, A, 50000, '2026-11-05T04:00:00.000Z'),
       // Fri 6 last week: must NOT count (like for like stops at Thu 5)
       txn(7, A, 99900, '2026-11-06T04:00:00.000Z'),
+      // months ago: only a search (365-day default) reaches it
+      txn(8, A, 31415, '2026-06-01T04:00:00.000Z'),
       { id: B_TXN, merchantId: B, amountCents: 77777, createdAt: '2026-11-12T04:00:00.000Z' },
     ],
   })
@@ -64,6 +66,27 @@ describe('GET /api/v1/transactions', () => {
     expect(b.data.map((r) => r.id)).toEqual([B_TXN])
     const a = await body(await transactionsResponse(A, { ...NOV, q: B_TXN }, TODAY))
     expect(a.data).toEqual([])
+  })
+
+  it('without q the default is 7 days; with q and no dates it looks back 365 days', async () => {
+    const plain = await body(await transactionsResponse(A, {}, TODAY))
+    expect(plain.data.map((r) => r.id)).not.toContain(idOf(8))
+    const found = await body(await transactionsResponse(A, { q: '314.15', limit: '5' }, TODAY))
+    expect(found.data.map((r) => r.id)).toEqual([idOf(8)])
+    const byRef = await body(await transactionsResponse(A, { q: idOf(8) }, TODAY))
+    expect(byRef.data.map((r) => r.id)).toEqual([idOf(8)])
+  })
+
+  it('explicit dates win over the search default', async () => {
+    const r = await body(await transactionsResponse(A, { q: '314.15', from: '2026-11-01', to: '2026-11-30' }, TODAY))
+    expect(r.data).toEqual([])
+  })
+
+  it('a search by amount or by another merchant reference finds nothing of theirs', async () => {
+    const amount = await body(await transactionsResponse(A, { q: '777.77' }, TODAY))
+    expect(amount.data).toEqual([])
+    const ref = await body(await transactionsResponse(A, { q: B_TXN }, TODAY))
+    expect(ref.data).toEqual([])
   })
 
   it('pages with next_cursor', async () => {
