@@ -4,9 +4,10 @@ Final Year Project with industry partner **NETS** (Singapore payments): an enhan
 
 ## Where we left off (update this section at the end of every session)
 
-**Last updated:** 2026-11-15
-**Current phase: MVP LIVE, polishing for Touchpoint 1.** The MVP is built, reviewed, merged into `main` and deployed.
+**Last updated:** 2026-11-15 (end of session: everything merged into `main` and live; no open PRs; no dev servers left running)
+**Current phase: MVP LIVE, polishing and preparing the Touchpoint 1 demo.** The MVP is built, reviewed, merged into `main` and deployed.
 **Next deadline:** Touchpoint 1 MVP demo to NETS & RP, about 2026-11-25.
+**Start next session with:** read "Next steps" below, then `git checkout main && git pull`.
 
 Where things are:
 - **Live site:** https://fyp-project-taupe.vercel.app (Vercel Hobby, deploys from `main`; every PR gets a preview link, which needs a Vercel login)
@@ -14,27 +15,33 @@ Where things are:
 - **Database (live):** the school's shared Azure MySQL 8.0 server, schema `SOI-2026-0021-sherwin` (the server shows it in lower case). Other schemas on that server belong to other people: only ever touch ours. Host and login live only in the git-ignored `.env.azure`. The schema came from `db/export/SOI-2026-0021-sherwin.sql` (`node scripts/export-schema.mjs <name>` regenerates it). Re-seed it with `node --env-file=.env.azure scripts/seed.mjs`
 - **Database (local):** MySQL 8 on this PC (`nets_portal`, `nets_portal_test`); settings in git-ignored `.env.local`
 - Tests: `npm test` (unit), `npm run test:integration` (MySQL `nets_portal_test`), `npm run test:e2e` (Playwright in installed Edge; builds and starts the app itself, so run `npm run seed` first). Results in `docs/04-documentation-and-test-plan.md`. CI (`.github/workflows/ci.yml`) runs lint, unit and integration on every PR
-- Docs: feature pages in `docs/features/`, open small issues and ideas in `docs/backlog.md`, build plan in `docs/superpowers/plans/2026-11-11-mvp.md`
+- Docs: feature pages in `docs/features/`, open small issues and ideas in `docs/backlog.md`, build plan in `docs/superpowers/plans/2026-11-11-mvp.md`, **demo script** `docs/demo-script.md`, **technical document for NETS and RP** `docs/NETS-Merchant-Portal-Technical-Document.docx` (22 pages; built by a docx-js script that lived in the session scratchpad, so edit the .docx in Word from now on)
+- Team (Programme DFT): Chow Sherwin (Team Coordinator), Deron Kwok Yu Hng, Dylan Teo Zhen Hwee, Lai Wei Jun Samuel. Student IDs and phone numbers are deliberately NOT in the repo (it is public)
+- Visual checks without Chrome: headless Microsoft Edge via the DevTools protocol works on this PC (Playwright e2e also uses `channel: 'msedge'`). Word is installed (export to PDF via Word COM in PowerShell). On Windows, stopping `npm run dev` leaves `next` node processes: kill node processes whose command line contains `FYP Project` and `next`; delete `.next` between `next build` and `next dev`
 
-Merged so far:
-- PR #1 (2026-11-15): the whole MVP (tasks 1-14a plus the final-review fixes)
+Merged so far (all 2026-11-15):
+- PR #1: the whole MVP (tasks 1-14a plus the final-review fixes)
 - PR #2: schema export for the school Azure database
 - PR #3: working outlet menu (Home and Sales & payments follow the chosen outlet, with each outlet's share of NETS payouts, animations and a "Now showing" message), red "Log out" button with words, check-up progress bar
+- PR #4: docs housekeeping (README, project notes, `docs/backlog.md`)
+- PR #5: gentler business health score (start 75; labels Healthy / Okay / Needs a look) with a full-width "How we worked this out" panel
+- PR #6: working search (live suggestions on desktop, full-screen search on phones, last 12 months, follows the outlet), payment drawer slides out when closed, demo script, Word technical document
 
 Waiting on the user:
 - Ask the school owner to **change the Azure database password** (it was exposed once in a session log on 2026-11-15), then update `.env.azure` and `DATABASE_URL` in Vercel
 - An Anthropic API key (optional; without it the assistant stays in rules mode)
 
 Next steps:
-1. **Before every demo: re-seed that morning**, locally and on Azure (`node --env-file=.env.azure scripts/seed.mjs`). Pending/late/"today" figures are set relative to the seed day and nothing refreshes them
-2. Decide on the health-score wording (it shows a low red score next to "Business is good"); see `docs/backlog.md`
-3. Full run-through on a phone and a laptop, a backup screen recording, and the demo script and slides
-4. Quick usability test with 3-5 non-technical users (user-centred design evidence)
+1. **Before every demo: re-seed that morning, after 9 am**, locally and on Azure (`node --env-file=.env.azure scripts/seed.mjs`). Pending/late/"today" figures are set relative to the seed day and nothing refreshes them
+2. Rehearse with `docs/demo-script.md` (presenter + driver), record a backup video, and prepare slides
+3. Optional before the demo: a usability test kit (`docs/usability-test.md`: 5 tasks for 3-5 non-technical users) for user-centred design evidence, and the quick wins in `docs/backlog.md`
+4. Optional: an Anthropic API key to try the assistant's AI mode (never run against the live API yet; quick-answers mode is the safe demo default)
 5. After Touchpoint 1: Phase 1 in `docs/01-project-plan.md`
 
 Done:
 - [x] Planning docs 01-04, design (Option 1 · Clean Console) and `PRODUCT.md`
-- [x] 2026-11-14/15: MVP built (tasks 1-14a), final whole-branch review and fixes, deployed to Vercel with the school Azure database, PRs #1-3 merged
+- [x] 2026-11-14/15: MVP built (tasks 1-14a), final whole-branch review and fixes, deployed to Vercel with the school Azure database
+- [x] 2026-11-15: outlet menu, Log out button, check-up progress bar, health score with explanation, working search, demo script and Word technical document (PRs #1-6 merged)
 
 ## Decisions made
 
