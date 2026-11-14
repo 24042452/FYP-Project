@@ -4,7 +4,7 @@ import { sgtDate } from '@/lib/dates'
 import { CHANNELS } from '@/lib/channels'
 import { feeFor } from '@/lib/fees'
 
-const opts = { start: '2026-05-01', end: '2026-11-11', today: '2026-11-11', seed: 42 } as const
+const opts = { start: '2026-05-01', end: '2026-11-11', today: '2026-11-11', seed: 42 }
 const hawker = generateDataset({ ...opts, profile: 'hawker' })
 const retail = generateDataset({ ...opts, profile: 'retail' })
 
@@ -64,19 +64,19 @@ describe('generateDataset', () => {
   it('settles each transaction on its Singapore business date and channel', () => {
     const byId = new Map(hawker.settlements.map((s) => [s.id, s]))
     for (const t of hawker.transactions.filter((t) => t.status === 'success')) {
-      const s = byId.get(t.settlement_id!)!
+      const s = byId.get(t.settlement_id)
       expect(s.business_date).toBe(sgtDate(t.created_at))
       expect(s.channel).toBe(t.channel)
     }
   })
 
   it('keeps settlement gross equal to its transactions except the injected mismatch', () => {
-    const sums = new Map<string, number>()
+    const sums = new Map()
     for (const t of hawker.transactions) {
       if (t.settlement_id) sums.set(t.settlement_id, (sums.get(t.settlement_id) ?? 0) + t.amount_cents)
     }
     for (const s of hawker.settlements) {
-      const expected = sums.get(s.id)!
+      const expected = sums.get(s.id)
       if (s.business_date === '2026-10-18' && s.channel === 'card') {
         expect(s.gross_cents).toBe(expected - 4210)
       } else {
@@ -87,14 +87,14 @@ describe('generateDataset', () => {
   })
 
   it('injects a delayed NETS QR settlement on 29 Oct 2026', () => {
-    const s = hawker.settlements.find((s) => s.business_date === '2026-10-29' && s.channel === 'nets_qr')!
+    const s = hawker.settlements.find((s) => s.business_date === '2026-10-29' && s.channel === 'nets_qr')
     expect(s.status).toBe('delayed')
     expect(s.paid_date).toBeNull()
   })
 
   it('injects a $3.60 overcharge on the October cards MDR invoice line', () => {
-    const oct = hawker.invoices.find((i) => i.period === '2026-10-01')!
-    const line = hawker.invoiceLines.find((l) => l.invoice_id === oct.id && l.channel === 'card')!
+    const oct = hawker.invoices.find((i) => i.period === '2026-10-01')
+    const line = hawker.invoiceLines.find((l) => l.invoice_id === oct.id && l.channel === 'card')
     const computed = hawker.transactions
       .filter((t) => t.channel === 'card' && t.status === 'success' && sgtDate(t.created_at).startsWith('2026-10'))
       .reduce((a, t) => a + t.fee_cents, 0)
@@ -107,8 +107,8 @@ describe('generateDataset', () => {
     expect(hawker.invoices.map((i) => i.period)).toEqual([
       '2026-05-01', '2026-06-01', '2026-07-01', '2026-08-01', '2026-09-01', '2026-10-01',
     ])
-    expect(hawker.invoices.find((i) => i.period === '2026-10-01')!.status).toBe('unpaid')
-    expect(hawker.invoices.find((i) => i.period === '2026-09-01')!.status).toBe('paid')
+    expect(hawker.invoices.find((i) => i.period === '2026-10-01').status).toBe('unpaid')
+    expect(hawker.invoices.find((i) => i.period === '2026-09-01').status).toBe('paid')
   })
 
   it('marks settlements pending when their expected date is today or later', () => {
@@ -124,9 +124,9 @@ describe('generateDataset', () => {
   })
 
   it('has repeat customers', () => {
-    const counts = new Map<string, number>()
+    const counts = new Map()
     for (const t of hawker.transactions) counts.set(t.customer_ref, (counts.get(t.customer_ref) ?? 0) + 1)
-    const repeatTxns = hawker.transactions.filter((t) => counts.get(t.customer_ref)! > 1).length
+    const repeatTxns = hawker.transactions.filter((t) => counts.get(t.customer_ref) > 1).length
     expect(repeatTxns / hawker.transactions.length).toBeGreaterThan(0.15)
   })
 })
