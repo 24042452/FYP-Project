@@ -5,36 +5,29 @@ Final Year Project with industry partner **NETS** (Singapore payments): an enhan
 ## Where we left off (update this section at the end of every session)
 
 **Last updated:** 2026-11-14
-**Current phase: PLANNING ONLY.** The user said: "make sure it is only in the planning phase, we will start the building phase after we have planned finish." **Do not write product code, run builds or touch databases until the user explicitly says planning is finished and building can start.**
+**Current phase: BUILDING.** The user approved building (database switched to MySQL 8 on 2026-11-14, see ADR-001). MVP feature tasks 1-13 are done and task 14a (Playwright e2e tests, GitHub Actions CI, README, feature docs, test-plan results) is done, all on branch `mvp`. The deployment part, 14b (hosted MySQL, `git push`, Vercel), is **waiting on the user's OK**: do not create hosted databases, push or deploy until they say so.
 **Next deadline:** Touchpoint 1 MVP demo to NETS & RP, about 2026-11-25.
 
-Build work started before the pause (kept, not deleted; don't continue it until building is approved):
-- Branch `mvp`, commit 1: Next.js scaffold, tooling, `lib/money.ts`, `lib/channels.ts` + tests (Plan Task 1 done)
-- Uncommitted, partial Plan Task 3 (data generator): `lib/dates.ts`, `lib/fees.ts`, `lib/failure-codes.ts`, `lib/synthetic/{prng,profiles}.ts`, `tests/unit/generate.test.ts`. `lib/synthetic/generate.ts` is not written yet, so these tests fail on purpose
-- Execution ledger: `.superpowers/sdd/2026-11-11-mvp/progress.md`
-- MVP build plan (draft, still open to planning changes): `docs/superpowers/plans/2026-11-11-mvp.md`
+Where things are:
+- Branch `mvp` (local; GitHub has `main` and an older `mvp`). Execution ledger: `.superpowers/sdd/2026-11-11-mvp/progress.md`. Build plan: `docs/superpowers/plans/2026-11-11-mvp.md`
+- Tests: `npm test` (unit), `npm run test:integration` (MySQL `nets_portal_test`), `npm run test:e2e` (Playwright in installed Edge; builds and starts the app itself, so run `npm run seed` first). Results in `docs/04-documentation-and-test-plan.md`
+- CI: `.github/workflows/ci.yml` (lint, unit, integration with a `mysql:8` service; e2e is local only)
+- Feature docs: `docs/features/`
+- Local setup: `.env.local` (git-ignored) has the MySQL URLs, `DEMO_MODE=true`, `DEMO_PASSWORD`, `ASSISTANT_MODE=rules`. The old Supabase keys in it are unused
 
 Waiting on the user:
-- An Anthropic API key (optional; without it the assistant shows "not set up yet")
-
-Set up 2026-11-12: `.env.local` created (git-ignored), with `ASSISTANT_MODE=rules`, `DEMO_MODE=true` and a generated `DEMO_PASSWORD`. It also still holds 3 Supabase keys, which are **no longer used** since the switch to MySQL (2026-11-14). Plan Task 1b lists the new MySQL env vars; the user updates `.env.local` themselves
-
-Done:
-- [x] Project plan, phases, methodology (Scrum, 1-week sprints, plus UCD): `docs/01-project-plan.md`
-- [x] Tech stack, architecture, data model, recon logic, AI design, open API: `docs/02-technical-design.md`
-- [x] Feature catalogue and extra improvement ideas: `docs/03-feature-catalogue.md`
-- [x] Documentation set and test plan: `docs/04-documentation-and-test-plan.md`
-- [x] UI design options produced for the user to choose from (see "Design" below)
-- [x] 2026-11-12: new design chosen (Option 1 · Clean Console) and 5 screens mocked up in `design/` (see "Design")
-- [x] `PRODUCT.md` (product brief used by the Impeccable design skill)
-- [x] 2026-11-12: pushed to GitHub https://github.com/Rampy2122/FYP-Project (`main` and `mvp` both at the same commit), with a README covering the project, design and progress. From now on: feature branches + PRs into `main`
+- OK for 14b: hosted MySQL 8 provider, push to GitHub, Vercel project and env vars
+- An Anthropic API key (optional; without it the assistant stays in rules mode)
 
 Next steps:
-1. ~~User picks a design direction~~ Done 2026-11-12: Option 1 · Clean Console (see "Design")
-2. ~~Update the build plan to plain JavaScript~~ Done 2026-11-12: the plan now uses `.js`/`.jsx` with JSDoc, and new **Task 1b** converts the existing TypeScript files first when building starts
-3. ~~Switch the database to MySQL~~ Done 2026-11-14: the requirements (JS/Node, React, REST APIs; MySQL and/or MongoDB) are firm, so docs 01, 02 (v0.2), 04, README, PRODUCT.md and the build plan now use MySQL 8. Reasoning in `docs/adr/001-mysql-database.md`
-4. Finish planning with the user/team: review docs 01–04, ADR-001 and the MVP build plan, and confirm the MVP scope. Before building, the user needs MySQL 8 installed locally (plan Task 2 prerequisite)
-5. Only after the user approves building: start with Task 1b (convert to JS and swap Supabase for mysql2), then Task 2 (MySQL schema), then continue Task 3 (see the ledger)
+1. 14b deploy (after the user's OK): hosted MySQL 8 with app and admin users, `npm run migrate` and `npm run seed` against it, push, Vercel, smoke-test both demo logins
+2. Final whole-branch review of `mvp`
+3. Open a PR from `mvp` to `main`
+4. Cut list if behind is in "Decisions made"
+
+Done:
+- [x] Planning docs 01-04, design (Option 1 · Clean Console) and `PRODUCT.md`, GitHub repo https://github.com/Rampy2122/FYP-Project
+- [x] 2026-11-14: MVP feature tasks 1-13 and 14a built on `mvp`
 
 ## Decisions made
 

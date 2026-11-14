@@ -18,7 +18,7 @@ Today, most merchants open the portal about once a month to look at an invoice. 
 
 ## Current status
 
-**Phase: planning** (12 Nov 2026). Building starts once the team agrees the plan is final.
+**Phase: building** (14 Nov 2026). All MVP feature screens are built and tested on the `mvp` branch. Left for the MVP: deploying to Vercel with a hosted MySQL database, a final review, and a pull request into `main`.
 **Next milestone:** Touchpoint 1, an MVP demo to NETS and RP, around **25 Nov 2026**.
 
 | Area | Status |
@@ -26,14 +26,13 @@ Today, most merchants open the portal about once a month to look at an invoice. 
 | Project plan, method (Scrum, 1-week sprints + user-centred design) | ✅ Done: [docs/01-project-plan.md](docs/01-project-plan.md) |
 | Technical design (architecture, database, reconciliation logic, assistant, API) | ✅ Done: [docs/02-technical-design.md](docs/02-technical-design.md) |
 | Feature list and phases | ✅ Done: [docs/03-feature-catalogue.md](docs/03-feature-catalogue.md) |
-| Documentation and test plan | ✅ Done: [docs/04-documentation-and-test-plan.md](docs/04-documentation-and-test-plan.md) |
-| MVP scope (2 demo merchants, demo logins, assistant without AI first) | ✅ Agreed |
-| Visual design (picked from 3 options) and clickable mockups of 5 screens | ✅ Done: [design/](design/), [DESIGN.md](DESIGN.md) |
-| Step-by-step MVP build plan (plain JavaScript) | ✅ Drafted: [docs/superpowers/plans/2026-11-11-mvp.md](docs/superpowers/plans/2026-11-11-mvp.md) |
-| App scaffold (Next.js) | 🟡 Started, will be converted from TypeScript to JavaScript (plan Task 1b) |
-| Synthetic data generator | 🟡 Partly written (plan Task 3) |
-| Database, login, dashboard, payments, check-up, reports, assistant | ⬜ Not started (after planning is approved) |
-| Deployment on Vercel | ⬜ Not started |
+| Documentation and test plan (with results) | ✅ Done: [docs/04-documentation-and-test-plan.md](docs/04-documentation-and-test-plan.md) |
+| Visual design and clickable mockups | ✅ Done: [design/](design/), [DESIGN.md](DESIGN.md) |
+| App in plain JavaScript, MySQL database, synthetic data generator and seed | ✅ Built |
+| Login (form and demo buttons), Home, Sales & payments, Money to my bank, Bills & charges (with PDF), Check-up, Reports (Excel), NETS Assistant (quick answers), alerts bell | ✅ Built: one page per feature in [docs/features/](docs/features/) |
+| Tests: unit, integration (MySQL) and end-to-end (desktop and phone) | ✅ Passing, and unit and integration run on GitHub Actions |
+| Deployment on Vercel with hosted MySQL | ⬜ Not started (needs the team's OK) |
+| NETS Assistant AI mode (needs an Anthropic API key) | ⬜ Later |
 
 ### MVP (Touchpoint 1) scope
 
@@ -65,7 +64,7 @@ We chose **"Clean Console"**: a professional, light merchant portal in red, blue
 
 ---
 
-## Tech stack (planned)
+## Tech stack
 
 | Part | Choice |
 |---|---|
@@ -73,9 +72,9 @@ We chose **"Clean Console"**: a professional, light merchant portal in red, blue
 | Back end and REST API | Next.js route handlers on **Node.js**; public REST API `/api/v1` |
 | Database | **MySQL 8** (transactions, invoices and user data). Every query is filtered by the logged-in merchant, so each merchant only sees their own data |
 | Login | Our own email + password login (bcrypt, sessions stored in MySQL) |
-| Hosting | **Vercel** |
-| Assistant | Rules mode first; later Claude (Anthropic API) with fixed, read-only tools. The AI never writes database queries |
-| Exports | Excel (ExcelJS) and PDF |
+| Hosting | **Vercel** (planned) |
+| Assistant | Rules mode now (no key needed); AI mode (Claude, Anthropic API) uses the same fixed, read-only tools. The AI never writes database queries |
+| Exports | Excel (ExcelJS) and PDF (@react-pdf/renderer) |
 | Tests | Vitest (unit, and integration tests against MySQL), Playwright (end-to-end) |
 
 ## Repository layout
@@ -85,24 +84,49 @@ docs/          Plan, technical design, feature catalogue, test plan, MVP build p
 design/        Clickable mockups (open design/index.html)
 DESIGN.md      Design system: colours, type, components, rules
 PRODUCT.md     Short product brief (users, purpose, principles)
-app/, lib/, components/, tests/   The Next.js app (early scaffold)
+app/, lib/, components/, db/   The Next.js app and the SQL migrations
+scripts/       Migrate and seed commands
+tests/         unit/, integration/ (MySQL) and e2e/ (Playwright)
+.github/       GitHub Actions: lint, unit and integration tests
 .impeccable/   Notes and screenshots from the design process
 CLAUDE.md      Running project notes: decisions made and where we left off
 ```
 
-## Running the app (once building starts)
+## Running the app
 
-The app is not usable yet. When it is, the steps are:
+**You need:** Node.js 22 or newer, and MySQL 8 running on your computer.
+
+1. **Create the databases and users.** Follow [docs/database/README.md](docs/database/README.md): two databases (`nets_portal` and `nets_portal_test`) and two users (`portal_admin` for migrations and seeding, `portal_app` for the running app).
+2. **Set up your settings.** Copy `.env.example` to `.env.local` and fill in the values. The names are:
+   `DATABASE_URL`, `DATABASE_ADMIN_URL`, `DATABASE_SSL`, `TEST_DATABASE_URL`, `TEST_DATABASE_ADMIN_URL`, `ANTHROPIC_API_KEY` (optional), `ASSISTANT_MODE` (`rules` needs no key), `DEMO_MODE` (`true` shows the "Try as…" buttons), `DEMO_PASSWORD`, `CRON_SECRET`.
+3. **Install and start:**
 
 ```bash
 npm install
-cp .env.example .env.local   # fill in your MySQL connection strings
-npm run migrate              # creates the tables
-npm run seed                 # creates the two demo merchants and their sample data
-npm run dev                  # http://localhost:3000
+npm run migrate    # creates the tables
+npm run seed       # creates the two demo merchants and their sample data (run again any time to reset)
+npm run dev        # http://localhost:3000
 ```
 
-`.env.local` holds secret keys. It is ignored by git and must never be committed.
+`.env.local` holds secrets. It is ignored by git and must never be committed.
+
+**Demo logins** (password is whatever you set as `DEMO_PASSWORD`):
+
+| Merchant | Email |
+|---|---|
+| Ah Hock Chicken Rice (hawker, 1 stall) | `hawker@demo.local` |
+| Tan & Sons Retail (3 outlets incl. online) | `retail@demo.local` |
+
+With `DEMO_MODE=true`, the login page also has one-click "Try as…" buttons.
+
+**Tests**
+
+| Command | What it runs |
+|---|---|
+| `npm test` | Unit tests (no database needed) |
+| `npm run test:integration` | Integration tests against the `nets_portal_test` database |
+| `npm run test:e2e` | End-to-end tests in Microsoft Edge, on a desktop and an iPhone 13 screen. It builds and starts the app itself, so run `npm run seed` first and stop `npm run dev` (port 3000 must be free) |
+| `npm run lint` | Code style checks |
 
 ## Team
 
