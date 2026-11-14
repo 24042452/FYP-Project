@@ -2,7 +2,7 @@ import { beforeAll, describe, expect, it } from 'vitest'
 import { randomUUID } from 'node:crypto'
 import { adminExecute, insertFixture, resetTestDb } from './helpers.js'
 import { getDailySales, getFeeTotals, getHeatmap } from '../../lib/data/sales.js'
-import { getRecentSettlements, getSettlementSummary, getSettlementTotals, listSettlements } from '../../lib/data/settlements.js'
+import { getOutletSettlementShares, getRecentSettlements, getSettlementSummary, getSettlementTotals, listSettlements } from '../../lib/data/settlements.js'
 import { getTransaction, listTransactions, listTransactionsForExport } from '../../lib/data/transactions.js'
 import { getInvoiceLinesForMonth, getInvoiceWithLines, listInvoices } from '../../lib/data/invoices.js'
 import { countUnread, insertNotifications, listNotifications, markAllRead, markRead } from '../../lib/data/notifications.js'
@@ -52,6 +52,8 @@ const CASES = [
   ['listNotifications', (id) => listNotifications(id), (rows) => (rows.length === 0 ? 0 : rows[0].id === NOTE_A ? A_CENTS : B_CENTS)],
   ['countUnread', async (id) => { const n = await countUnread(id); return n > 0 ? [{ n }] : [] }, (rows) => (rows.length === 0 ? 0 : rows[0].n === 1 ? A_CENTS : B_CENTS)],
   ['listOutlets', (id) => listOutlets(id), (rows) => (rows.length === 0 ? 0 : rows[0].id === OUT_A ? A_CENTS : B_CENTS)],
+  ['getOutletSettlementShares', (id) => getOutletSettlementShares(id, id === A ? OUT_A : OUT_B, { since: '2000-01-01' }), (rows) => rows.reduce((s, r) => s + r.netCents, 0)],
+  ['getLatestRunSummary (outlet)', async (id) => { const r = await getLatestRunSummary(id, id === A ? OUT_A : OUT_B); return r ? [r] : [] }, (rows) => rows.reduce((s, r) => s + r.matchedCount, 0)],
   ['listLatestRunIds', (id) => listLatestRunIds(id), (rows) => (rows.length === 0 ? 0 : rows[0].id === RUN_A ? A_CENTS : B_CENTS)],
 ]
 
@@ -65,12 +67,14 @@ beforeAll(async () => {
     ],
   })
   for (const [id, cents] of [[A, A_CENTS], [B, B_CENTS]]) {
+    const settleId = randomUUID()
     await adminExecute(`INSERT INTO outlets (id, merchant_id, name) VALUES (?, ?, 'Outlet')`, [id === A ? OUT_A : OUT_B, id])
     await adminExecute(
       `INSERT INTO settlements (id, merchant_id, business_date, channel, gross_cents, fee_cents, net_cents, status, expected_date)
        VALUES (?, ?, ?, 'nets_qr', ?, 0, ?, 'pending', '2026-11-05')`,
-      [randomUUID(), id, DAY, cents, cents],
+      [settleId, id, DAY, cents, cents],
     )
+    await adminExecute(`UPDATE transactions SET outlet_id = ?, settlement_id = ? WHERE id = ?`, [id === A ? OUT_A : OUT_B, settleId, id === A ? TXN_A : TXN_B])
     const invId = id === A ? INV_A : INV_B
     await adminExecute(
       `INSERT INTO invoices (id, merchant_id, period, total_cents, status, due_date) VALUES (?, ?, '2026-10-01', ?, 'unpaid', '2026-11-15')`,

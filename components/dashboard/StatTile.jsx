@@ -1,4 +1,7 @@
+'use client'
+
 import Link from 'next/link'
+import { AnimatedMoney } from './AnimatedMoney'
 
 /**
  * One cell of the summary strip.
@@ -15,7 +18,7 @@ export function StatTile({ label, value, hint, scope, note, tone = 'default', hr
       <span
         className={`text-[28px] leading-[1.15] font-semibold tracking-[-0.025em] tabular-nums sm:text-[32px] ${attention ? 'text-bad' : 'text-ink'}`}
       >
-        {value}
+        <AnimatedMoney text={value} />
       </span>
       {hint ? <span className="text-[14px] text-ink-2">{hint}</span> : null}
       {note ? <span className="text-[14px] font-medium text-bad">{note}</span> : null}

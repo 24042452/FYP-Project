@@ -2,7 +2,8 @@ import Link from 'next/link'
 import { getCurrentMerchant } from '@/lib/data/merchant'
 import { getSelectedOutlet } from '@/lib/outlets/server'
 import { getDailySales, getFeeTotals, getHeatmap } from '@/lib/data/sales'
-import { getRecentSettlements, getSettlementSummary } from '@/lib/data/settlements'
+import { getOutletSettlementShares, getRecentSettlements, getSettlementSummary } from '@/lib/data/settlements'
+import { shareDays, shareSummary } from '@/lib/settlements/outlet-share'
 import { getLatestRunSummary } from '@/lib/data/recon'
 import { addDays, periodRange, sgtDate, sgtHour } from '@/lib/dates'
 import { buildHomeModel, chartRange, parsePeriod } from '@/lib/dashboard/home-model'
@@ -16,6 +17,7 @@ import { ChannelBars } from '@/components/dashboard/ChannelBars'
 import { SettlementList } from '@/components/dashboard/SettlementList'
 import { AttentionList } from '@/components/dashboard/AttentionList'
 import { CheckupCard } from '@/components/dashboard/CheckupCard'
+import { SwitchFx } from '@/components/dashboard/SwitchFx'
 import { Panel, EmptyState } from '@/components/dashboard/Panel'
 
 export const metadata = { title: 'Home · Merchant Portal' }
@@ -42,10 +44,19 @@ export default async function HomePage({ searchParams }) {
     kind === 'today' ? getDailySales(merchant.id, chart.from, chart.to, outletId) : Promise.resolve(null),
     getHeatmap(merchant.id, addDays(today, -27), today, outletId),
     getFeeTotals(merchant.id, range.from, range.toDate, outletId),
-    getRecentSettlements(merchant.id, 5),
-    getSettlementSummary(merchant.id, today),
-    getLatestRunSummary(merchant.id),
+    outletId ? Promise.resolve(null) : getRecentSettlements(merchant.id, 5),
+    outletId ? Promise.resolve(null) : getSettlementSummary(merchant.id, today),
+    getLatestRunSummary(merchant.id, outletId),
   ])
+
+  // With an outlet picked, the bank figures are that outlet's share of each NETS payout.
+  let settlementList = settlements
+  let settlementTotals = settlementSummary
+  if (outletId) {
+    const shares = await getOutletSettlementShares(merchant.id, outletId, { since: addDays(today, -14) })
+    settlementList = shareDays(shares, 5)
+    settlementTotals = shareSummary(shares, today)
+  }
 
   const m = buildHomeModel({
     today,
@@ -58,16 +69,20 @@ export default async function HomePage({ searchParams }) {
     chartRows: chartRows ?? currRows,
     heat,
     fees,
-    settlements,
-    settlementSummary,
+    settlements: settlementList ?? [],
+    settlementSummary: settlementTotals ?? { pendingCents: 0, nextExpectedDate: null, lateCount: 0, lateCents: 0 },
     recon,
     outletName: selected?.name,
   })
 
+  const fxKey = `${outletId ?? 'all'}|${kind}`
+
   return (
     <div className="flex flex-col gap-5 sm:gap-6">
       <div className="flex flex-wrap items-end justify-between gap-4">
-        <Headline greeting={m.greeting} headline={m.headline} subline={m.subline} />
+        <SwitchFx fxKey={fxKey} variant="ring" className="-mx-2 -my-1 px-2 py-1">
+          <Headline greeting={m.greeting} headline={m.headline} subline={m.subline} />
+        </SwitchFx>
         <div className="flex flex-col items-start gap-2 sm:items-end">
           <PeriodSwitcher current={kind} />
           {m.outletName ? (
@@ -78,6 +93,7 @@ export default async function HomePage({ searchParams }) {
         </div>
       </div>
 
+      <SwitchFx fxKey={fxKey} variant="panels" className="flex flex-col gap-5 sm:gap-6">
       <div className="flex flex-wrap items-center gap-2">
         {m.tags.map((t) => (
           <Pill key={t.label} tone={t.tone}>
@@ -118,7 +134,7 @@ export default async function HomePage({ searchParams }) {
         <Panel
           title="Money to your bank"
           tech="Settlements"
-          caption={m.mergedScope || undefined}
+          caption={m.payoutNote || undefined}
           action={
             <Link href="/settlements" className="inline-flex min-h-11 items-center text-[14px] font-semibold">
               See all
@@ -138,8 +154,16 @@ export default async function HomePage({ searchParams }) {
             ) : (
               <EmptyState>Nothing needs your attention right now</EmptyState>
             )}
+            {m.attention.wholeBusiness ? (
+              <p className="mt-3 border-t border-line pt-3 text-[14px] text-ink-3" data-testid="whole-business-line">
+                {m.attention.wholeBusiness.text}.{' '}
+                <Link href={m.attention.wholeBusiness.href} className="inline-flex min-h-11 items-center font-semibold">
+                  See them
+                </Link>
+              </p>
+            ) : null}
           </Panel>
-          <CheckupCard checkup={m.checkup} caption={m.mergedScope || undefined} />
+          <CheckupCard checkup={m.checkup} />
         </div>
       </div>
 
@@ -154,6 +178,7 @@ export default async function HomePage({ searchParams }) {
           See your payments
         </Link>
       </div>
+      </SwitchFx>
     </div>
   )
 }

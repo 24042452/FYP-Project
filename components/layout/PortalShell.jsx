@@ -8,6 +8,7 @@ import { Sheet, SheetContent, SheetTitle, SheetDescription } from '@/components/
 import { TABS } from '@/lib/nav'
 import { Sidebar, SidebarContent } from './Sidebar'
 import { TopBar } from './TopBar'
+import { OutletToast } from './OutletToast'
 import { NavIcon } from './nav-icons'
 
 /**
@@ -24,6 +25,7 @@ export function PortalShell({ merchant, alerts, outlets, selectedId, children })
 
   return (
     <div className="flex min-h-screen">
+      <OutletToast />
       <Sidebar outlets={outlets} selectedId={selectedId} />
 
       <div className="flex min-w-0 flex-1 flex-col">

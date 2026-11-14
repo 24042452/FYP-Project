@@ -19,8 +19,8 @@ export function MoneyFlow({ flow }) {
       {flow.hasData ? (
         <>
           <div role="img" aria-label={flow.ariaLabel} className="flex h-10 gap-0.5 overflow-hidden rounded-md">
-            <i className="block bg-nets-blue" style={{ flex: Math.max(flow.netCents, 1) }} />
-            {flow.feeCents > 0 ? <i className="block min-w-2.5 bg-nets-red" style={{ flex: flow.feeCents }} /> : null}
+            <i className="block bg-nets-blue transition-[flex-grow] duration-500 motion-reduce:transition-none" style={{ flex: Math.max(flow.netCents, 1) }} />
+            {flow.feeCents > 0 ? <i className="block min-w-2.5 bg-nets-red transition-[flex-grow] duration-500 motion-reduce:transition-none" style={{ flex: flow.feeCents }} /> : null}
           </div>
           <div className="mt-3 grid grid-cols-3 gap-3 text-[14px] text-ink-2 sm:gap-6">
             <div className="min-w-0">

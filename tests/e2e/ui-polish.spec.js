@@ -138,3 +138,30 @@ test('TC-SEARCH-01: on a phone the top-bar search icon opens Payments with the s
   await page.waitForURL((url) => url.pathname === '/transactions' && url.searchParams.get('focus') === 'search')
   await expect(page.getByLabel('Find a payment')).toBeFocused()
 })
+
+test('TC-OUT-05: with an outlet picked the headline names it, the bank tile changes, and a message says what changed', async ({ page }) => {
+  test.skip(isPhone(page), 'desktop sidebar')
+  await loginWithForm(page, 'retail@demo.local')
+  await page.goto('/')
+  const h1 = page.getByRole('heading', { level: 1 })
+  const bankTile = page.getByLabel('Summary').locator('> div').nth(1)
+  await expect(h1).toContainText('Business is')
+  const allHeadline = await h1.innerText()
+  const allBank = await bankTile.innerText()
+
+  await page.getByLabel('Showing').selectOption({ label: 'Tampines Mall #02-15' })
+  await expect(h1).toContainText('Tampines Mall #02-15')
+  await expect(h1).not.toContainText('Business is')
+  expect(await h1.innerText()).not.toEqual(allHeadline)
+  await expect(page.getByTestId('outlet-toast')).toHaveText('Now showing Tampines Mall #02-15')
+  await expect(bankTile).toContainText('This outlet’s share of NETS payouts')
+  await expect.poll(async () => bankTile.innerText()).not.toEqual(allBank)
+  // A settled page has no bad values.
+  expect(await page.locator('main').innerText()).not.toMatch(/NaN|Infinity|undefined/)
+
+  await page.getByLabel('Showing').selectOption({ label: 'All outlets' })
+  await expect(page.getByTestId('outlet-toast')).toHaveText('Now showing all outlets')
+  await expect(h1).toContainText('Business is')
+  await expect(h1).not.toContainText('Tampines Mall')
+  await expect(bankTile).not.toContainText('share of NETS payouts')
+})

@@ -3,6 +3,8 @@ import { randomUUID } from 'node:crypto'
 import { adminExecute, insertFixture, resetTestDb } from './helpers.js'
 import { listOutlets } from '../../lib/data/outlets.js'
 import { getDailySales, getFeeTotals, getHeatmap } from '../../lib/data/sales.js'
+import { getOutletSettlementShares } from '../../lib/data/settlements.js'
+import { getLatestRunSummary } from '../../lib/data/recon.js'
 import { listTransactions } from '../../lib/data/transactions.js'
 import { transactionsResponse } from '../../lib/api/v1.js'
 import { validateOutletChoice } from '../../lib/outlets/selection.js'
@@ -13,6 +15,9 @@ const OUT_TAMPINES = randomUUID()
 const OUT_ONLINE = randomUUID()
 const OUT_B = randomUUID()
 const idOf = (n) => `00000000-0000-4000-8000-${String(n).padStart(12, '0')}`
+const SETTLE = randomUUID()
+const SETTLE_B = randomUUID()
+const RUN = randomUUID()
 const DAY = '2026-11-03'
 const FROM = '2026-11-01'
 const TO = '2026-11-07'
@@ -35,6 +40,17 @@ beforeAll(async () => {
   await adminExecute(`UPDATE transactions SET outlet_id = ? WHERE id IN (?, ?, ?)`, [OUT_TAMPINES, idOf(1), idOf(2), idOf(4)])
   await adminExecute(`UPDATE transactions SET outlet_id = ? WHERE id = ?`, [OUT_ONLINE, idOf(3)])
   await adminExecute(`UPDATE transactions SET outlet_id = ? WHERE id = ?`, [OUT_B, idOf(5)])
+  // One settlement of A holds payments 1, 2 and 3 (two outlets); B has its own.
+  const ins = `INSERT INTO settlements (id, merchant_id, business_date, channel, gross_cents, fee_cents, net_cents, status, expected_date) VALUES (?, ?, ?, 'nets_qr', ?, ?, ?, 'pending', '2026-11-05')`
+  await adminExecute(ins, [SETTLE, A, DAY, 7000, 70, 6930])
+  await adminExecute(ins, [SETTLE_B, B, DAY, 99999, 1, 99998])
+  await adminExecute(`UPDATE transactions SET settlement_id = ? WHERE id IN (?, ?, ?)`, [SETTLE, idOf(1), idOf(2), idOf(3)])
+  await adminExecute(`UPDATE transactions SET settlement_id = ? WHERE id = ?`, [SETTLE_B, idOf(5)])
+  await adminExecute(`INSERT INTO recon_runs (id, merchant_id, period, run_at, matched_count, exception_count) VALUES (?, ?, '2026-10-01', '2026-11-03 04:00:00.000', 5, 3)`, [RUN, A])
+  const exc = `INSERT INTO recon_exceptions (id, merchant_id, run_id, type, settlement_id, status) VALUES (?, ?, ?, ?, ?, ?)`
+  await adminExecute(exc, [randomUUID(), A, RUN, 'amount_mismatch', SETTLE, 'open'])
+  await adminExecute(exc, [randomUUID(), A, RUN, 'fee_mismatch', null, 'open'])
+  await adminExecute(exc, [randomUUID(), A, RUN, 'failed_payment', null, 'open'])
 })
 
 const sum = (rows, k) => rows.reduce((s, r) => s + r[k], 0)
@@ -109,5 +125,45 @@ describe('GET /api/v1/transactions?outlet=', () => {
       expect(body.error.code).toBe('invalid_params')
       expect(body.error.message).toMatch(/outlet/)
     }
+  })
+})
+
+describe('getOutletSettlementShares', () => {
+  const opts = { since: '2000-01-01' }
+  it('gives each outlet its own share, and the shares add up to the settlement', async () => {
+    const t = await getOutletSettlementShares(A, OUT_TAMPINES, opts)
+    const o = await getOutletSettlementShares(A, OUT_ONLINE, opts)
+    expect(t).toHaveLength(1)
+    expect(t[0]).toMatchObject({ id: SETTLE, status: 'pending', expectedDate: '2026-11-05', channel: 'nets_qr', grossCents: 3000, feeCents: 30, netCents: 2970 })
+    expect(o[0]).toMatchObject({ grossCents: 4000, feeCents: 40, netCents: 3960 })
+    expect(t[0].grossCents + o[0].grossCents).toBe(7000)
+    expect(t[0].netCents + o[0].netCents).toBe(6930)
+  })
+  it('only counts successful payments (the failed one adds nothing)', async () => {
+    expect((await getOutletSettlementShares(A, OUT_TAMPINES, opts))[0].grossCents).toBe(3000)
+  })
+  it('another merchants outlet, or another merchant, gets nothing', async () => {
+    expect(await getOutletSettlementShares(A, OUT_B, opts)).toEqual([])
+    expect(await getOutletSettlementShares(B, OUT_TAMPINES, opts)).toEqual([])
+    expect(await getOutletSettlementShares(randomUUID(), OUT_TAMPINES, opts)).toEqual([])
+  })
+  it('old paid settlements fall outside since, unpaid ones never do', async () => {
+    expect(await getOutletSettlementShares(A, OUT_TAMPINES, { since: '2026-12-01' })).toHaveLength(1) // still pending
+  })
+})
+
+describe('getLatestRunSummary with an outlet', () => {
+  it('counts only problems tied to the outlet, and reports the whole-business ones', async () => {
+    const all = await getLatestRunSummary(A)
+    expect(all.openCount).toBe(2)
+    expect(all.wholeBusinessCount).toBe(0)
+    for (const o of [OUT_TAMPINES, OUT_ONLINE]) {
+      const r = await getLatestRunSummary(A, o)
+      expect(r.openCount).toBe(1)
+      expect(r.wholeBusinessCount).toBe(1)
+    }
+  })
+  it('an outlet of another merchant has no tied problems', async () => {
+    expect((await getLatestRunSummary(A, OUT_B)).openCount).toBe(0)
   })
 })

@@ -9,7 +9,7 @@ export function ChannelBars({ mix }) {
         <li key={m.channel} className="grid grid-cols-[6.5em_1fr_3.2em] items-center gap-3 text-[15px] sm:grid-cols-[8.5em_1fr_3.2em]">
           <span>{m.label}</span>
           <span className="h-2 overflow-hidden rounded-full bg-mute-bg" aria-hidden="true">
-            <i className="block h-full rounded-full bg-nets-blue" style={{ width: `${m.pct}%` }} />
+            <i className="block h-full rounded-full bg-nets-blue transition-[width] duration-500 ease-out motion-reduce:transition-none" style={{ width: `${m.pct}%` }} />
           </span>
           <span className="text-right text-ink-2 tabular-nums">{m.pct}%</span>
         </li>

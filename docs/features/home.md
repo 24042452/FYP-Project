@@ -26,7 +26,8 @@ The answer first: one plain sentence about how business is ("You took $4,309.00 
 ## Outlet menu
 - The "Showing" menu in the sidebar (and the phone menu) picks one outlet or "All outlets". A merchant with one outlet just sees its name.
 - The choice is the cookie `portal_outlet` (set by the server action `selectOutlet` in `app/outlet-actions.js`, which only accepts the merchant's own outlets; read by `getSelectedOutlet` in `lib/outlets/server.js`, which ignores any id that is not theirs).
-- Home and Sales & payments follow the outlet (data functions take an optional `outletId`). Money to my bank, Bills, Check-up, Reports and the Assistant stay merchant-wide and show a note saying so.
+- With an outlet picked, **everything on Home follows it**: the headline names the outlet (`buildHeadline` `subject`), sales, chart, channel mix and failed payments use `outletId`; money to the bank is the outlet's share of each settlement (`getOutletSettlementShares`, summed from its successful payments inside each settlement; pure helpers in `lib/settlements/outlet-share.js`; labelled "This outlet's share of NETS payouts"); check-up problems count only those whose settlement holds a payment from the outlet (`getLatestRunSummary(merchantId, outletId)`), with one muted line for whole-business items (such as a fee mismatch). Sales & payments follows the outlet too. Money to my bank, Bills, Check-up, Reports and the Assistant stay merchant-wide and show a note saying so.
+- Switching plays short animations (count-up numbers, panels fading in, a ring on the headline, bars growing, a "Now showing ..." message); all are off with reduced motion.
 
 ## Tests
 - Unit: `tests/unit/home-model.test.js`, `metrics.test.js`
