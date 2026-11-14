@@ -2,7 +2,7 @@ import { beforeAll, describe, expect, it } from 'vitest'
 import { randomUUID } from 'node:crypto'
 import { adminExecute, insertFixture, resetTestDb } from './helpers.js'
 import { getDailySales, getFeeTotals, getHeatmap } from '../../lib/data/sales.js'
-import { getRecentSettlements, getSettlementSummary } from '../../lib/data/settlements.js'
+import { getRecentSettlements, getSettlementSummary, getSettlementTotals, listSettlements } from '../../lib/data/settlements.js'
 import { getTransaction, listTransactions } from '../../lib/data/transactions.js'
 import { getLatestRunSummary } from '../../lib/data/recon.js'
 
@@ -26,6 +26,8 @@ const CASES = [
   ['getFeeTotals', async (id) => { const r = await getFeeTotals(id, FROM, TO); return r.grossCents > 0 ? [r] : [] }, (rows) => rows.reduce((s, r) => s + r.grossCents, 0)],
   ['getRecentSettlements', (id) => getRecentSettlements(id, 5), (rows) => rows.reduce((s, r) => s + r.netCents, 0)],
   ['getSettlementSummary', async (id) => { const r = await getSettlementSummary(id, '2026-11-04'); return r.pendingCents > 0 ? [r] : [] }, (rows) => rows.reduce((s, r) => s + r.pendingCents, 0)],
+  ['listSettlements', (id) => listSettlements(id, { from: FROM, to: TO, today: '2026-11-04' }), (rows) => rows.reduce((s, r) => s + r.netCents, 0)],
+  ['getSettlementTotals', async (id) => { const r = await getSettlementTotals(id, { from: FROM, to: TO, today: '2026-11-04' }); return r.onTheWayCents > 0 ? [r] : [] }, (rows) => rows.reduce((s, r) => s + r.onTheWayCents, 0)],
   ['listTransactions', async (id) => (await listTransactions(id, {})).rows, (rows) => rows.reduce((s, r) => s + r.amountCents, 0)],
   ['getTransaction', async (id) => { const r = await getTransaction(id, id === A ? TXN_A : TXN_B); return r ? [r] : [] }, (rows) => rows.reduce((s, r) => s + r.amountCents, 0)],
   ['getLatestRunSummary', async (id) => { const r = await getLatestRunSummary(id); return r ? [r] : [] }, (rows) => rows.reduce((s, r) => s + r.matchedCount, 0)],
