@@ -236,3 +236,30 @@ describe('buildHomeModel: other periods', () => {
     expect(m.flow.title).toBe('Where your money went this month')
   })
 })
+
+describe('buildHomeModel: with an outlet selected', () => {
+  const rows = [row('2026-11-10', 'nets_qr', 5000)]
+  it('names the outlet, and leaves the headline copy alone', () => {
+    const all = buildHomeModel({ ...EMPTY_INPUT, currRows: rows })
+    const one = buildHomeModel({ ...EMPTY_INPUT, currRows: rows, outletName: 'Tampines Mall' })
+    expect(all.outletName).toBe('')
+    expect(one.outletName).toBe('Tampines Mall')
+    expect(one.headline).toBe(all.headline)
+    expect(one.subline).toBe(all.subline)
+    expect(noBad(one)).toBe(true)
+  })
+  it('treats a blank name as all outlets', () => {
+    expect(buildHomeModel({ ...EMPTY_INPUT, outletName: '  ' }).outletName).toBe('')
+  })
+  it('shows only that outlets figures (the model just uses the rows it is given)', () => {
+    const m = buildHomeModel({
+      ...EMPTY_INPUT,
+      outletName: 'Online',
+      todayRows: [row('2026-11-11', 'card', 1234, 3, 1)],
+      fees: { grossCents: 1234, feeCents: 12 },
+    })
+    expect(m.tiles[0].value).toBe('$12.34')
+    expect(m.flow.feeCents).toBe(12)
+    expect(m.attention.items.some((i) => i.key === 'failed')).toBe(true)
+  })
+})

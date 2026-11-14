@@ -23,7 +23,13 @@ The answer first: one plain sentence about how business is ("You took $4,309.00 
 - Health score (0-100) uses growth, failed-payment rate and delayed settlements.
 - Greeting uses the signed-in person's name and the Singapore hour.
 
+## Outlet menu
+- The "Showing" menu in the sidebar (and the phone menu) picks one outlet or "All outlets". A merchant with one outlet just sees its name.
+- The choice is the cookie `portal_outlet` (set by the server action `selectOutlet` in `app/outlet-actions.js`, which only accepts the merchant's own outlets; read by `getSelectedOutlet` in `lib/outlets/server.js`, which ignores any id that is not theirs).
+- Home and Sales & payments follow the outlet (data functions take an optional `outletId`). Money to my bank, Bills, Check-up, Reports and the Assistant stay merchant-wide and show a note saying so.
+
 ## Tests
 - Unit: `tests/unit/home-model.test.js`, `metrics.test.js`
 - Integration: `tests/integration/sales.test.js`, `isolation.test.js`
+- End-to-end: `tests/e2e/ui-polish.spec.js` (TC-OUT-01 to 04 outlet menu); also `tests/unit/outlet-selection.test.js`, `tests/integration/outlets.test.js`
 - End-to-end: `tests/e2e/dashboard.spec.js` (TC-DASH-01 headline and no NaN, TC-MOB-01 no sideways scroll at 375px)

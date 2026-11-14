@@ -27,6 +27,7 @@ Payments, newest first.
 | `channel` | `nets_qr`, `nets_click`, `enets`, `card`, `sgqr` |
 | `status` | `success`, `failed`, `refunded` |
 | `q` | Search: an amount like `12.50`, or the start of a payment id or customer reference |
+| `outlet` | One of your outlet ids (an id that is not yours answers 400) |
 | `limit` | 1 to 100 (default 50) |
 | `cursor` | The `next_cursor` from the previous page |
 

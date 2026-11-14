@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { NAV, ASK_HREF } from '@/lib/nav'
 import { NavIcon } from './nav-icons'
+import { OutletPicker } from './OutletPicker'
 
 /** @param {string} pathname @param {string} href */
 function isActive(pathname, href) {
@@ -13,9 +14,9 @@ function isActive(pathname, href) {
 /**
  * The navigation itself: brand, outlet picker, grouped links, assistant button.
  * Used in the desktop sidebar and inside the phone menu Sheet.
- * @param {{merchantName: string, onNavigate?: () => void}} props
+ * @param {{outlets: {id: string, name: string}[], selectedId: string | null, idSuffix?: string, onNavigate?: () => void}} props
  */
-export function SidebarContent({ merchantName, onNavigate }) {
+export function SidebarContent({ outlets, selectedId, idSuffix, onNavigate }) {
   const pathname = usePathname()
   const askActive = isActive(pathname, ASK_HREF)
 
@@ -26,17 +27,7 @@ export function SidebarContent({ merchantName, onNavigate }) {
         <span className="text-base font-bold">Merchant Portal</span>
       </Link>
 
-      <div className="flex flex-col gap-1 px-1">
-        <label htmlFor="outlet-select" className="px-1 text-[13px] text-ink-3">Showing</label>
-        <select
-          id="outlet-select"
-          disabled
-          title="Choosing an outlet is coming soon"
-          className="min-h-11 w-full rounded-lg border border-line-strong bg-white px-3 text-[15px] font-medium text-ink shadow-panel"
-        >
-          <option>{merchantName}: all outlets</option>
-        </select>
-      </div>
+      <OutletPicker outlets={outlets} selectedId={selectedId} idSuffix={idSuffix} />
 
       <div className="-mx-1 flex min-h-0 flex-1 flex-col gap-1.5 overflow-y-auto px-1 pb-4">
         {NAV.map((g) => (
@@ -92,13 +83,13 @@ export function SidebarContent({ merchantName, onNavigate }) {
 }
 
 /** Desktop sidebar (hidden below 768px; phones use the menu Sheet). */
-export function Sidebar({ merchantName }) {
+export function Sidebar({ outlets, selectedId }) {
   return (
     <aside
       aria-label="Main menu"
       className="sticky top-0 hidden h-screen w-[264px] flex-none overflow-hidden border-r border-line bg-white md:block"
     >
-      <SidebarContent merchantName={merchantName} />
+      <SidebarContent outlets={outlets} selectedId={selectedId} />
     </aside>
   )
 }

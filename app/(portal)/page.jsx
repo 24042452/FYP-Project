@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { getCurrentMerchant } from '@/lib/data/merchant'
+import { getSelectedOutlet } from '@/lib/outlets/server'
 import { getDailySales, getFeeTotals, getHeatmap } from '@/lib/data/sales'
 import { getRecentSettlements, getSettlementSummary } from '@/lib/data/settlements'
 import { getLatestRunSummary } from '@/lib/data/recon'
@@ -26,6 +27,8 @@ export default async function HomePage({ searchParams }) {
   const merchant = await getCurrentMerchant()
   const sp = await searchParams
   const kind = parsePeriod(sp?.period)
+  const { selected } = await getSelectedOutlet(merchant)
+  const outletId = selected?.id ?? null
 
   const now = new Date().toISOString()
   const today = sgtDate(now)
@@ -33,12 +36,12 @@ export default async function HomePage({ searchParams }) {
   const chart = chartRange(kind, today)
 
   const [currRows, prevRows, todayRows, chartRows, heat, fees, settlements, settlementSummary, recon] = await Promise.all([
-    getDailySales(merchant.id, range.from, range.to),
-    getDailySales(merchant.id, range.prevFrom, range.prevToDate),
-    getDailySales(merchant.id, today, today),
-    kind === 'today' ? getDailySales(merchant.id, chart.from, chart.to) : Promise.resolve(null),
-    getHeatmap(merchant.id, addDays(today, -27), today),
-    getFeeTotals(merchant.id, range.from, range.toDate),
+    getDailySales(merchant.id, range.from, range.to, outletId),
+    getDailySales(merchant.id, range.prevFrom, range.prevToDate, outletId),
+    getDailySales(merchant.id, today, today, outletId),
+    kind === 'today' ? getDailySales(merchant.id, chart.from, chart.to, outletId) : Promise.resolve(null),
+    getHeatmap(merchant.id, addDays(today, -27), today, outletId),
+    getFeeTotals(merchant.id, range.from, range.toDate, outletId),
     getRecentSettlements(merchant.id, 5),
     getSettlementSummary(merchant.id, today),
     getLatestRunSummary(merchant.id),
@@ -58,13 +61,21 @@ export default async function HomePage({ searchParams }) {
     settlements,
     settlementSummary,
     recon,
+    outletName: selected?.name,
   })
 
   return (
     <div className="flex flex-col gap-5 sm:gap-6">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <Headline greeting={m.greeting} headline={m.headline} subline={m.subline} />
-        <PeriodSwitcher current={kind} />
+        <div className="flex flex-col items-start gap-2 sm:items-end">
+          <PeriodSwitcher current={kind} />
+          {m.outletName ? (
+            <p data-testid="home-outlet" className="text-[14px] font-medium text-ink-2">
+              Outlet: <span className="font-semibold text-ink">{m.outletName}</span>
+            </p>
+          ) : null}
+        </div>
       </div>
 
       <div className="flex flex-wrap items-center gap-2">
