@@ -77,22 +77,30 @@ export function SearchResults({ q, state, rows, highlight, idPrefix, large = fal
               </span>
             </li>
           ))}
-          <li
-            id={`${idPrefix}-opt-${rows.length}`}
-            role="option"
-            aria-selected={highlight === rows.length}
-            onMouseDown={(e) => e.preventDefault()}
-            onMouseMove={() => onHover?.(rows.length)}
-            onClick={onSeeAll}
-            className={
-              large
-                ? 'm-3 flex min-h-12 cursor-pointer items-center justify-center rounded-lg border border-line-strong bg-white px-4 text-[15px] font-semibold text-nets-blue'
-                : 'flex min-h-11 cursor-pointer items-center px-4 text-[15px] font-semibold text-nets-blue aria-selected:bg-nets-blue-soft'
-            }
-          >
-            See all results for &lsquo;{text}&rsquo;
-          </li>
+          {large ? null : (
+            <li
+              id={`${idPrefix}-opt-${rows.length}`}
+              role="option"
+              aria-selected={highlight === rows.length}
+              onMouseDown={(e) => e.preventDefault()}
+              onMouseMove={() => onHover?.(rows.length)}
+              onClick={onSeeAll}
+              className="flex min-h-11 cursor-pointer items-center px-4 text-[15px] font-semibold text-nets-blue aria-selected:bg-nets-blue-soft"
+            >
+              See all results for &lsquo;{text}&rsquo;
+            </li>
+          )}
         </ul>
+      ) : null}
+
+      {large && state === 'ok' ? (
+        <button
+          type="button"
+          onClick={onSeeAll}
+          className="m-3 flex min-h-12 w-[calc(100%-1.5rem)] items-center justify-center rounded-lg border border-line-strong bg-white px-4 text-[15px] font-semibold text-nets-blue hover:bg-page"
+        >
+          See all results for &lsquo;{text}&rsquo;
+        </button>
       ) : null}
     </div>
   )

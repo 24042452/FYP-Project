@@ -57,6 +57,7 @@ export function MobileSearch({ outletId, showOutlet = true, triggerClassName }) 
   }
 
   return (
+    <>
     <Sheet
       open={open}
       onOpenChange={(o) => {
@@ -120,10 +121,6 @@ export function MobileSearch({ outletId, showOutlet = true, triggerClassName }) 
           </button>
         </form>
 
-        <div role="status" aria-live="polite" className="sr-only">
-          {shouldSearch(text) ? liveMessage(state, rows.length, text) : ''}
-        </div>
-
         <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
           {shouldSearch(text) ? (
             <SearchResults
@@ -141,8 +138,11 @@ export function MobileSearch({ outletId, showOutlet = true, triggerClassName }) 
             <p className="px-4 py-6 text-[15px] text-ink-2">Type an amount like 12.50, or the start of a payment reference.</p>
           )}
         </div>
-
       </SheetContent>
     </Sheet>
+    <div role="status" aria-live="polite" className="sr-only">
+      {open && shouldSearch(text) ? liveMessage(state, rows.length, text) : ''}
+    </div>
+    </>
   )
 }
