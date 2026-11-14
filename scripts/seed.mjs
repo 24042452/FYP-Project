@@ -4,7 +4,9 @@ import mysql from 'mysql2/promise'
 import { generateDataset } from '../lib/synthetic/generate.js'
 import { trimFuture } from '../lib/synthetic/trim.js'
 import { hashPassword } from '../lib/auth/password.js'
-import { sgtDate } from '../lib/dates.js'
+import { randomUUID } from 'node:crypto'
+import { periodRange, sgtDate, sgtToIso } from '../lib/dates.js'
+import { buildNudges } from '../lib/nudges/build.js'
 import { loadFaq } from '../lib/assistant/kb.js'
 
 const START = '2026-05-01'
@@ -109,6 +111,56 @@ async function seedMerchant(conn, demo, password, nowIso, today) {
   }
 }
 
+/**
+ * Build the merchant's nudges from what is now in the database and insert them (unread).
+ * The inputs are gathered here (admin connection) because lib/data is server-only.
+ */
+async function seedNudges(conn, merchantId, nowIso, today) {
+  const r = periodRange('week', today)
+  const gross = async (from, to) => {
+    const [rows] = await conn.query(
+      `SELECT COALESCE(SUM(amount_cents), 0) AS g FROM transactions
+        WHERE merchant_id = ? AND status = 'success' AND created_at >= ? AND created_at < ?`,
+      [merchantId, dt(sgtToIso(from, 0, 0)), dt(sgtToIso(addDaysStr(to), 0, 0))],
+    )
+    return Number(rows[0].g)
+  }
+  const addDaysStr = (d) => new Date(new Date(`${d}T00:00:00Z`).getTime() + 86400000).toISOString().slice(0, 10)
+  const weekCurr = await gross(r.from, r.toDate)
+  const weekPrev = await gross(r.prevFrom, r.prevToDate)
+  const [failed] = await conn.query(
+    `SELECT COUNT(*) AS n FROM transactions
+      WHERE merchant_id = ? AND status = 'failed' AND created_at >= ? AND created_at < ?`,
+    [merchantId, dt(sgtToIso(today, 0, 0)), dt(sgtToIso(addDaysStr(today), 0, 0))],
+  )
+  const [late] = await conn.query(
+    `SELECT COUNT(DISTINCT business_date) AS n FROM settlements
+      WHERE merchant_id = ? AND business_date >= DATE_SUB(?, INTERVAL 30 DAY)
+        AND (status = 'delayed' OR (status = 'pending' AND expected_date < ?))`,
+    [merchantId, today, today],
+  )
+  const [inv] = await conn.query(
+    `SELECT DATE_FORMAT(period, '%Y-%m') AS month, total_cents AS totalCents, status
+       FROM invoices WHERE merchant_id = ? ORDER BY period DESC LIMIT 1`,
+    [merchantId],
+  )
+  const nudges = buildNudges({
+    weekCurr,
+    weekPrev,
+    failedToday: Number(failed[0].n),
+    delayedSettlements: Number(late[0].n),
+    latestInvoice: inv[0] ? { month: inv[0].month, totalCents: Number(inv[0].totalCents), status: inv[0].status } : undefined,
+  })
+  const now = new Date(nowIso).getTime()
+  const rows = nudges.map((n, i) => [
+    randomUUID(), merchantId, n.kind, n.title, n.body, n.link, dt(new Date(now - (i * 7 + 5) * 60_000).toISOString()),
+  ])
+  if (rows.length) {
+    await conn.query('INSERT INTO notifications (id, merchant_id, kind, title, body, link, created_at) VALUES ?', [rows])
+  }
+  return nudges.length
+}
+
 async function main() {
   const url = process.env.DATABASE_ADMIN_URL
   const password = process.env.DEMO_PASSWORD
@@ -122,9 +174,10 @@ async function main() {
   try {
     for (const demo of DEMOS) {
       const c = await seedMerchant(conn, demo, password, nowIso, today)
+      const nudgeCount = await seedNudges(conn, demo.merchantId, nowIso, today)
       console.log(
         `${demo.legal_name} (${demo.email}): ${c.outlets} outlets, ${c.terminals} terminals, ` +
-          `${c.transactions} transactions, ${c.settlements} settlements, ${c.invoices} invoices`,
+          `${c.transactions} transactions, ${c.settlements} settlements, ${c.invoices} invoices, ${nudgeCount} alerts`,
       )
     }
     // Help-centre content (shared, not merchant data): delete + insert so re-seeding is idempotent.

@@ -12,9 +12,9 @@ import { NavIcon } from './nav-icons'
 
 /**
  * The portal frame: sidebar (desktop), top bar, page, and on phones a menu Sheet plus bottom tabs.
- * @param {{merchant: {tradingName: string, role: string, userName: string}, children: React.ReactNode}} props
+ * @param {{merchant: {tradingName: string, role: string, userName: string}, alerts?: {unread: number, items: import('./NotificationBell').BellItem[]}, children: React.ReactNode}} props
  */
-export function PortalShell({ merchant, children }) {
+export function PortalShell({ merchant, alerts, children }) {
   const [open, setOpen] = useState(false)
   const pathname = usePathname()
 
@@ -32,6 +32,7 @@ export function PortalShell({ merchant, children }) {
           role={merchant.role}
           merchantName={merchant.tradingName}
           onOpenMenu={() => setOpen(true)}
+          alerts={alerts}
         />
         <main className="mx-auto w-full max-w-[1240px] flex-1 px-4 pt-6 pb-24 md:px-9 md:pb-16">{children}</main>
       </div>

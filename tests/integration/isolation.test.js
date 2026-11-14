@@ -5,6 +5,7 @@ import { getDailySales, getFeeTotals, getHeatmap } from '../../lib/data/sales.js
 import { getRecentSettlements, getSettlementSummary, getSettlementTotals, listSettlements } from '../../lib/data/settlements.js'
 import { getTransaction, listTransactions, listTransactionsForExport } from '../../lib/data/transactions.js'
 import { getInvoiceLinesForMonth, getInvoiceWithLines, listInvoices } from '../../lib/data/invoices.js'
+import { countUnread, insertNotifications, listNotifications, markAllRead, markRead } from '../../lib/data/notifications.js'
 import { getLatestRunForMonth, getLatestRunSummary, getReconRun, getReconTransactions, listLatestRunIds } from '../../lib/data/recon.js'
 
 // Merchant isolation: for every data function, A's call must never return B's rows.
@@ -20,6 +21,8 @@ const INV_A = randomUUID()
 const INV_B = randomUUID()
 const RUN_A = randomUUID()
 const RUN_B = randomUUID()
+const NOTE_A = randomUUID()
+const NOTE_B = randomUUID()
 const DAY = '2026-11-03'
 const FROM = '2026-11-01'
 const TO = '2026-11-07'
@@ -43,6 +46,8 @@ const CASES = [
   ['listTransactionsForExport', (id) => listTransactionsForExport(id, FROM, TO), (rows) => rows.reduce((s, r) => s + r.amountCents, 0)],
   ['getLatestRunForMonth', async (id) => { const r = await getLatestRunForMonth(id, '2026-10'); return r ? [r] : [] }, (rows) => rows.reduce((s, r) => s + r.matchedCount, 0)],
   ['getReconRun', async (id) => { const r = await getReconRun(id, id === A ? RUN_A : RUN_B); return r ? [r] : [] }, (rows) => rows.reduce((s, r) => s + r.matchedCount, 0)],
+  ['listNotifications', (id) => listNotifications(id), (rows) => (rows.length === 0 ? 0 : rows[0].id === NOTE_A ? A_CENTS : B_CENTS)],
+  ['countUnread', async (id) => { const n = await countUnread(id); return n > 0 ? [{ n }] : [] }, (rows) => (rows.length === 0 ? 0 : rows[0].n === 1 ? A_CENTS : B_CENTS)],
   ['listLatestRunIds', (id) => listLatestRunIds(id), (rows) => (rows.length === 0 ? 0 : rows[0].id === RUN_A ? A_CENTS : B_CENTS)],
 ]
 
@@ -70,6 +75,9 @@ beforeAll(async () => {
       `INSERT INTO invoice_lines (id, merchant_id, invoice_id, charge_type, description, qty, amount_cents) VALUES (?, ?, ?, 'portal_fee', 'Portal fee', 1, ?)`,
       [randomUUID(), id, invId, cents],
     )
+    for (const noteId of id === A ? [NOTE_A] : [NOTE_B, randomUUID()]) {
+      await adminExecute(`INSERT INTO notifications (id, merchant_id, kind, title) VALUES (?, ?, 'sales_up', 'Test')`, [noteId, id])
+    }
     const runId = id === A ? RUN_A : RUN_B
     await adminExecute(
       `INSERT INTO recon_runs (id, merchant_id, period, run_at, matched_count, exception_count) VALUES (?, ?, '2026-10-01', '2026-11-03 04:00:00.000', ?, 1)`,
@@ -110,5 +118,27 @@ describe('merchant isolation: single check-up', () => {
   it('getReconRun never returns another merchants check-up', async () => {
     expect(await getReconRun(A, RUN_B)).toBeNull()
     expect(await getReconRun(B, RUN_A)).toBeNull()
+  })
+})
+
+describe('merchant isolation: notifications', () => {
+  it('markRead never touches another merchants notification', async () => {
+    expect(await markRead(A, NOTE_B)).toBe(false)
+    expect(await countUnread(B)).toBe(2)
+  })
+  it('markAllRead only marks the callers own, and markRead marks once', async () => {
+    expect(await markAllRead(randomUUID())).toBe(0)
+    expect(await countUnread(A)).toBe(1)
+    expect(await markRead(A, NOTE_A)).toBe(true)
+    expect(await markRead(A, NOTE_A)).toBe(false)
+    expect(await countUnread(A)).toBe(0)
+    expect(await countUnread(B)).toBe(2)
+    expect(await markAllRead(B)).toBe(2)
+    expect(await countUnread(B)).toBe(0)
+  })
+  it('insertNotifications adds to the callers merchant only', async () => {
+    await insertNotifications(A, [{ kind: 'settlement_delay', title: 'Late' }])
+    expect(await countUnread(A)).toBe(1)
+    expect(await countUnread(B)).toBe(0)
   })
 })
