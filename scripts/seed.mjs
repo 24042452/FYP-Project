@@ -5,6 +5,7 @@ import { generateDataset } from '../lib/synthetic/generate.js'
 import { trimFuture } from '../lib/synthetic/trim.js'
 import { hashPassword } from '../lib/auth/password.js'
 import { sgtDate } from '../lib/dates.js'
+import { loadFaq } from '../lib/assistant/kb.js'
 
 const START = '2026-05-01'
 const BATCH = 1000
@@ -126,6 +127,11 @@ async function main() {
           `${c.transactions} transactions, ${c.settlements} settlements, ${c.invoices} invoices`,
       )
     }
+    // Help-centre content (shared, not merchant data): delete + insert so re-seeding is idempotent.
+    const faq = loadFaq()
+    await conn.query('DELETE FROM kb_chunks')
+    await conn.query('INSERT INTO kb_chunks (source, heading, content) VALUES ?', [faq.map((c) => [c.source, c.heading, c.content])])
+    console.log(`Help centre: ${faq.length} answers loaded.`)
     console.log(`Seeded ${START} to ${today} (Singapore time).`)
   } finally {
     await conn.end()
