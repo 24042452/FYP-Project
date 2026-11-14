@@ -42,7 +42,7 @@ Applies each `db/migrations/*.sql` file that is not yet listed in `schema_migrat
 
 ## 3. Tests
 
-`npm run test:integration` runs `tests/integration/` against `nets_portal_test`. It runs the migrations first, and each test file clears the tables it uses. It only runs when `TEST_DATABASE_URL` is set. `npx vitest run` runs the unit tests only and needs no database.
+`npm run test:integration` runs `tests/integration/` against `nets_portal_test`. It runs the migrations first, and each test file clears the tables it uses. It only runs when `TEST_DATABASE_URL` is set. `npm test` runs the unit tests only and needs no database. Plain `npx vitest run` runs both projects when `TEST_DATABASE_URL` is set (so it then needs MySQL).
 
 ## 4. The isolation rule
 
@@ -50,7 +50,9 @@ Every query on a merchant-owned table has `WHERE merchant_id = ?`, uses `?` plac
 
 ## 5. Table dictionary
 
-Ids are `CHAR(36)` UUIDs. Money is `BIGINT` cents. Times are `DATETIME(3)` in UTC (Singapore days: `CONVERT_TZ(col, '+00:00', '+08:00')`). Channel values: `nets_qr`, `nets_click`, `enets`, `card`, `sgqr`. Every child table cascades on delete from `merchants`.
+Ids are `CHAR(36)` UUIDs. Money is `BIGINT` cents. Times are `DATETIME(3)` in UTC (Singapore days: `CONVERT_TZ(col, '+00:00', '+08:00')`). Channel values: `nets_qr`, `nets_click`, `enets`, `card`, `sgqr`. Every child table cascades on delete from `merchants`. `DATE` columns are returned by the app pool as `'YYYY-MM-DD'` strings (`dateStrings: ['DATE']`).
+
+**Composite foreign keys.** Parents `outlets`, `terminals`, `settlements`, `invoices` and `recon_runs` have `UNIQUE (id, merchant_id)`, and child foreign keys include `merchant_id`: `terminals`, `transactions` (outlet, terminal, settlement), `invoice_lines` (invoice) and `recon_exceptions` (run). The database therefore rejects a child row whose `merchant_id` differs from its parent's. Transactions' links to outlets, terminals and settlements have no `ON DELETE` action (a parent with transactions cannot be deleted on its own); deleting a merchant still cascades through everything. `recon_exceptions.settlement_id` and `transaction_id` are loose references with no foreign keys.
 
 | Table | Columns |
 |---|---|

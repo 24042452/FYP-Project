@@ -64,3 +64,17 @@ export async function insertFixture({ merchants = [], transactions = [] }) {
     await conn.end()
   }
 }
+
+/**
+ * Run one statement as the admin user (for fixtures the helpers above do not cover).
+ * @param {string} sql
+ * @param {any[]} [params]
+ */
+export async function adminExecute(sql, params = []) {
+  const conn = await adminConn()
+  try {
+    await conn.execute(sql, params)
+  } finally {
+    await conn.end()
+  }
+}

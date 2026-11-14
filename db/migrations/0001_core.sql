@@ -1,3 +1,5 @@
+-- Child tables use composite foreign keys (id, merchant_id) so a child can never point at
+-- another merchant's parent row.
 -- Core merchant data. InnoDB, utf8mb4, ids CHAR(36), money BIGINT cents, times DATETIME(3) UTC.
 
 CREATE TABLE merchants (
@@ -17,6 +19,7 @@ CREATE TABLE outlets (
   name        VARCHAR(200) NOT NULL,
   address     VARCHAR(300) NULL,
   PRIMARY KEY (id),
+  UNIQUE KEY uq_outlets_id_merchant (id, merchant_id),
   KEY idx_outlets_merchant (merchant_id),
   CONSTRAINT fk_outlets_merchant FOREIGN KEY (merchant_id) REFERENCES merchants (id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -29,10 +32,11 @@ CREATE TABLE terminals (
   model       VARCHAR(60) NULL,
   status      VARCHAR(20) NOT NULL DEFAULT 'active',
   PRIMARY KEY (id),
+  UNIQUE KEY uq_terminals_id_merchant (id, merchant_id),
   KEY idx_terminals_merchant (merchant_id),
-  KEY idx_terminals_outlet (outlet_id),
+  KEY idx_terminals_outlet (outlet_id, merchant_id),
   CONSTRAINT fk_terminals_merchant FOREIGN KEY (merchant_id) REFERENCES merchants (id) ON DELETE CASCADE,
-  CONSTRAINT fk_terminals_outlet FOREIGN KEY (outlet_id) REFERENCES outlets (id) ON DELETE CASCADE
+  CONSTRAINT fk_terminals_outlet FOREIGN KEY (outlet_id, merchant_id) REFERENCES outlets (id, merchant_id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE settlements (
@@ -48,6 +52,7 @@ CREATE TABLE settlements (
   paid_date     DATE        NULL,
   bank_ref      VARCHAR(60) NULL,
   PRIMARY KEY (id),
+  UNIQUE KEY uq_settlements_id_merchant (id, merchant_id),
   KEY idx_settlements_merchant_date (merchant_id, business_date),
   CONSTRAINT fk_settlements_merchant FOREIGN KEY (merchant_id) REFERENCES merchants (id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -68,11 +73,13 @@ CREATE TABLE transactions (
   PRIMARY KEY (id),
   KEY idx_txn_merchant_created (merchant_id, created_at),
   KEY idx_txn_merchant_status_created (merchant_id, status, created_at),
-  KEY idx_txn_settlement (settlement_id),
+  KEY idx_txn_outlet (outlet_id, merchant_id),
+  KEY idx_txn_terminal (terminal_id, merchant_id),
+  KEY idx_txn_settlement (settlement_id, merchant_id),
   CONSTRAINT fk_txn_merchant FOREIGN KEY (merchant_id) REFERENCES merchants (id) ON DELETE CASCADE,
-  CONSTRAINT fk_txn_outlet FOREIGN KEY (outlet_id) REFERENCES outlets (id) ON DELETE SET NULL,
-  CONSTRAINT fk_txn_terminal FOREIGN KEY (terminal_id) REFERENCES terminals (id) ON DELETE SET NULL,
-  CONSTRAINT fk_txn_settlement FOREIGN KEY (settlement_id) REFERENCES settlements (id) ON DELETE SET NULL
+  CONSTRAINT fk_txn_outlet FOREIGN KEY (outlet_id, merchant_id) REFERENCES outlets (id, merchant_id),
+  CONSTRAINT fk_txn_terminal FOREIGN KEY (terminal_id, merchant_id) REFERENCES terminals (id, merchant_id),
+  CONSTRAINT fk_txn_settlement FOREIGN KEY (settlement_id, merchant_id) REFERENCES settlements (id, merchant_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE invoices (
@@ -84,6 +91,7 @@ CREATE TABLE invoices (
   due_date    DATE         NOT NULL,
   pdf_path    VARCHAR(300) NULL,
   PRIMARY KEY (id),
+  UNIQUE KEY uq_invoices_id_merchant (id, merchant_id),
   KEY idx_invoices_merchant_period (merchant_id, period),
   CONSTRAINT fk_invoices_merchant FOREIGN KEY (merchant_id) REFERENCES merchants (id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -99,9 +107,9 @@ CREATE TABLE invoice_lines (
   amount_cents     BIGINT       NOT NULL,
   PRIMARY KEY (id),
   KEY idx_invoice_lines_merchant (merchant_id),
-  KEY idx_invoice_lines_invoice (invoice_id),
+  KEY idx_invoice_lines_invoice (invoice_id, merchant_id),
   CONSTRAINT fk_invoice_lines_merchant FOREIGN KEY (merchant_id) REFERENCES merchants (id) ON DELETE CASCADE,
-  CONSTRAINT fk_invoice_lines_invoice FOREIGN KEY (invoice_id) REFERENCES invoices (id) ON DELETE CASCADE
+  CONSTRAINT fk_invoice_lines_invoice FOREIGN KEY (invoice_id, merchant_id) REFERENCES invoices (id, merchant_id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE recon_runs (
@@ -112,6 +120,7 @@ CREATE TABLE recon_runs (
   matched_count   INT         NOT NULL DEFAULT 0,
   exception_count INT         NOT NULL DEFAULT 0,
   PRIMARY KEY (id),
+  UNIQUE KEY uq_recon_runs_id_merchant (id, merchant_id),
   KEY idx_recon_runs_merchant (merchant_id, run_at),
   CONSTRAINT fk_recon_runs_merchant FOREIGN KEY (merchant_id) REFERENCES merchants (id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -129,9 +138,9 @@ CREATE TABLE recon_exceptions (
   note           VARCHAR(500) NULL,
   PRIMARY KEY (id),
   KEY idx_recon_exc_merchant_status (merchant_id, status),
-  KEY idx_recon_exc_run (run_id),
+  KEY idx_recon_exc_run (run_id, merchant_id),
   CONSTRAINT fk_recon_exc_merchant FOREIGN KEY (merchant_id) REFERENCES merchants (id) ON DELETE CASCADE,
-  CONSTRAINT fk_recon_exc_run FOREIGN KEY (run_id) REFERENCES recon_runs (id) ON DELETE CASCADE
+  CONSTRAINT fk_recon_exc_run FOREIGN KEY (run_id, merchant_id) REFERENCES recon_runs (id, merchant_id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE notifications (
