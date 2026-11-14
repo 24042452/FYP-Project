@@ -1,5 +1,6 @@
 import { z } from 'zod'
-import { getCurrentMerchant } from '@/lib/data/merchant'
+import { getCurrentMerchant, findMerchantForUser } from '@/lib/data/merchant'
+import { getSessionUser } from '@/lib/auth/session'
 import { makeTools } from '@/lib/assistant/tools'
 import { answerWithRules, SUGGESTIONS } from '@/lib/assistant/rules'
 import { streamAiAnswer } from '@/lib/assistant/ai'
@@ -26,6 +27,9 @@ const json = (/** @type {unknown} */ body, status = 200) =>
  * @param {Request} request
  */
 export async function POST(request) {
+  // An expired or unknown session gets a plain 401 (getCurrentMerchant would redirect to the login page).
+  const user = await getSessionUser()
+  if (!user || !(await findMerchantForUser(user.id))) return json({ error: 'signed_out' }, 401)
   const merchant = await getCurrentMerchant()
 
   let parsed

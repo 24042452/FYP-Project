@@ -114,6 +114,17 @@ describe('answerWithRules', () => {
     expect(a.text).toMatch(/you made/)
   })
 
+  it('greets on a greeting but not on a word that starts with hi', async () => {
+    for (const q of ['hi', 'Hi there!', 'hello']) expect((await answerWithRules(q, ctx())).text, q).toMatch(/^Hello!/)
+    const a = await answerWithRules('hiss', ctx({ kb: false }))
+    expect(a.text).toMatch(/can.t answer that yet/)
+  })
+
+  it('a period where every payment failed says so instead of no payments', async () => {
+    const a = await answerWithRules('How much did I take last week?', ctx({ allFailed: true }))
+    expect(a.text).toMatch(/none of your payments went through. 3 payments did not go through./)
+  })
+
   it('never prints NaN or undefined, even for an empty period', async () => {
     for (const q of [
       'How much did I take last week?', 'which day is my busiest', 'Why did a payment fail today?', 'When will I get paid?',

@@ -1,6 +1,6 @@
 # Assistant eval (rules mode)
 
-Run 2026-11-14 (Singapore) against the seeded database, signed in as Ah Hock Chicken Rice, through `POST /api/assistant`. Expected values were computed with separate SQL on the seeded data (a throwaway script, not committed) and checked against the answer text automatically.
+Run 2026-11-14 (Singapore) against the seeded database, signed in as Ah Hock Chicken Rice, through `POST /api/assistant`. Expected values come from the committed queries in [`scripts/eval-assistant.sql`](../../scripts/eval-assistant.sql) (one block per question, `@m` = the merchant id, dates derived from the Singapore clock), so the eval can be re-run: execute the SQL, ask each question at `/assistant`, and compare. On the first run the comparison was done by a throwaway script that ran the same queries and checked the answer text.
 
 **Result: 12 / 12 passed. 0 invented numbers, no NaN or undefined in any answer.**
 

@@ -2,11 +2,13 @@
  * A fake data layer for assistant unit tests. Not a test file (no .test.js).
  * @param {{empty?: boolean, kb?: boolean}} [opts]
  */
-export function makeFakeDeps({ empty = false, kb = true } = {}) {
+export function makeFakeDeps({ empty = false, kb = true, allFailed = false } = {}) {
   return {
     today: () => '2026-11-11',
     getDailySales: async (_m, from) =>
-      empty
+      allFailed
+        ? [{ day: from, channel: "card", grossCents: 0, txnCount: 3, failedCount: 3 }]
+        : empty
         ? []
         : [
             { day: from, channel: 'nets_qr', grossCents: 10000, txnCount: 5, failedCount: 1 },

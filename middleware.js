@@ -5,6 +5,10 @@ import { NextResponse } from 'next/server'
 // layout and in every route.
 export function middleware(request) {
   if (!request.cookies.get('portal_session')?.value) {
+    // The assistant's fetch must get a plain 401 it can show, not the login page.
+    if (request.nextUrl.pathname === '/api/assistant') {
+      return NextResponse.json({ error: 'signed_out' }, { status: 401, headers: { 'Cache-Control': 'private, no-store' } })
+    }
     return NextResponse.redirect(new URL('/login', request.url))
   }
   // Logged-in portal pages must never be stored, so the back button after sign-out shows nothing.

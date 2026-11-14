@@ -90,6 +90,26 @@ describe('streamAiAnswer', () => {
     expect(calls[1].messages.at(-1).content[0].is_error).toBe(true)
   })
 
+  it('keeps database errors away from the model and separates turns with a newline', async () => {
+    const deps = makeFakeDeps()
+    deps.getDailySales = async () => { throw new Error('ER_ACCESS_DENIED secret detail') }
+    const t = makeTools(M, deps)
+    const calls = []
+    const client = { beta: { messages: { stream(p) {
+      calls.push(p)
+      return calls.length === 1
+        ? fakeStream('Checking.', { stop_reason: 'tool_use', content: [{ type: 'tool_use', id: 't1', name: 'get_sales_summary', input: { from: '2026-11-02', to: '2026-11-08' } }] })
+        : fakeStream('Sorry.', { stop_reason: 'end_turn', content: [] })
+    } } } }
+    let out = ''
+    for await (const x of streamAiAnswer({ client, tradingName: 'X', today: '2026-11-11', messages: [], tools: t })) out += x
+    const res = calls[1].messages.at(-1).content[0]
+    expect(res.is_error).toBe(true)
+    expect(res.content).toMatch(/lookup failed/)
+    expect(res.content).not.toMatch(/secret|ER_/)
+    expect(out).toBe('Checking.\nSorry.')
+  })
+
   it('says something friendly on a refusal', async () => {
     const client = { beta: { messages: { stream: () => fakeStream('', { stop_reason: 'refusal', content: [] }) } } }
     let out = ''
