@@ -70,11 +70,13 @@ We chose **"Clean Console"**: a professional, light merchant portal in red, blue
 | Part | Choice |
 |---|---|
 | Web app | **Next.js 15** (App Router) in **plain JavaScript** (no TypeScript), Tailwind CSS, shadcn/ui, Recharts |
-| Database, login, storage | **Supabase** (PostgreSQL with row-level security, so each merchant only sees their own data) |
+| Back end and REST API | Next.js route handlers on **Node.js**; public REST API `/api/v1` |
+| Database | **MySQL 8** (transactions, invoices and user data). Every query is filtered by the logged-in merchant, so each merchant only sees their own data |
+| Login | Our own email + password login (bcrypt, sessions stored in MySQL) |
 | Hosting | **Vercel** |
 | Assistant | Rules mode first; later Claude (Anthropic API) with fixed, read-only tools. The AI never writes database queries |
 | Exports | Excel (ExcelJS) and PDF |
-| Tests | Vitest (unit), Playwright (end-to-end), pgTAP (database security) |
+| Tests | Vitest (unit, and integration tests against MySQL), Playwright (end-to-end) |
 
 ## Repository layout
 
@@ -94,7 +96,8 @@ The app is not usable yet. When it is, the steps are:
 
 ```bash
 npm install
-cp .env.example .env.local   # fill in your Supabase project values
+cp .env.example .env.local   # fill in your MySQL connection strings
+npm run migrate              # creates the tables
 npm run seed                 # creates the two demo merchants and their sample data
 npm run dev                  # http://localhost:3000
 ```

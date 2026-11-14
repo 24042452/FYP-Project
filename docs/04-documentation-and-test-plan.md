@@ -8,14 +8,14 @@
 | `02-technical-design.md` | Developers, assessors | B + C | Stack, architecture, data model, recon logic, AI design, security | Now, updated with every architecture change |
 | `03-feature-catalogue.md` | Everyone | D | Modules, phases, improvement ideas | Now |
 | `api/` (per route) | Developers | Feature owner | Endpoint, inputs, outputs, errors | With each feature PR |
-| `database/` | Developers | B | Table dictionary, RLS policies, migrations log | With each migration |
+| `database/` | Developers | B | MySQL setup guide, table dictionary, merchant-isolation rule, migrations log | With each migration |
 | `assistant/` | Developers | C | System prompt, tool definitions, evaluation questions and results | With each copilot change |
-| `adr/` | Developers, assessors | Anyone | Architecture Decision Records (e.g. "ADR-001: Supabase Postgres over MySQL") | When a decision is made |
+| `adr/` | Developers, assessors | Anyone | Architecture Decision Records (e.g. "ADR-001: MySQL as the database") | When a decision is made |
 | `user-guide/` | **Merchants** (non-technical) | A + D | Screenshot-led how-tos in plain words, one page per task | From P1, final in P4 |
 | `test-plan.md` + `test-cases/` | Assessors, team | D | Strategy (below) and case table | From P0 |
 | `sprint-log/` | RP | Scrum Master | Sprint goals, burndown, retro notes, as evidence of the methodology | Weekly |
 | `final-report.md` | RP, NETS | All | Compiled at the end from the above | P4 |
-| `README.md` (repo root) | Developers | D | Setup: clone, env vars, `supabase start`, seed, `npm run dev` | P0 |
+| `README.md` (repo root) | Developers | D | Setup: clone, local MySQL 8, env vars, `npm run migrate`, `npm run seed`, `npm run dev` | P0 |
 
 **Rule:** a feature PR is not "Done" until its docs page is updated (this is in the Definition of Done).
 
@@ -24,7 +24,7 @@
 | Level | Tool | What | Target |
 |---|---|---|---|
 | Unit | Vitest | Recon matching, formatting, summary-text templates, export builders | Recon logic ≥ 90% coverage |
-| Database | pgTAP | RLS isolation (merchant A ≠ B), constraints, recon SQL | Every table has an RLS test |
+| Integration (database) | Vitest + test MySQL database (local and GitHub Actions `mysql:8`) | Merchant isolation (merchant A never sees B), SGT day boundaries, constraints, migrations re-run safely, login and sessions | Every `lib/data/` function has an isolation test |
 | End-to-end | Playwright | Key journeys on desktop and mobile viewport | All P0 journeys |
 | AI evaluation | Scripted question set | ~30 questions with known answers from seed data; check numbers and refusals | ≥ 90% correct; 0 invented numbers |
 | Accessibility | axe + manual keyboard check | WCAG 2.1 AA | 0 critical issues |

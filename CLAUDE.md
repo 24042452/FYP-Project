@@ -4,7 +4,7 @@ Final Year Project with industry partner **NETS** (Singapore payments): an enhan
 
 ## Where we left off (update this section at the end of every session)
 
-**Last updated:** 2026-11-12
+**Last updated:** 2026-11-14
 **Current phase: PLANNING ONLY.** The user said: "make sure it is only in the planning phase, we will start the building phase after we have planned finish." **Do not write product code, run builds or touch databases until the user explicitly says planning is finished and building can start.**
 **Next deadline:** Touchpoint 1 MVP demo to NETS & RP, about 2026-11-25.
 
@@ -17,7 +17,7 @@ Build work started before the pause (kept, not deleted; don't continue it until 
 Waiting on the user:
 - An Anthropic API key (optional; without it the assistant shows "not set up yet")
 
-Set up 2026-11-12: `.env.local` created (git-ignored); the user filled in the 3 Supabase keys from their own project. `ASSISTANT_MODE=rules`, `DEMO_MODE=true`, `DEMO_PASSWORD` generated
+Set up 2026-11-12: `.env.local` created (git-ignored), with `ASSISTANT_MODE=rules`, `DEMO_MODE=true` and a generated `DEMO_PASSWORD`. It also still holds 3 Supabase keys, which are **no longer used** since the switch to MySQL (2026-11-14). Plan Task 1b lists the new MySQL env vars; the user updates `.env.local` themselves
 
 Done:
 - [x] Project plan, phases, methodology (Scrum, 1-week sprints, plus UCD): `docs/01-project-plan.md`
@@ -32,16 +32,18 @@ Done:
 Next steps:
 1. ~~User picks a design direction~~ Done 2026-11-12: Option 1 · Clean Console (see "Design")
 2. ~~Update the build plan to plain JavaScript~~ Done 2026-11-12: the plan now uses `.js`/`.jsx` with JSDoc, and new **Task 1b** converts the existing TypeScript files first when building starts
-3. Finish planning with the user/team: review docs 01–04 and the MVP build plan, and confirm the MVP scope
-4. Only after the user approves building: start with Task 1b (convert to JS), then continue from Task 3 (see the ledger)
+3. ~~Switch the database to MySQL~~ Done 2026-11-14: the requirements (JS/Node, React, REST APIs; MySQL and/or MongoDB) are firm, so docs 01, 02 (v0.2), 04, README, PRODUCT.md and the build plan now use MySQL 8. Reasoning in `docs/adr/001-mysql-database.md`
+4. Finish planning with the user/team: review docs 01–04, ADR-001 and the MVP build plan, and confirm the MVP scope. Before building, the user needs MySQL 8 installed locally (plan Task 2 prerequisite)
+5. Only after the user approves building: start with Task 1b (convert to JS and swap Supabase for mysql2), then Task 2 (MySQL schema), then continue Task 3 (see the ledger)
 
 ## Decisions made
 
-- Hosting: **Vercel**. Database: **Supabase = PostgreSQL** (not MySQL), with RLS, pgvector, pg_cron, Storage, Auth
+- Project requirements (firm, confirmed 2026-11-14): **JavaScript / Node.js, a React framework, building and consuming REST APIs (front and back end); MySQL and/or MongoDB for transactions, invoices and user data**
+- Hosting: **Vercel**. Database: **MySQL 8** via `mysql2` with prepared statements, no ORM, `.sql` migrations (decided 2026-11-14, ADR-001; replaced Supabase Postgres). MongoDB not used. Own login (bcrypt + `sessions` table). No row-level security in MySQL, so **merchant isolation = every query in `lib/data/` filters by the merchant id from the server session**, with an isolation test per data function. Vercel Cron for jobs, Vercel Blob for files. Hosted MySQL provider to be picked in Sprint 1
 - Frontend: Next.js 15 App Router in **plain JavaScript (no TypeScript; decided 2026-11-12, the team has not learned TS)**, Tailwind, shadcn/ui, Recharts, TanStack Table, RHF + Zod. Python was considered and not chosen
-- AI copilot: Anthropic `@anthropic-ai/sdk`, model `claude-opus-5-5`, tool use with **fixed read-only query tools; the AI never writes SQL**. help centre in `kb_chunks` (MVP: Postgres full-text search; Phase 2: pgvector gte-small embeddings). Rules mode (no AI) is the MVP default; AI mode = RAG
+- AI copilot: Anthropic `@anthropic-ai/sdk`, model `claude-opus-5-5`, tool use with **fixed read-only query tools; the AI never writes SQL**. help centre in `kb_chunks` (MVP: MySQL FULLTEXT search; Phase 2: embeddings stored as JSON, similarity computed in Node). Rules mode (no AI) is the MVP default; AI mode = RAG
 - Exports: ExcelJS (xlsx), @react-pdf/renderer (PDF)
-- Tests: Vitest, Playwright, pgTAP (RLS isolation)
+- Tests: Vitest (unit + integration tests against a test MySQL database, incl. merchant isolation), Playwright
 - **API-first:** public REST `/api/v1` with an OpenAPI 3.1 spec, scoped API keys (P1), OAuth client-credentials for partners (P3), signed outbound webhooks with retries (P1), and an integration adapter pattern in `/lib/integrations/<provider>/` (SAP, Xero, QuickBooks, Shopify)
 - Data: synthetic only, from our own generator, until NETS sandbox data arrives
 - MVP scope review (2026-11-11, in progress): **2 demo merchants confirmed**, to show the contrast: Ah Hock Chicken Rice (hawker, 1 stall) and Tan & Sons Retail (3 outlets incl. online). **Login: both** the normal email/password form and one-click "Try as Ah Hock" / "Try as Tan & Sons" buttons (shown only when `DEMO_MODE=true`). **Assistant: no-AI "rules" mode first** (`ASSISTANT_MODE=rules`, keyword intents + templates + help-centre search, no API key). AI/RAG mode (`ASSISTANT_MODE=ai`) uses the same tools and is added when a key is available. **Cut list if behind (drop in this order):** 1) notifications bell, 2) PDF version of the check-up export (Excel stays), 3) "Coming soon" pages, replaced by greyed-out menu items tagged "Soon", 4) assistant AI mode (rules mode stays). **MVP scope review: complete.**

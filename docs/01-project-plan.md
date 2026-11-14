@@ -6,7 +6,7 @@
 | Date | 2026-11-11 |
 | Team | 4 members |
 | Next milestone | Touchpoint 1 — MVP demo to NETS & RP (~2026-11-25, 2 weeks from today) |
-| Hosting | Vercel (web app) + Supabase (PostgreSQL database, auth, storage) |
+| Hosting | Vercel (Next.js web app: React front end, Node.js back end and REST API) + hosted **MySQL 8** database (see [ADR-001](adr/001-mysql-database.md)) |
 
 > Related docs: [02 Technical Design](02-technical-design.md) · [03 Feature Catalogue](03-feature-catalogue.md) · [04 Documentation & Test Plan](04-documentation-and-test-plan.md)
 
@@ -76,7 +76,7 @@ Version control: GitHub, with a `main` branch (production) and short-lived featu
 
 | # | MVP feature | Layer | MoSCoW |
 |---|---|---|---|
-| 1 | Login (Supabase Auth, email + password) with 2 demo merchants (a hawker stall and a retail chain) | Platform | Must |
+| 1 | Login (our own email + password login, sessions stored in MySQL) with 2 demo merchants (a hawker stall and a retail chain) | Platform | Must |
 | 2 | Synthetic data generator: 6 months of transactions across NETS QR / Click / eNETS / Cards / SGQR, plus settlements, invoices, failures and deliberate mismatches | Platform | Must |
 | 3 | **Home dashboard**: today / week / month KPIs, revenue trend, channel mix, peak hours heatmap, this-month-vs-last comparison | Insights | Must |
 | 4 | **Plain-language summary card** ("How business is going"), template-based so it is always reliable | Insights | Must |
@@ -99,8 +99,8 @@ Version control: GitHub, with a `main` branch (production) and short-lived featu
 | Member | Role | Week 1 | Week 2 |
 |---|---|---|---|
 | **A** | Frontend lead / UI | App shell, nav, design system (from chosen design), login page, dashboard layout | Dashboard charts, transactions page, settlements, mobile polish |
-| **B** | Data & backend | Supabase project, schema + RLS migrations, synthetic data generator, seed both demo merchants | Reconciliation engine (SQL/functions), dashboard aggregate queries/views, invoices data |
-| **C** | AI & assistant | Copilot API route, query tools (sales by period, busiest day, failed payment lookup, settlement status), FAQ content + embeddings | Chat UI, summary card text, notifications rules, prompt tuning & guardrails |
+| **B** | Data & backend | Local MySQL setup, schema migrations, login + sessions, data layer with merchant-isolation tests, synthetic data generator, seed both demo merchants | Reconciliation engine, dashboard aggregate SQL queries, invoices data, hosted MySQL for the deployed demo |
+| **C** | AI & assistant | Copilot API route, query tools (sales by period, busiest day, failed payment lookup, settlement status), FAQ content + full-text search | Chat UI, summary card text, notifications rules, prompt tuning & guardrails |
 | **D** | Reports, QA, PM & docs | GitHub repo/board, CI, Vercel setup, invoice PDF template | Excel/PDF exports, test plan + test cases, user-guide draft, demo script & slides |
 
 **Scope decisions (2026-11-11):** two demo merchants (hawker stall + 3-outlet retailer); login offers both email/password and one-click demo buttons (demo mode only); the assistant ships in no-AI "rules" mode first, with AI/RAG mode switched on when an API key is available.
@@ -112,7 +112,7 @@ Day 10 = **feature freeze**. Days 11–12 = bug fixes, rehearse the demo, keep a
 ---
 
 ### Phase 1 — Operations depth (Weeks 3–5)
-- Reconciliation v2: automatic nightly run (pg_cron), tolerance rules, mark-as-resolved workflow, audit trail
+- Reconciliation v2: automatic nightly run (Vercel Cron), tolerance rules, mark-as-resolved workflow, audit trail
 - **Configurable alerts**: failed transactions, settlement delay, unusual sales dip (threshold or % drop), delivered in-app and by email
 - **Refunds & chargeback disputes**: raise a refund, respond to a chargeback, upload evidence, status tracker
 - **Finance reporting**: monthly P&L-style sales report, fee report, GST-ready summary, scheduled email reports
@@ -138,7 +138,7 @@ Day 10 = **feature freeze**. Days 11–12 = bug fixes, rehearse the demo, keep a
 
 ### Phase 4 — Stretch, hardening & handover (Weeks 12–14)
 - Stretch: **cash-flow forecasting**, **anomaly / fraud alerts**, **maker-checker approval flow** for outgoing actions (refunds, bank changes, loan applications)
-- Performance, accessibility audit (axe), security review (RLS tests), full test run
+- Performance, accessibility audit (axe), security review (merchant-isolation tests, SQL injection check), full test run
 - Final report, technical documentation, user guide, presentation
 
 ---
@@ -161,5 +161,5 @@ Day 10 = **feature freeze**. Days 11–12 = bug fixes, rehearse the demo, keep a
 | AI gives wrong numbers | The copilot never invents numbers: it can only call pre-defined, tested query tools, and its answers show the figure and the date range used |
 | 2-week MVP is too tight | Strict MoSCoW and a Day-10 freeze; "Should" items get dropped first |
 | Scope creep from the module list | Later modules live as "Coming soon" pages until their phase |
-| Leaking one merchant's data to another | Postgres Row Level Security on every table, plus automated tests for it |
-| Free-tier limits (Supabase/Vercel) | Keep the data volume moderate (~50k transactions per merchant); Supabase free projects pause when idle, so open the project before demos |
+| Leaking one merchant's data to another | All SQL in one data layer; every query filters by the merchant id from the server session; an automated isolation test for every data function (MySQL has no row-level security, see ADR-001) |
+| Free-tier limits (hosted MySQL/Vercel) | Keep the data volume moderate (~50k transactions per merchant); check the MySQL host's limits and whether it sleeps when idle, and open the demo before presenting |

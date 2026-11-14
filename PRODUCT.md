@@ -32,7 +32,7 @@ One place for every NETS payment channel (NETS QR, cards, SGQR, NETS Click, eNET
 
 ## Capabilities and Constraints
 
-- Next.js web app on Vercel, Supabase (Postgres) backend. MVP deadline: Touchpoint 1 demo, about 2026-11-25.
+- Next.js web app on Vercel (React front end, Node.js back end and REST API), MySQL 8 database. MVP deadline: Touchpoint 1 demo, about 2026-11-25.
 - MVP modules: Home, Transactions, Settlements ("Money to my bank"), Invoices ("Bills & charges"), Check-up (Reconciliation), Reports, NETS Assistant. Other modules show as "Soon".
 - Terminology: plain words first, the technical term underneath (Check-up / *Reconciliation*, Money to my bank / *Settlements*).
 - English only for the MVP; multi-language (中文, Melayu, தமிழ்) is a Phase 2 idea, so layouts should tolerate longer text.
