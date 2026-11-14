@@ -236,3 +236,5 @@ New tables: `api_keys` (merchant_id, name, prefix, hash, scopes, last_used_at, r
 | Production (demo) | Vercel production → hosted MySQL demo database | Seeded demo merchants |
 
 **Hosted MySQL:** Vercel has no built-in MySQL, so we use a managed MySQL 8 service on a free or student tier that accepts TLS connections from Vercel (for example Aiven for MySQL or Railway). Pick one in Sprint 1, check its current free-tier limits, and record the choice here. Keep the demo data moderate (~50k transactions per merchant) so it fits a free tier.
+
+**Provider requirements:** the database must support InnoDB foreign keys and FULLTEXT indexes (Aiven for MySQL and Railway are OK; PlanetScale/Vitess and TiDB are risky for our composite foreign keys and FULLTEXT). Use TLS (`DATABASE_SSL=true`, plus `DATABASE_SSL_CA` if the provider uses its own certificate authority). On Vercel each function instance has its own pool, so `lib/db.js` uses `DB_CONNECTION_LIMIT` (default 3 in production, 10 locally), `maxIdle: 1` and a 60 s idle timeout.

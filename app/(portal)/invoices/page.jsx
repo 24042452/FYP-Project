@@ -1,5 +1,6 @@
 import { getCurrentMerchant } from '@/lib/data/merchant'
 import { listInvoiceLines, listInvoices } from '@/lib/data/invoices'
+import { sgtDate } from '@/lib/dates'
 import { buildInvoicesModel } from '@/lib/invoices/model'
 import { Pill } from '@/components/dashboard/Pill'
 import { EmptyState } from '@/components/dashboard/Panel'
@@ -21,7 +22,7 @@ export default async function InvoicesPage({ searchParams }) {
     merchant.id,
     invoices.map((i) => i.id),
   )
-  const m = buildInvoicesModel({ invoices, linesById, openId })
+  const m = buildInvoicesModel({ invoices, linesById, openId, today: sgtDate(new Date().toISOString()) })
 
   return (
     <div className="flex flex-col gap-5 sm:gap-6">

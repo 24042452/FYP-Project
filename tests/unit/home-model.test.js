@@ -181,6 +181,22 @@ describe('buildHomeModel: settlements and attention', () => {
     expect(m.tiles[2].tone).toBe('attention')
     expect(m.attention.items.map((i) => i.href)).toEqual(['/reconciliation', '/transactions?status=failed', '/settlements'])
   })
+  it('does not count a late settlement twice (check-up delay + late)', () => {
+    const d = buildHomeModel({
+      ...EMPTY_INPUT,
+      settlementSummary: { pendingCents: 0, nextExpectedDate: null, lateCount: 2, lateCents: 60870 },
+      recon: { runAt: '2026-11-10T16:30:00.000Z', period: '2026-10-01', matchedCount: 1, exceptionCount: 3, openCount: 3, openDelayCount: 2 },
+    })
+    // 1 other check-up problem + 2 late days; the 2 delays are not counted again
+    expect(d.attention.count).toBe(3)
+    expect(d.checkup.openCount).toBe(3)
+    const onlyDelays = buildHomeModel({
+      ...EMPTY_INPUT,
+      settlementSummary: { pendingCents: 0, nextExpectedDate: null, lateCount: 2, lateCents: 60870 },
+      recon: { runAt: '2026-11-10T16:30:00.000Z', period: '2026-10-01', matchedCount: 1, exceptionCount: 2, openCount: 2, openDelayCount: 2 },
+    })
+    expect(onlyDelays.attention.items.map((i) => i.key)).toEqual(['late'])
+  })
   it('coming-to-bank tile', () => {
     expect(m.tiles[1].value).toBe('$693.40')
     expect(m.tiles[1].hint).toBe('Next: Fri 13 Nov')

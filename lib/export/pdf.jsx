@@ -2,6 +2,8 @@ import { Document, Page, StyleSheet, Text, View, renderToBuffer } from '@react-p
 import { formatSGD } from '../money.js'
 import { formatDayLabel } from '../dashboard/home-model.js'
 import { invoiceMonthLabel, invoiceStatusView } from '../invoices/model.js'
+import { effectiveInvoiceStatus } from '../invoices/status.js'
+import { sgtDate } from '../dates.js'
 import { formatWhen } from '../transactions/format.js'
 import { failedSummary, invoiceMonthName } from '../recon/view.js'
 
@@ -18,10 +20,10 @@ const s = StyleSheet.create({
 })
 
 /**
- * @param {{inv: NonNullable<Awaited<ReturnType<typeof import('../data/invoices.js').getInvoiceWithLines>>>}} props
+ * @param {{inv: NonNullable<Awaited<ReturnType<typeof import('../data/invoices.js').getInvoiceWithLines>>>, today: string}} props
  */
-export function InvoicePdf({ inv }) {
-  const st = invoiceStatusView(inv.status, inv.dueDate)
+export function InvoicePdf({ inv, today }) {
+  const st = invoiceStatusView(effectiveInvoiceStatus(inv.status, inv.dueDate, today), inv.dueDate)
   return (
     <Document title={`Invoice ${invoiceMonthLabel(inv.period)}`}>
       <Page size="A4" style={s.page}>
@@ -58,10 +60,11 @@ export function InvoicePdf({ inv }) {
 
 /**
  * @param {Parameters<typeof InvoicePdf>[0]['inv']} inv
+ * @param {string} [today] YYYY-MM-DD (Singapore); defaults to now
  * @returns {Promise<Buffer>}
  */
-export async function renderInvoicePdf(inv) {
-  return Buffer.from(await renderToBuffer(<InvoicePdf inv={inv} />))
+export async function renderInvoicePdf(inv, today = sgtDate(new Date().toISOString())) {
+  return Buffer.from(await renderToBuffer(<InvoicePdf inv={inv} today={today} />))
 }
 
 /**

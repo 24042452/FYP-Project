@@ -1,12 +1,14 @@
 // Loads the two demo merchants (synthetic data) into the database. Usage: npm run seed
 // Idempotent: each merchant is deleted (cascade) and re-inserted in one transaction.
 import mysql from 'mysql2/promise'
+import { sslOptions } from '../lib/db-ssl.js'
 import { generateDataset } from '../lib/synthetic/generate.js'
 import { trimFuture } from '../lib/synthetic/trim.js'
 import { hashPassword } from '../lib/auth/password.js'
 import { randomUUID } from 'node:crypto'
 import { periodRange, sgtDate, sgtToIso } from '../lib/dates.js'
 import { buildNudges } from '../lib/nudges/build.js'
+import { effectiveInvoiceStatus } from '../lib/invoices/status.js'
 import { loadFaq } from '../lib/assistant/kb.js'
 
 const START = '2026-05-01'
@@ -135,12 +137,12 @@ async function seedNudges(conn, merchantId, nowIso, today) {
   )
   const [late] = await conn.query(
     `SELECT COUNT(DISTINCT business_date) AS n FROM settlements
-      WHERE merchant_id = ? AND business_date >= DATE_SUB(?, INTERVAL 30 DAY)
+      WHERE merchant_id = ?
         AND (status = 'delayed' OR (status = 'pending' AND expected_date < ?))`,
-    [merchantId, today, today],
+    [merchantId, today],
   )
   const [inv] = await conn.query(
-    `SELECT DATE_FORMAT(period, '%Y-%m') AS month, total_cents AS totalCents, status
+    `SELECT DATE_FORMAT(period, '%Y-%m') AS month, total_cents AS totalCents, status, due_date AS dueDate
        FROM invoices WHERE merchant_id = ? ORDER BY period DESC LIMIT 1`,
     [merchantId],
   )
@@ -149,7 +151,7 @@ async function seedNudges(conn, merchantId, nowIso, today) {
     weekPrev,
     failedToday: Number(failed[0].n),
     delayedSettlements: Number(late[0].n),
-    latestInvoice: inv[0] ? { month: inv[0].month, totalCents: Number(inv[0].totalCents), status: inv[0].status } : undefined,
+    latestInvoice: inv[0] ? { month: inv[0].month, totalCents: Number(inv[0].totalCents), status: effectiveInvoiceStatus(inv[0].status, inv[0].dueDate, today) } : undefined,
   })
   const now = new Date(nowIso).getTime()
   const rows = nudges.map((n, i) => [
@@ -170,7 +172,7 @@ async function main() {
   const now = new Date()
   const nowIso = now.toISOString()
   const today = sgtDate(nowIso)
-  const conn = await mysql.createConnection({ uri: url })
+  const conn = await mysql.createConnection({ uri: url, ssl: sslOptions() })
   try {
     for (const demo of DEMOS) {
       const c = await seedMerchant(conn, demo, password, nowIso, today)

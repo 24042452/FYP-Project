@@ -98,7 +98,7 @@ CLAUDE.md      Running project notes: decisions made and where we left off
 
 1. **Create the databases and users.** Follow [docs/database/README.md](docs/database/README.md): two databases (`nets_portal` and `nets_portal_test`) and two users (`portal_admin` for migrations and seeding, `portal_app` for the running app).
 2. **Set up your settings.** Copy `.env.example` to `.env.local` and fill in the values. The names are:
-   `DATABASE_URL`, `DATABASE_ADMIN_URL`, `DATABASE_SSL`, `TEST_DATABASE_URL`, `TEST_DATABASE_ADMIN_URL`, `ANTHROPIC_API_KEY` (optional), `ASSISTANT_MODE` (`rules` needs no key), `DEMO_MODE` (`true` shows the "Try as…" buttons), `DEMO_PASSWORD`, `CRON_SECRET`.
+   `DATABASE_URL`, `DATABASE_ADMIN_URL`, `DATABASE_SSL`, `DATABASE_SSL_CA` (optional, hosted database CA certificate), `DB_CONNECTION_LIMIT` (optional), `TEST_DATABASE_URL`, `TEST_DATABASE_ADMIN_URL`, `ANTHROPIC_API_KEY` (optional), `ASSISTANT_MODE` (`rules` needs no key), `DEMO_MODE` (`true` shows the "Try as…" buttons), `DEMO_PASSWORD`, `CRON_SECRET` (reserved for the Phase 1 scheduled jobs; no cron route exists yet).
 3. **Install and start:**
 
 ```bash
@@ -107,6 +107,8 @@ npm run migrate    # creates the tables
 npm run seed       # creates the two demo merchants and their sample data (run again any time to reset)
 npm run dev        # http://localhost:3000
 ```
+
+**Before a demo: run `npm run seed` that morning** (and against the hosted database as well). The seed sets pending, late and "today" figures relative to the day it runs and nothing refreshes them, so old data looks stale.
 
 `.env.local` holds secrets. It is ignored by git and must never be committed.
 

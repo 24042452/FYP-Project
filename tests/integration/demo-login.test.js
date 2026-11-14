@@ -43,6 +43,11 @@ describe('demo sign-in and the login limiter', () => {
     expect(loginLimiter.isBlocked(EMAIL)).toBe(false)
   })
 
+  it('rejects prototype-property profile names', async () => {
+    process.env.DEMO_MODE = 'true'
+    for (const p of ['constructor', 'toString', '__proto__']) expect(await checkDemo(p)).toHaveProperty('error')
+  })
+
   it('refuses when DEMO_MODE is not true', async () => {
     process.env.DEMO_MODE = 'false'
     expect(await checkDemo('hawker')).toHaveProperty('error')

@@ -17,6 +17,8 @@ The answer first: one plain sentence about how business is ("You took $4,309.00 
 - **Like-for-like comparison:** the current period so far (`from`..`toDate`) is compared with the same number of days of the previous period (`prevFrom`..`prevToDate`), so a half-finished week is not compared with a full one. A month compares with the true previous calendar month.
 - "Where your money went": sales, then NETS fees, then what goes to your bank, for the same range.
 - "Coming to your bank" counts pending money due today or later (or with no expected date). Late money is shown separately as "plus $X late", never double counted.
+- **Needs your attention** counts each problem once: a late settlement that the check-up also lists as a "settlement delay" is counted only as late. The late figure covers all time, the same rule as the Money to my bank tiles.
+- **Before a demo: run `npm run seed` that morning** (and against the hosted database too). The seed sets the pending, late and "today" figures relative to the day it runs, and nothing refreshes them afterwards, so old seed data shows stale numbers.
 - Money is integer cents everywhere and formatted only for display. No `NaN`: empty periods show "No sales yet for this period".
 - Health score (0-100) uses growth, failed-payment rate and delayed settlements.
 - Greeting uses the signed-in person's name and the Singapore hour.

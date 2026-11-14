@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { NAV, COMING_SOON, allNavItems } from '../../lib/nav.js'
+import { NAV, COMING_SOON, allNavItems, comingSoonEntry } from '../../lib/nav.js'
 
 const slug = (/** @type {string} */ href) => href.replace(/^\//, '')
 
@@ -31,5 +31,12 @@ describe('NAV', () => {
       expect(entry.pitch).not.toContain('\n')
       expect(Number.isInteger(entry.phase)).toBe(true)
     }
+  })
+})
+
+describe('comingSoonEntry', () => {
+  it('finds real entries and ignores prototype names', () => {
+    expect(comingSoonEntry('insights')).toBeDefined()
+    for (const k of ['constructor', 'toString', '__proto__', 'hasOwnProperty']) expect(comingSoonEntry(k)).toBeUndefined()
   })
 })

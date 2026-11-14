@@ -43,6 +43,8 @@ Postgres does not meet the database requirement. No database code had been writt
 - Writing our own SQL, login and tenant checks shows more back-end work to assessors
 
 **Costs and risks**
+- **The hosted MySQL must support InnoDB foreign keys and FULLTEXT indexes.** Our schema uses composite foreign keys (`(merchant_id, id)`) and a FULLTEXT index for help-centre search. Aiven for MySQL and Railway are fine. PlanetScale (Vitess) and TiDB are risky: they handle foreign keys and FULLTEXT differently or not at all, so do not pick them without testing `npm run migrate` first.
+- **Serverless connections:** each Vercel instance has its own pool, so the pool is small in production (`DB_CONNECTION_LIMIT`, default 3, one idle connection kept) to stay under the provider's connection limit.
 - **Data isolation is no longer enforced by the database.** One missing `WHERE merchant_id = ?` would leak data. Mitigations:
   - All SQL lives in `lib/data/`. Pages, API routes and assistant tools never write SQL.
   - Every data function takes `merchantId` as its first argument.

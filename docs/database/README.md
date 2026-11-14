@@ -12,14 +12,27 @@ CREATE DATABASE nets_portal CHARACTER SET utf8mb4;
 CREATE DATABASE nets_portal_test CHARACTER SET utf8mb4;
 
 -- Admin: runs migrations and seeding. Never used by the running app.
+-- Three host names, because "localhost" in the connection string can resolve to 127.0.0.1 or ::1 (IPv6).
 CREATE USER 'portal_admin'@'localhost' IDENTIFIED BY 'change-me';
+CREATE USER 'portal_admin'@'127.0.0.1' IDENTIFIED BY 'change-me';
+CREATE USER 'portal_admin'@'::1' IDENTIFIED BY 'change-me';
 GRANT ALL ON nets_portal.* TO 'portal_admin'@'localhost';
 GRANT ALL ON nets_portal_test.* TO 'portal_admin'@'localhost';
+GRANT ALL ON nets_portal.* TO 'portal_admin'@'127.0.0.1';
+GRANT ALL ON nets_portal_test.* TO 'portal_admin'@'127.0.0.1';
+GRANT ALL ON nets_portal.* TO 'portal_admin'@'::1';
+GRANT ALL ON nets_portal_test.* TO 'portal_admin'@'::1';
 
 -- App: what the running app (and the data functions under test) use.
 CREATE USER 'portal_app'@'localhost' IDENTIFIED BY 'change-me';
+CREATE USER 'portal_app'@'127.0.0.1' IDENTIFIED BY 'change-me';
+CREATE USER 'portal_app'@'::1' IDENTIFIED BY 'change-me';
 GRANT SELECT, INSERT, UPDATE, DELETE ON nets_portal.* TO 'portal_app'@'localhost';
 GRANT SELECT, INSERT, UPDATE, DELETE ON nets_portal_test.* TO 'portal_app'@'localhost';
+GRANT SELECT, INSERT, UPDATE, DELETE ON nets_portal.* TO 'portal_app'@'127.0.0.1';
+GRANT SELECT, INSERT, UPDATE, DELETE ON nets_portal_test.* TO 'portal_app'@'127.0.0.1';
+GRANT SELECT, INSERT, UPDATE, DELETE ON nets_portal.* TO 'portal_app'@'::1';
+GRANT SELECT, INSERT, UPDATE, DELETE ON nets_portal_test.* TO 'portal_app'@'::1';
 ```
 
 3. Copy `.env.example` to `.env.local` and fill in the connection strings:

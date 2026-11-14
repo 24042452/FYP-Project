@@ -1,19 +1,19 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { COMING_SOON, allNavItems } from '@/lib/nav'
+import { allNavItems, comingSoonEntry } from '@/lib/nav'
 
 // Pages that have their own folder (for example /transactions) win over this one.
 // This handles the planned-but-unbuilt pages, plus built pages whose task is still to come.
 
 export async function generateMetadata({ params }) {
   const { module } = await params
-  const entry = COMING_SOON[module]
+  const entry = comingSoonEntry(module)
   return { title: `${entry?.title ?? 'Page'} · Merchant Portal` }
 }
 
 export default async function ModulePage({ params }) {
   const { module } = await params
-  const entry = COMING_SOON[module]
+  const entry = comingSoonEntry(module)
   const navItem = allNavItems().find((i) => i.href === `/${module}`)
 
   if (!entry && !navItem) notFound()

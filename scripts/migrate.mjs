@@ -1,5 +1,6 @@
 // Applies db/migrations/*.sql in name order. Usage: npm run migrate
 import mysql from 'mysql2/promise'
+import { sslOptions } from '../lib/db-ssl.js'
 import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -15,7 +16,7 @@ const MIGRATIONS_DIR = path.join(here, '..', 'db', 'migrations')
  */
 export async function migrate(url = process.env.DATABASE_ADMIN_URL) {
   if (!url) throw new Error('DATABASE_ADMIN_URL is not set')
-  const conn = await mysql.createConnection({ uri: url, multipleStatements: true })
+  const conn = await mysql.createConnection({ uri: url, multipleStatements: true, ssl: sslOptions() })
   /** @type {string[]} */
   const applied = []
   try {

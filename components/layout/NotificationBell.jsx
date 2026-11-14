@@ -28,8 +28,11 @@ export function NotificationBell({ unread, items, className }) {
   /** @param {BellItem} item */
   const open = (item) =>
     startTransition(async () => {
-      if (!item.read) await markNotificationRead(item.id)
-      if (item.link) router.push(item.link)
+      try {
+        if (!item.read) await markNotificationRead(item.id)
+      } finally {
+        if (item.link && item.link.startsWith('/') && !item.link.startsWith('//')) router.push(item.link)
+      }
     })
 
   return (

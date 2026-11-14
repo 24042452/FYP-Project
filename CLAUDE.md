@@ -24,6 +24,7 @@ Next steps:
 2. Final whole-branch review of `mvp`
 3. Open a PR from `mvp` to `main`
 4. Cut list if behind is in "Decisions made"
+5. **Before every demo: run `npm run seed` that morning** (and against the hosted DB). Pending/late/today figures are set relative to the seed day and nothing refreshes them
 
 Done:
 - [x] Planning docs 01-04, design (Option 1 · Clean Console) and `PRODUCT.md`, GitHub repo https://github.com/Rampy2122/FYP-Project
