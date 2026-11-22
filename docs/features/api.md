@@ -26,7 +26,7 @@ Payments, newest first.
 | `from`, `to` | Singapore dates, inclusive. Send both or neither. Default: the last 7 days |
 | `channel` | `nets_qr`, `nets_click`, `enets`, `card`, `sgqr` |
 | `status` | `success`, `failed`, `refunded` |
-| `q` | Search: an amount like `12.50`, or the start of a payment id or customer reference |
+| `q` | Search: an amount like `12.50`, or the start of a payment id or STAN (trace number) |
 | `outlet` | One of your outlet ids (an id that is not yours answers 400) |
 | `limit` | 1 to 100 (default 50) |
 | `cursor` | The `next_cursor` from the previous page |
@@ -40,8 +40,8 @@ GET /api/v1/transactions?status=failed&limit=2
     {
       "id": "6f0c1e52-...", "created_at": "2026-11-12T04:00:00.000Z",
       "amount_cents": 2000, "fee_cents": 40, "channel": "card", "status": "failed",
-      "failure_code": "51", "customer_ref": "VISA4821", "outlet": "Tampines Mall",
-      "terminal_serial": "AH-01", "settlement_date": null
+      "failure_code": "51", "stan": "004821", "outlet": "Tampines Mall",
+      "terminal_serial": "AH-01", "tid": "11010001", "settlement_date": null
     }
   ],
   "next_cursor": "eyJjcmVhdGVkQXQiOi4uLn0"

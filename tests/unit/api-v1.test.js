@@ -42,7 +42,7 @@ describe('transaction JSON shape', () => {
   it('round-trips', () => {
     const t = {
       id: 'a', createdAt: '2026-11-12T04:00:00.000Z', amountCents: 5, feeCents: 1, channel: 'card', status: 'success',
-      failureCode: null, customerRef: null, outletName: 'X', terminalSerial: null, settlementDate: '2026-11-13',
+      failureCode: null, stan: null, outletName: 'X', terminalSerial: null, tid: null, settlementDate: '2026-11-13',
     }
     expect(fromApiTransaction(toApiTransaction(t))).toEqual(t)
     expect(toApiTransaction(t).amount_cents).toBe(5)

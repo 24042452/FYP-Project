@@ -30,7 +30,7 @@ function fakeDeps() {
       const rows = Array.from({ length: 50 }, (_, i) => ({
         id: `0000000${i % 10}-0000-4000-8000-0000000000${String(i).padStart(2, '0')}`,
         createdAt: '2026-11-11T05:02:00.000Z', amountCents: 850, feeCents: 0, channel: 'card', status: 'failed',
-        failureCode: '51', customerRef: null, outletName: null, terminalSerial: null, settlementDate: null,
+        failureCode: '51', stan: null, outletName: null, terminalSerial: null, tid: null, settlementDate: null,
       }))
       return { rows, nextCursor: null }
     },

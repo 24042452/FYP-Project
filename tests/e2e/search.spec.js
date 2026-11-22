@@ -12,7 +12,7 @@ async function retailAmountText(name = 'Tan & Sons%') {
   const conn = await mysql.createConnection(url)
   try {
     const [rows] = await conn.query(
-      `SELECT t.amount_cents AS c FROM transactions t JOIN merchants m ON m.id = t.merchant_id
+      `SELECT t.amount_cents AS c FROM transactions t JOIN merchants m ON m.merchant_id = t.merchant_id
        WHERE m.trading_name LIKE ? AND t.status = 'success' ORDER BY t.created_at DESC LIMIT 1`,
       [name],
     )

@@ -19,6 +19,8 @@ const DEMOS = [
     profile: 'hawker',
     seed: 1001,
     merchantId: '11111111-1111-4111-8111-111111111111',
+    mid: '110000000010001',
+    tidPrefix: '1101',
     userId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
     email: 'hawker@demo.local',
     userName: 'Ah Hock',
@@ -33,6 +35,8 @@ const DEMOS = [
     profile: 'retail',
     seed: 2002,
     merchantId: '22222222-2222-4222-8222-222222222222',
+    mid: '110000000020002',
+    tidPrefix: '1102',
     userId: 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
     email: 'retail@demo.local',
     userName: 'Mr Tan',
@@ -64,35 +68,35 @@ async function seedMerchant(conn, demo, password, nowIso, today) {
 
   await conn.beginTransaction()
   try {
-    await conn.query('DELETE FROM merchants WHERE id = ?', [m])
+    await conn.query('DELETE FROM merchants WHERE merchant_id = ?', [m])
     await conn.query('DELETE FROM sessions WHERE user_id = ?', [demo.userId])
     await conn.query(
-      `INSERT INTO users (id, email, password_hash, name) VALUES (?, ?, ?, ?)
+      `INSERT INTO users (user_id, email, password_hash, name) VALUES (?, ?, ?, ?)
        ON DUPLICATE KEY UPDATE password_hash = VALUES(password_hash), name = VALUES(name)`,
       [demo.userId, demo.email, passwordHash, demo.userName],
     )
     await conn.query(
-      `INSERT INTO merchants (id, legal_name, trading_name, uen, category, gst_registered) VALUES (?, ?, ?, ?, ?, ?)`,
-      [m, demo.legal_name, demo.trading_name, demo.uen, demo.category, demo.gst],
+      `INSERT INTO merchants (merchant_id, mid, legal_name, trading_name, uen, category, gst_registered) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      [m, demo.mid, demo.legal_name, demo.trading_name, demo.uen, demo.category, demo.gst],
     )
     await conn.query(`INSERT INTO merchant_users (merchant_id, user_id, role) VALUES (?, ?, 'owner')`, [m, demo.userId])
 
-    await bulk(conn, 'outlets', ['id', 'merchant_id', 'name', 'address'],
+    await bulk(conn, 'outlets', ['outlet_id', 'merchant_id', 'name', 'address'],
       data.outlets.map((o) => [o.id, m, o.name, o.address]))
-    await bulk(conn, 'terminals', ['id', 'merchant_id', 'outlet_id', 'serial_no', 'model', 'status'],
-      data.terminals.map((t, i) => [t.id, m, t.outlet_id, `${demo.serialPrefix}-${String(i + 1).padStart(4, '0')}`, 'NETS Smart Terminal', 'active']))
+    await bulk(conn, 'terminals', ['terminal_id', 'tid', 'merchant_id', 'outlet_id', 'serial_no', 'model', 'status'],
+      data.terminals.map((t, i) => [t.id, `${demo.tidPrefix}${String(i + 1).padStart(4, '0')}`, m, t.outlet_id, `${demo.serialPrefix}-${String(i + 1).padStart(4, '0')}`, 'NETS Smart Terminal', 'active']))
     await bulk(conn, 'settlements',
-      ['id', 'merchant_id', 'business_date', 'channel', 'gross_cents', 'fee_cents', 'net_cents', 'status', 'expected_date', 'paid_date', 'bank_ref'],
+      ['settlement_id', 'merchant_id', 'business_date', 'channel', 'gross_cents', 'fee_cents', 'net_cents', 'status', 'expected_date', 'paid_date', 'bank_ref'],
       data.settlements.map((s) => [s.id, m, s.business_date, s.channel, s.gross_cents, s.fee_cents, s.net_cents, s.status,
         s.expected_date, s.paid_date, s.paid_date ? `BANK-${s.paid_date.replace(/-/g, '')}-${s.id.slice(0, 6).toUpperCase()}` : null]))
     await bulk(conn, 'transactions',
-      ['id', 'merchant_id', 'outlet_id', 'terminal_id', 'channel', 'status', 'amount_cents', 'fee_cents', 'customer_ref', 'failure_code', 'settlement_id', 'created_at'],
-      data.transactions.map((t) => [t.id, m, t.outlet_id, t.terminal_id, t.channel, t.status, t.amount_cents, t.fee_cents,
-        t.customer_ref, t.failure_code, t.settlement_id, dt(t.created_at)]))
-    await bulk(conn, 'invoices', ['id', 'merchant_id', 'period', 'total_cents', 'status', 'due_date'],
+      ['transaction_id', 'merchant_id', 'outlet_id', 'terminal_id', 'stan', 'channel', 'status', 'amount_cents', 'fee_cents', 'failure_code', 'settlement_id', 'created_at'],
+      data.transactions.map((t) => [t.id, m, t.outlet_id, t.terminal_id, t.stan, t.channel, t.status, t.amount_cents, t.fee_cents,
+        t.failure_code, t.settlement_id, dt(t.created_at)]))
+    await bulk(conn, 'invoices', ['invoice_id', 'merchant_id', 'period', 'total_cents', 'status', 'due_date'],
       data.invoices.map((v) => [v.id, m, v.period, v.total_cents, v.status, v.due_date]))
     await bulk(conn, 'invoice_lines',
-      ['id', 'merchant_id', 'invoice_id', 'charge_type', 'channel', 'description', 'qty', 'unit_price_cents', 'amount_cents'],
+      ['invoice_line_id', 'merchant_id', 'invoice_id', 'charge_type', 'channel', 'description', 'qty', 'unit_price_cents', 'amount_cents'],
       data.invoiceLines.map((l) => {
         const rental = l.description === 'Terminal rental'
         const type = l.channel ? 'mdr' : rental ? 'terminal_rental' : 'portal_fee'
@@ -158,7 +162,7 @@ async function seedNudges(conn, merchantId, nowIso, today) {
     randomUUID(), merchantId, n.kind, n.title, n.body, n.link, dt(new Date(now - (i * 7 + 5) * 60_000).toISOString()),
   ])
   if (rows.length) {
-    await conn.query('INSERT INTO notifications (id, merchant_id, kind, title, body, link, created_at) VALUES ?', [rows])
+    await conn.query('INSERT INTO notifications (notification_id, merchant_id, kind, title, body, link, created_at) VALUES ?', [rows])
   }
   return nudges.length
 }

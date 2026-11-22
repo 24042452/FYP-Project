@@ -41,7 +41,7 @@ describe('suggestionView', () => {
   it('formats time, amount, way of paying, outlet and status', () => {
     const v = suggestionView({
       id: 'x', created_at: '2026-11-14T04:41:00.000Z', amount_cents: 1250, fee_cents: 10, channel: 'nets_qr',
-      status: 'failed', failure_code: '51', customer_ref: null, outlet: null, terminal_serial: null, settlement_date: null,
+      status: 'failed', failure_code: '51', stan: null, outlet: null, terminal_serial: null, tid: null, settlement_date: null,
     })
     expect(v).toMatchObject({ id: 'x', when: 'Sat 14 Nov, 12:41 pm', amount: '$12.50', outlet: 'Not recorded', pill: { label: 'Failed', tone: 'bad' } })
     expect(typeof v.how).toBe('string')

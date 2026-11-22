@@ -50,7 +50,7 @@ describe('Excel exports', () => {
   })
   it('the payments workbook formats amounts in dollars', async () => {
     const buf = await buildTransactionsWorkbook([
-      { id: 'a', createdAt: '2026-10-01T04:00:00.000Z', amountCents: 1250, feeCents: 31, channel: 'card', status: 'failed', failureCode: '51', customerRef: null, outletName: 'Stall', terminalSerial: 'T1', settlementDate: null },
+      { id: 'a', createdAt: '2026-10-01T04:00:00.000Z', amountCents: 1250, feeCents: 31, channel: 'card', status: 'failed', failureCode: '51', stan: null, outletName: 'Stall', terminalSerial: 'T1', tid: null, settlementDate: null },
     ])
     const wb = new ExcelJS.Workbook()
     await wb.xlsx.load(buf)

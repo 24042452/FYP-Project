@@ -116,28 +116,29 @@ erDiagram
 ```
 
 MySQL conventions:
-- Ids are `CHAR(36)` UUID strings. The generator creates them, so seeded data is the same on every machine
+- Every primary key is named after its table: `merchant_id`, `transaction_id`, `user_id` and so on ([ADR-002](adr/002-table-named-ids-and-nets-identifiers.md)). They are `CHAR(36)` UUID strings. The generator creates them, so seeded data is the same on every machine
+- NETS identifiers sit beside them: **MID** on merchants, **TID** on terminals, **STAN** on transactions (merchant → terminal → payment)
 - Money is `BIGINT` cents (`amount_cents`, `fee_cents`…), never `FLOAT` or `DECIMAL` dollars
 - Times are `DATETIME(3)` in **UTC**. Singapore days and hours are computed in SQL with `CONVERT_TZ(created_at, '+00:00', '+08:00')`. Singapore has no daylight saving, so the fixed offset is always right, and the server's time-zone tables don't need loading
 - Fixed value lists use `ENUM(...)` columns; foreign keys and InnoDB everywhere; `utf8mb4`
 
 | Table | Key columns |
 |---|---|
-| `users` | id, email (unique), password_hash (bcrypt), name, created_at, last_login_at |
-| `sessions` | id, user_id, token_hash (SHA-256 of the cookie token), expires_at, created_at |
-| `merchants` | id, legal_name, trading_name, uen, category (F&B, retail…), gst_registered |
+| `users` | user_id, email (unique), password_hash (bcrypt), name, created_at, last_login_at |
+| `sessions` | session_id, user_id, token_hash (SHA-256 of the cookie token), expires_at, created_at |
+| `merchants` | merchant_id, mid (NETS merchant ID), legal_name, trading_name, uen, category (F&B, retail…), gst_registered |
 | `merchant_users` | merchant_id, user_id (→ users), role (owner/manager/cashier/accountant) |
-| `outlets` | id, merchant_id, name, address |
-| `terminals` | id, outlet_id, serial_no, model, status |
-| `transactions` | id, merchant_id, outlet_id, terminal_id, **channel** (nets_qr, nets_click, enets, card, sgqr), amount, fee, status (success/failed/refunded), failure_code, customer_ref (hashed, for repeat-customer analysis), settlement_id, created_at |
-| `settlements` | id, merchant_id, business_date, gross, fees, net, status (pending/paid/delayed), expected_date, paid_date, bank_ref |
-| `invoices` | id, merchant_id, period (month), total, status (unpaid/paid/overdue), due_date, pdf_path |
-| `invoice_lines` | invoice_id, charge_type (MDR fee, terminal rental, …), qty, unit_price, amount |
-| `recon_runs` | id, merchant_id, period, run_at, matched_count, exception_count |
-| `recon_exceptions` | run_id, type (amount_mismatch, missing_settlement, settlement_delay, failed_payment, fee_mismatch), ref ids, expected, actual, status (open/resolved), note |
-| `notifications` | merchant_id, kind, title, body, link, read_at |
+| `outlets` | outlet_id, merchant_id, name, address |
+| `terminals` | terminal_id, tid (NETS terminal ID), merchant_id, outlet_id, serial_no, model, status |
+| `transactions` | transaction_id, merchant_id, outlet_id, terminal_id, stan (6-digit trace number per terminal), **channel** (nets_qr, nets_click, enets, card, sgqr), amount, fee, status (success/failed/refunded), failure_code, settlement_id, created_at |
+| `settlements` | settlement_id, merchant_id, business_date, gross, fees, net, status (pending/paid/delayed), expected_date, paid_date, bank_ref |
+| `invoices` | invoice_id, merchant_id, period (month), total, status (unpaid/paid/overdue), due_date, pdf_path |
+| `invoice_lines` | invoice_line_id, invoice_id, charge_type (MDR fee, terminal rental, …), qty, unit_price, amount |
+| `recon_runs` | recon_run_id, merchant_id, period, run_at, matched_count, exception_count |
+| `recon_exceptions` | recon_exception_id, recon_run_id, type (amount_mismatch, missing_settlement, settlement_delay, failed_payment, fee_mismatch), ref ids, expected, actual, status (open/resolved), note |
+| `notifications` | notification_id, merchant_id, kind, title, body, link, read_at |
 | `alert_rules` | merchant_id, rule_type, threshold, channel (in_app/email), enabled |
-| `kb_chunks` | id, source_doc, heading, content, `FULLTEXT(heading, content)`; Phase 2 adds embedding (JSON) |
+| `kb_chunks` | kb_chunk_id, source_doc, heading, content, `FULLTEXT(heading, content)`; Phase 2 adds embedding (JSON) |
 | `chat_messages` | session_id, user_id, role, content, created_at |
 | `audit_log` | actor, action, entity, before/after, at |
 

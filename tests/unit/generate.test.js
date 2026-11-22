@@ -129,10 +129,13 @@ describe('generateDataset', () => {
     expect(recent.length).toBe(1)
   })
 
-  it('has repeat customers', () => {
-    const counts = new Map()
-    for (const t of hawker.transactions) counts.set(t.customer_ref, (counts.get(t.customer_ref) ?? 0) + 1)
-    const repeatTxns = hawker.transactions.filter((t) => counts.get(t.customer_ref) > 1).length
-    expect(repeatTxns / hawker.transactions.length).toBeGreaterThan(0.15)
+  it("numbers each terminal's payments with a 6-digit STAN, unique per terminal", () => {
+    const seen = new Set()
+    for (const t of hawker.transactions) {
+      expect(t.stan).toMatch(/^\d{6}$/)
+      const key = `${t.terminal_id}|${t.stan}`
+      expect(seen.has(key)).toBe(false)
+      seen.add(key)
+    }
   })
 })

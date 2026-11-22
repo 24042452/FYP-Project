@@ -39,7 +39,7 @@ beforeAll(async () => {
   ]
   for (const [m, d, ch, net, st, exp] of rows) {
     await adminExecute(
-      `INSERT INTO settlements (id, merchant_id, business_date, channel, gross_cents, fee_cents, net_cents, status, expected_date)
+      `INSERT INTO settlements (settlement_id, merchant_id, business_date, channel, gross_cents, fee_cents, net_cents, status, expected_date)
        VALUES (?, ?, ?, ?, ?, 0, ?, ?, ?)`,
       [randomUUID(), m, d, ch, net, net, st, exp],
     )

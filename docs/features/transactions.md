@@ -17,7 +17,8 @@ A searchable list of every payment, from all NETS payment types (NETS QR, cards,
 - Filters in the address: `from`, `to`, `channel`, `status` (success, failed, refunded), `q`, `cursor`, `id`. Anything invalid is ignored and the default used (last 7 Singapore days), so unchecked text never reaches SQL.
 - Dates are Singapore days (`to` inclusive); times are stored in UTC and shown in Singapore time.
 - Paging is by cursor, 50 per page (max 100). An unreadable cursor means the first page.
-- `?id=` opens one payment. The lookup is `WHERE merchant_id = ? AND id = ?`, so another merchant's payment id shows "We couldn't find that payment" and leaks nothing.
+- `?id=` opens one payment. The lookup is `WHERE merchant_id = ? AND transaction_id = ?`, so another merchant's payment id shows "We couldn't find that payment" and leaks nothing.
+- The payment details show NETS' own identifiers: the terminal's **TID** and the payment's **STAN** (6-digit trace number, unique per terminal). Search also matches the start of a STAN. See [ADR-002](../adr/002-table-named-ids-and-nets-identifiers.md).
 - Search text is escaped for `LIKE` (`likeEscape`).
 - Failed payments show a failure code explained in plain words.
 - Excel export is capped at 93 days and 50,000 rows.

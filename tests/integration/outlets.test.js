@@ -34,20 +34,20 @@ beforeAll(async () => {
       { id: idOf(5), merchantId: B, amountCents: 99999, feeCents: 1, createdAt: `${DAY}T04:00:00.000Z` },
     ],
   })
-  await adminExecute(`INSERT INTO outlets (id, merchant_id, name) VALUES (?, ?, 'Tampines Mall')`, [OUT_TAMPINES, A])
-  await adminExecute(`INSERT INTO outlets (id, merchant_id, name) VALUES (?, ?, 'Online Store')`, [OUT_ONLINE, A])
-  await adminExecute(`INSERT INTO outlets (id, merchant_id, name) VALUES (?, ?, 'Aardvark Stall')`, [OUT_B, B])
-  await adminExecute(`UPDATE transactions SET outlet_id = ? WHERE id IN (?, ?, ?)`, [OUT_TAMPINES, idOf(1), idOf(2), idOf(4)])
-  await adminExecute(`UPDATE transactions SET outlet_id = ? WHERE id = ?`, [OUT_ONLINE, idOf(3)])
-  await adminExecute(`UPDATE transactions SET outlet_id = ? WHERE id = ?`, [OUT_B, idOf(5)])
+  await adminExecute(`INSERT INTO outlets (outlet_id, merchant_id, name) VALUES (?, ?, 'Tampines Mall')`, [OUT_TAMPINES, A])
+  await adminExecute(`INSERT INTO outlets (outlet_id, merchant_id, name) VALUES (?, ?, 'Online Store')`, [OUT_ONLINE, A])
+  await adminExecute(`INSERT INTO outlets (outlet_id, merchant_id, name) VALUES (?, ?, 'Aardvark Stall')`, [OUT_B, B])
+  await adminExecute(`UPDATE transactions SET outlet_id = ? WHERE transaction_id IN (?, ?, ?)`, [OUT_TAMPINES, idOf(1), idOf(2), idOf(4)])
+  await adminExecute(`UPDATE transactions SET outlet_id = ? WHERE transaction_id = ?`, [OUT_ONLINE, idOf(3)])
+  await adminExecute(`UPDATE transactions SET outlet_id = ? WHERE transaction_id = ?`, [OUT_B, idOf(5)])
   // One settlement of A holds payments 1, 2 and 3 (two outlets); B has its own.
-  const ins = `INSERT INTO settlements (id, merchant_id, business_date, channel, gross_cents, fee_cents, net_cents, status, expected_date) VALUES (?, ?, ?, 'nets_qr', ?, ?, ?, 'pending', '2026-11-05')`
+  const ins = `INSERT INTO settlements (settlement_id, merchant_id, business_date, channel, gross_cents, fee_cents, net_cents, status, expected_date) VALUES (?, ?, ?, 'nets_qr', ?, ?, ?, 'pending', '2026-11-05')`
   await adminExecute(ins, [SETTLE, A, DAY, 7000, 70, 6930])
   await adminExecute(ins, [SETTLE_B, B, DAY, 99999, 1, 99998])
-  await adminExecute(`UPDATE transactions SET settlement_id = ? WHERE id IN (?, ?, ?)`, [SETTLE, idOf(1), idOf(2), idOf(3)])
-  await adminExecute(`UPDATE transactions SET settlement_id = ? WHERE id = ?`, [SETTLE_B, idOf(5)])
-  await adminExecute(`INSERT INTO recon_runs (id, merchant_id, period, run_at, matched_count, exception_count) VALUES (?, ?, '2026-10-01', '2026-11-03 04:00:00.000', 5, 3)`, [RUN, A])
-  const exc = `INSERT INTO recon_exceptions (id, merchant_id, run_id, type, settlement_id, status) VALUES (?, ?, ?, ?, ?, ?)`
+  await adminExecute(`UPDATE transactions SET settlement_id = ? WHERE transaction_id IN (?, ?, ?)`, [SETTLE, idOf(1), idOf(2), idOf(3)])
+  await adminExecute(`UPDATE transactions SET settlement_id = ? WHERE transaction_id = ?`, [SETTLE_B, idOf(5)])
+  await adminExecute(`INSERT INTO recon_runs (recon_run_id, merchant_id, period, run_at, matched_count, exception_count) VALUES (?, ?, '2026-10-01', '2026-11-03 04:00:00.000', 5, 3)`, [RUN, A])
+  const exc = `INSERT INTO recon_exceptions (recon_exception_id, merchant_id, recon_run_id, type, settlement_id, status) VALUES (?, ?, ?, ?, ?, ?)`
   await adminExecute(exc, [randomUUID(), A, RUN, 'amount_mismatch', SETTLE, 'open'])
   await adminExecute(exc, [randomUUID(), A, RUN, 'fee_mismatch', null, 'open'])
   await adminExecute(exc, [randomUUID(), A, RUN, 'failed_payment', null, 'open'])
@@ -182,16 +182,16 @@ describe('check-up problems are tied by successful payments only', () => {
         { id: idOf(702), merchantId: M, amountCents: 500, status: 'failed', createdAt: `${DAY}T05:00:00.000Z` },
       ],
     })
-    await adminExecute(`INSERT INTO outlets (id, merchant_id, name) VALUES (?, ?, 'Pays')`, [O_OK, M])
-    await adminExecute(`INSERT INTO outlets (id, merchant_id, name) VALUES (?, ?, 'Only failed')`, [O_FAIL, M])
+    await adminExecute(`INSERT INTO outlets (outlet_id, merchant_id, name) VALUES (?, ?, 'Pays')`, [O_OK, M])
+    await adminExecute(`INSERT INTO outlets (outlet_id, merchant_id, name) VALUES (?, ?, 'Only failed')`, [O_FAIL, M])
     await adminExecute(
-      `INSERT INTO settlements (id, merchant_id, business_date, channel, gross_cents, fee_cents, net_cents, status, expected_date) VALUES (?, ?, ?, 'nets_qr', 1000, 0, 1000, 'pending', '2026-11-05')`,
+      `INSERT INTO settlements (settlement_id, merchant_id, business_date, channel, gross_cents, fee_cents, net_cents, status, expected_date) VALUES (?, ?, ?, 'nets_qr', 1000, 0, 1000, 'pending', '2026-11-05')`,
       [S, M, DAY],
     )
-    await adminExecute(`UPDATE transactions SET outlet_id = ?, settlement_id = ? WHERE id = ?`, [O_OK, S, idOf(701)])
-    await adminExecute(`UPDATE transactions SET outlet_id = ?, settlement_id = ? WHERE id = ?`, [O_FAIL, S, idOf(702)])
-    await adminExecute(`INSERT INTO recon_runs (id, merchant_id, period, run_at, matched_count, exception_count) VALUES (?, ?, '2026-10-01', '2026-11-03 04:00:00.000', 0, 1)`, [R, M])
-    await adminExecute(`INSERT INTO recon_exceptions (id, merchant_id, run_id, type, settlement_id, status) VALUES (?, ?, ?, 'amount_mismatch', ?, 'open')`, [randomUUID(), M, R, S])
+    await adminExecute(`UPDATE transactions SET outlet_id = ?, settlement_id = ? WHERE transaction_id = ?`, [O_OK, S, idOf(701)])
+    await adminExecute(`UPDATE transactions SET outlet_id = ?, settlement_id = ? WHERE transaction_id = ?`, [O_FAIL, S, idOf(702)])
+    await adminExecute(`INSERT INTO recon_runs (recon_run_id, merchant_id, period, run_at, matched_count, exception_count) VALUES (?, ?, '2026-10-01', '2026-11-03 04:00:00.000', 0, 1)`, [R, M])
+    await adminExecute(`INSERT INTO recon_exceptions (recon_exception_id, merchant_id, recon_run_id, type, settlement_id, status) VALUES (?, ?, ?, 'amount_mismatch', ?, 'open')`, [randomUUID(), M, R, S])
 
     expect((await getLatestRunSummary(M, O_OK)).openCount).toBe(1)
     const failedOnly = await getLatestRunSummary(M, O_FAIL)
