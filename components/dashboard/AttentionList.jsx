@@ -1,8 +1,8 @@
 import Link from 'next/link'
 
 /**
- * The things that need doing, each with a link.
- * @param {{items: {key: string, title: string, detail: string, href: string, linkLabel: string, scope?: string}[]}} props
+ * The things that need doing, each with a link (none when the person cannot open that page).
+ * @param {{items: {key: string, title: string, detail: string, href: string | null, linkLabel: string | null, scope?: string}[]}} props
  */
 export function AttentionList({ items }) {
   return (
@@ -16,9 +16,11 @@ export function AttentionList({ items }) {
               {i.scope ? <span className="ml-2 text-[13px] font-normal text-ink-3">{i.scope}</span> : null}
             </b>
             <span className="text-[14px] text-ink-2">{i.detail}</span>{' '}
-            <Link href={i.href} className="inline-flex min-h-11 items-center text-[14px] font-semibold">
-              {i.linkLabel}
-            </Link>
+            {i.href ? (
+              <Link href={i.href} className="inline-flex min-h-11 items-center text-[14px] font-semibold">
+                {i.linkLabel}
+              </Link>
+            ) : null}
           </div>
         </li>
       ))}

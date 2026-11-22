@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Menu } from 'lucide-react'
 import { Sheet, SheetContent, SheetTitle, SheetDescription } from '@/components/ui/sheet'
-import { TABS } from '@/lib/nav'
+import { navFor } from '@/lib/nav'
 import { Sidebar, SidebarContent } from './Sidebar'
 import { TopBar } from './TopBar'
 import { OutletToast } from './OutletToast'
@@ -13,11 +13,13 @@ import { NavIcon } from './nav-icons'
 
 /**
  * The portal frame: sidebar (desktop), top bar, page, and on phones a menu Sheet plus bottom tabs.
- * @param {{merchant: {tradingName: string, role: string, userName: string}, alerts?: {unread: number, items: import('./NotificationBell').BellItem[]}, outlets: {id: string, name: string}[], selectedId: string | null, children: React.ReactNode}} props
+ * @param {{merchant: {id: string, tradingName: string, role: string, userName: string, tier: import('@/lib/access/rules').Tier, readOnly: boolean, group: {name: string, franchisees: {id: string, tradingName: string}[]} | null}, alerts?: {unread: number, items: import('./NotificationBell').BellItem[]}, outlets: {id: string, name: string}[], selectedId: string | null, children: React.ReactNode}} props
  */
 export function PortalShell({ merchant, alerts, outlets, selectedId, children }) {
   const [open, setOpen] = useState(false)
   const pathname = usePathname()
+  const access = { id: merchant.id, tier: merchant.tier, group: merchant.group }
+  const { tabs } = navFor(access)
 
   const tabClass = (/** @type {boolean} */ active) =>
     'flex min-h-14 flex-1 flex-col items-center justify-center gap-0.5 text-xs font-medium no-underline ' +
@@ -26,26 +28,33 @@ export function PortalShell({ merchant, alerts, outlets, selectedId, children })
   return (
     <div className="flex min-h-screen">
       <OutletToast />
-      <Sidebar outlets={outlets} selectedId={selectedId} />
+      <Sidebar outlets={outlets} selectedId={selectedId} access={access} />
 
       <div className="flex min-w-0 flex-1 flex-col">
         <TopBar
           userName={merchant.userName}
           role={merchant.role}
-          merchantName={merchant.tradingName}
+          merchantName={merchant.group ? merchant.group.name : merchant.tradingName}
           onOpenMenu={() => setOpen(true)}
           outletId={selectedId}
-          showOutlet={outlets.length > 1}
+          showOutlet={outlets.length > 1 && pathname !== '/group'}
           alerts={alerts}
         />
-        <main className="mx-auto w-full max-w-[1240px] flex-1 px-4 pt-6 pb-24 md:px-9 md:pb-16">{children}</main>
+        <main className="mx-auto w-full max-w-[1240px] flex-1 px-4 pt-6 pb-24 md:px-9 md:pb-16">
+          {merchant.readOnly && pathname !== '/group' ? (
+            <p data-testid="view-only-banner" className="mb-5 rounded-lg border border-line bg-info-bg px-4 py-3 text-[14px] text-info">
+              <span className="font-semibold">Head office view.</span> You are looking at {merchant.tradingName}. You can see everything but not change it.
+            </p>
+          ) : null}
+          {children}
+        </main>
       </div>
 
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetContent side="left" showCloseButton={false} className="w-[300px] max-w-[85vw] gap-0 bg-white p-0 sm:max-w-[300px]">
           <SheetTitle className="sr-only">Menu</SheetTitle>
           <SheetDescription className="sr-only">All the pages in the portal</SheetDescription>
-          <SidebarContent outlets={outlets} selectedId={selectedId} idSuffix="-menu" onNavigate={() => setOpen(false)} />
+          <SidebarContent outlets={outlets} selectedId={selectedId} access={access} idSuffix="-menu" onNavigate={() => setOpen(false)} />
         </SheetContent>
       </Sheet>
 
@@ -53,7 +62,7 @@ export function PortalShell({ merchant, alerts, outlets, selectedId, children })
         aria-label="Quick links"
         className="fixed inset-x-0 bottom-0 z-20 flex border-t border-line bg-white pb-[env(safe-area-inset-bottom)] md:hidden"
       >
-        {TABS.map((t) => {
+        {tabs.map((t) => {
           const active = t.href === '/' ? pathname === '/' : pathname.startsWith(t.href)
           return (
             <Link key={t.href} href={t.href} aria-current={active ? 'page' : undefined} className={tabClass(active)}>

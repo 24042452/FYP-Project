@@ -1,6 +1,6 @@
 import {
   House, Receipt, TrendingUp, Landmark, CircleCheck, FileText, ChartColumn, Undo2, Tag,
-  Megaphone, Banknote, Smartphone, Inbox, Building2, Plug, MessageCircle,
+  Megaphone, Banknote, Smartphone, Inbox, Building2, Plug, MessageCircle, Network,
 } from 'lucide-react'
 
 const ICONS = {
@@ -20,6 +20,7 @@ const ICONS = {
   building: Building2,
   plug: Plug,
   chat: MessageCircle,
+  group: Network,
 }
 
 /** @param {{name: string, className?: string}} props */

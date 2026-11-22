@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { getCurrentMerchant, findMerchantForUser } from '@/lib/data/merchant'
+import { canOpen } from '@/lib/access/rules'
 import { getSessionUser } from '@/lib/auth/session'
 import { makeTools } from '@/lib/assistant/tools'
 import { answerWithRules, SUGGESTIONS } from '@/lib/assistant/rules'
@@ -31,6 +32,7 @@ export async function POST(request) {
   const user = await getSessionUser()
   if (!user || !(await findMerchantForUser(user.id))) return json({ error: 'signed_out' }, 401)
   const merchant = await getCurrentMerchant()
+  if (!canOpen(merchant, '/assistant')) return json({ error: 'The assistant looks at the whole business, so it is not available for an outlet login.' }, 403)
 
   let parsed
   try {

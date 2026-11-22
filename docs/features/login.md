@@ -26,3 +26,4 @@ Lets a merchant sign in with their email and password. For demos, one-click "Try
 - Unit: `tests/unit/password.test.js`, `rate-limit.test.js`, `login-form.test.jsx` (no demo buttons when demo mode is off)
 - Integration: `tests/integration/auth.test.js`, `demo-login.test.js`
 - End-to-end: `tests/e2e/auth.spec.js` (TC-AUTH-01, 01b, 02, 03)
+- **Franchise demo:** three more buttons log in as Kopi Corner head office, the Kopi Corner East owner and the Bedok outlet manager (`kopi_hq`, `kopi_owner`, `kopi_outlet` in `checkDemo`). Head office starts on the group overview: signing in clears the `portal_merchant` cookie. See [Franchises](franchise.md).

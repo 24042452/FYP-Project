@@ -98,7 +98,11 @@ flowchart LR
 
 ```mermaid
 erDiagram
+  merchant_groups ||--o{ merchants : "franchisees"
+  merchant_groups ||--o{ group_users : "head office"
+  users ||--o{ group_users : "is HQ of"
   users ||--o{ merchant_users : "belongs to"
+  outlets |o--o{ merchant_users : "outlet manager of"
   users ||--o{ sessions : has
   merchants ||--o{ merchant_users : has
   merchants ||--o{ outlets : has
@@ -126,8 +130,10 @@ MySQL conventions:
 |---|---|
 | `users` | user_id, email (unique), password_hash (bcrypt), name, created_at, last_login_at |
 | `sessions` | session_id, user_id, token_hash (SHA-256 of the cookie token), expires_at, created_at |
-| `merchants` | merchant_id, mid (NETS merchant ID), legal_name, trading_name, uen, category (F&B, retail…), gst_registered |
-| `merchant_users` | merchant_id, user_id (→ users), role (owner/manager/cashier/accountant) |
+| `merchants` | merchant_id, mid (NETS merchant ID), group_id (franchise, nullable), legal_name, trading_name, uen, category (F&B, retail…), gst_registered |
+| `merchant_groups` | group_id, name (a franchise brand; head office) |
+| `group_users` | group_id, user_id, role (hq_owner): head office sees every franchisee, view only ([ADR-003](adr/003-franchise-tiers.md)) |
+| `merchant_users` | merchant_id, user_id (→ users), role (owner/manager/cashier/accountant/outlet_manager), outlet_id (set = locked to that outlet) |
 | `outlets` | outlet_id, merchant_id, name, address |
 | `terminals` | terminal_id, tid (NETS terminal ID), merchant_id, outlet_id, serial_no, model, status |
 | `transactions` | transaction_id, merchant_id, outlet_id, terminal_id, stan (6-digit trace number per terminal), **channel** (nets_qr, nets_click, enets, card, sgqr), amount, fee, status (success/failed/refunded), failure_code, settlement_id, created_at |

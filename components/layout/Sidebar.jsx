@@ -2,9 +2,10 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { NAV, ASK_HREF } from '@/lib/nav'
+import { ASK_HREF, navFor } from '@/lib/nav'
 import { NavIcon } from './nav-icons'
 import { OutletPicker } from './OutletPicker'
+import { FranchiseePicker } from './FranchiseePicker'
 
 /** @param {string} pathname @param {string} href */
 function isActive(pathname, href) {
@@ -14,10 +15,14 @@ function isActive(pathname, href) {
 /**
  * The navigation itself: brand, outlet picker, grouped links, assistant button.
  * Used in the desktop sidebar and inside the phone menu Sheet.
- * @param {{outlets: {id: string, name: string}[], selectedId: string | null, idSuffix?: string, onNavigate?: () => void}} props
+ * `access` decides the menu: head office gets the franchisee menu and the group overview; an outlet manager
+ * only sees the pages that follow their outlet.
+ * @typedef {{id: string, tier: import('@/lib/access/rules').Tier, group: {name: string, franchisees: {id: string, tradingName: string}[]} | null}} MenuAccess
+ * @param {{outlets: {id: string, name: string}[], selectedId: string | null, access: MenuAccess, idSuffix?: string, onNavigate?: () => void}} props
  */
-export function SidebarContent({ outlets, selectedId, idSuffix, onNavigate }) {
+export function SidebarContent({ outlets, selectedId, access, idSuffix, onNavigate }) {
   const pathname = usePathname()
+  const { nav, showAsk } = navFor(access)
   const askActive = isActive(pathname, ASK_HREF)
 
   return (
@@ -27,10 +32,13 @@ export function SidebarContent({ outlets, selectedId, idSuffix, onNavigate }) {
         <span className="text-base font-bold">Merchant Portal</span>
       </Link>
 
-      <OutletPicker outlets={outlets} selectedId={selectedId} idSuffix={idSuffix} />
+      {access.group ? (
+        <FranchiseePicker group={access.group} currentId={access.id} idSuffix={idSuffix} onNavigate={onNavigate} />
+      ) : null}
+      {pathname === '/group' ? null : <OutletPicker outlets={outlets} selectedId={selectedId} idSuffix={idSuffix} />}
 
       <div className="-mx-1 flex min-h-0 flex-1 flex-col gap-1.5 overflow-y-auto px-1 pb-4">
-        {NAV.map((g) => (
+        {nav.map((g) => (
           <nav key={g.group} aria-label={g.group} className="flex flex-col gap-px">
             <div className="px-3 pt-1.5 pb-0.5 text-xs font-semibold tracking-wider text-ink-3 uppercase">{g.group}</div>
             {g.items.map((item) => {
@@ -69,6 +77,7 @@ export function SidebarContent({ outlets, selectedId, idSuffix, onNavigate }) {
         ))}
       </div>
 
+      {showAsk ? (
       <Link
         href={ASK_HREF}
         onClick={onNavigate}
@@ -78,18 +87,20 @@ export function SidebarContent({ outlets, selectedId, idSuffix, onNavigate }) {
         <NavIcon name="chat" className="size-5 text-white" />
         Ask NETS Assistant
       </Link>
+      ) : null}
     </div>
   )
 }
 
 /** Desktop sidebar (hidden below 768px; phones use the menu Sheet). */
-export function Sidebar({ outlets, selectedId }) {
+/** @param {{outlets: {id: string, name: string}[], selectedId: string | null, access: MenuAccess}} props */
+export function Sidebar({ outlets, selectedId, access }) {
   return (
     <aside
       aria-label="Main menu"
       className="sticky top-0 hidden h-screen w-[264px] flex-none overflow-hidden border-r border-line bg-white md:block"
     >
-      <SidebarContent outlets={outlets} selectedId={selectedId} />
+      <SidebarContent outlets={outlets} selectedId={selectedId} access={access} />
     </aside>
   )
 }

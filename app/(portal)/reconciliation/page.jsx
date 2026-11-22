@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { getCurrentMerchant } from '@/lib/data/merchant'
+import { requirePage } from '@/lib/data/merchant'
 import { getLatestRunForMonth } from '@/lib/data/recon'
 import { addMonths, monthStart, sgtDate } from '@/lib/dates'
 import { formatSGD } from '@/lib/money'
@@ -54,8 +54,8 @@ function SortedForm({ e, month }) {
   )
 }
 
-/** @param {{e: import('@/lib/data/recon').StoredException, month: string}} props */
-function ExceptionCard({ e, month }) {
+/** @param {{e: import('@/lib/data/recon').StoredException, month: string, readOnly?: boolean}} props */
+function ExceptionCard({ e, month, readOnly = false }) {
   const both = e.type !== 'failed_payment' && e.expectedCents != null && e.actualCents != null
   const diff = both ? /** @type {number} */ (e.actualCents) - /** @type {number} */ (e.expectedCents) : 0
   const seeHref =
@@ -82,7 +82,7 @@ function ExceptionCard({ e, month }) {
         </dl>
       ) : null}
       <div className="flex flex-wrap items-center gap-x-4">
-        <SortedForm e={e} month={month} />
+        {readOnly ? null : <SortedForm e={e} month={month} />}
         {seeHref ? (
           <Link href={seeHref} className="inline-flex min-h-11 items-center text-[14px] font-semibold text-nets-blue-hover">
             See the {e.day ? shortDay(e.day) : ''} payments
@@ -99,7 +99,7 @@ function ExceptionCard({ e, month }) {
 
 export default async function ReconciliationPage({ searchParams }) {
   // The merchant comes only from the session, never from the address.
-  const merchant = await getCurrentMerchant()
+  const merchant = await requirePage('/reconciliation')
   const sp = await searchParams
   const today = sgtDate(new Date().toISOString())
   const current = today.slice(0, 7)
@@ -140,12 +140,24 @@ export default async function ReconciliationPage({ searchParams }) {
           </div>
           <button type="submit" className={linkBtn}>Show</button>
         </form>
-        <RunCheckup month={month} label={run ? 'Check again' : 'Run check-up'} />
+        {merchant.readOnly ? (
+          <p data-testid="view-only" className="rounded-lg bg-mute-bg px-3.5 py-3 text-[14px] text-ink-2 sm:max-w-[26rem]">
+            <span className="font-semibold text-ink">View only.</span> Head office can see {merchant.tradingName}'s check-ups. The franchisee runs and sorts them.
+          </p>
+        ) : (
+          <RunCheckup month={month} label={run ? 'Check again' : 'Run check-up'} />
+        )}
       </section>
 
       {!view || !run ? (
         <Panel title={monthLabel(month)}>
-          <EmptyState>No check-up has been run for {monthLabel(month)} yet. Press &quot;Run check-up&quot; to compare your sales with your bank deposits and your bill.</EmptyState>
+          <EmptyState>
+            {merchant.readOnly ? (
+              <>{merchant.tradingName} has not run a check-up for {monthLabel(month)} yet.</>
+            ) : (
+              <>No check-up has been run for {monthLabel(month)} yet. Press &quot;Run check-up&quot; to compare your sales with your bank deposits and your bill.</>
+            )}
+          </EmptyState>
         </Panel>
       ) : view.isEmpty ? (
         <Panel title={monthLabel(month)}>
@@ -175,7 +187,7 @@ export default async function ReconciliationPage({ searchParams }) {
             <Panel key={g.type} title={`${g.title} (${g.items.length})`} tech={g.tech}>
               <ul className="-mx-4 m-0 -mb-4 list-none p-0 sm:-mx-5 sm:-mb-5">
                 {g.items.map((e) => (
-                  <ExceptionCard key={e.id} e={e} month={month} />
+                  <ExceptionCard key={e.id} e={e} month={month} readOnly={merchant.readOnly} />
                 ))}
               </ul>
             </Panel>

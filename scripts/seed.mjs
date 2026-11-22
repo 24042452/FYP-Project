@@ -14,6 +14,13 @@ import { loadFaq } from '../lib/assistant/kb.js'
 const START = '2026-05-01'
 const BATCH = 1000
 
+/** The franchise group and its head-office owner. */
+const KOPI_GROUP = {
+  groupId: '33333333-3333-4333-8333-333333333333',
+  name: 'Kopi Corner',
+  hq: { userId: 'cccccccc-cccc-4ccc-8ccc-cccccccccccc', email: 'kopi.hq@demo.local', name: 'Ms Lim' },
+}
+
 const DEMOS = [
   {
     profile: 'hawker',
@@ -21,9 +28,7 @@ const DEMOS = [
     merchantId: '11111111-1111-4111-8111-111111111111',
     mid: '110000000010001',
     tidPrefix: '1101',
-    userId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
-    email: 'hawker@demo.local',
-    userName: 'Ah Hock',
+    users: [{ userId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', email: 'hawker@demo.local', name: 'Ah Hock', role: 'owner' }],
     legal_name: 'Ah Hock Chicken Rice',
     trading_name: 'Ah Hock Chicken Rice',
     uen: 'T26LL0001A',
@@ -37,15 +42,72 @@ const DEMOS = [
     merchantId: '22222222-2222-4222-8222-222222222222',
     mid: '110000000020002',
     tidPrefix: '1102',
-    userId: 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
-    email: 'retail@demo.local',
-    userName: 'Mr Tan',
+    users: [{ userId: 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb', email: 'retail@demo.local', name: 'Mr Tan', role: 'owner' }],
     legal_name: 'Tan & Sons Retail Pte Ltd',
     trading_name: 'Tan & Sons Retail',
     uen: '202612345K',
     category: 'Retail',
     gst: 1,
     serialPrefix: 'TS',
+  },
+  // Kopi Corner: a franchise (3 tiers). Head office sees all three franchisees; East has an owner and an outlet manager.
+  {
+    profile: 'cafe',
+    seed: 3003,
+    merchantId: '44444444-4444-4444-8444-444444444444',
+    mid: '110000000030003',
+    tidPrefix: '1103',
+    groupId: KOPI_GROUP.groupId,
+    outlets: [
+      { name: 'Tampines Hub #01-12', address: '1 Tampines Walk, Singapore 528523' },
+      { name: 'Bedok North #01-30', address: '210 Bedok North St 1, Singapore 460210' },
+    ],
+    recentDelay: false,
+    users: [
+      { userId: 'dddddddd-dddd-4ddd-8ddd-dddddddddddd', email: 'kopi.east@demo.local', name: 'Mr Wong', role: 'owner' },
+      { userId: 'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee', email: 'kopi.bedok@demo.local', name: 'Priya', role: 'outlet_manager', outletIndex: 1 },
+    ],
+    legal_name: 'KC East Pte Ltd',
+    trading_name: 'Kopi Corner East',
+    uen: '202633301E',
+    category: 'F&B',
+    gst: 1,
+    serialPrefix: 'KE',
+  },
+  {
+    profile: 'cafe',
+    seed: 4004,
+    merchantId: '55555555-5555-4555-8555-555555555555',
+    mid: '110000000040004',
+    tidPrefix: '1104',
+    groupId: KOPI_GROUP.groupId,
+    outlets: [{ name: 'Jurong Point #02-08', address: '1 Jurong West Central 2, Singapore 648886' }],
+    recentDelay: true,
+    users: [],
+    legal_name: 'KC West Pte Ltd',
+    trading_name: 'Kopi Corner West',
+    uen: '202633302W',
+    category: 'F&B',
+    gst: 0,
+    serialPrefix: 'KW',
+  },
+  {
+    profile: 'cafe',
+    seed: 5005,
+    merchantId: '66666666-6666-4666-8666-666666666666',
+    mid: '110000000050005',
+    tidPrefix: '1105',
+    groupId: KOPI_GROUP.groupId,
+    outlets: [{ name: 'Woodlands Civic #01-05', address: '900 South Woodlands Dr, Singapore 730900' }],
+    recentDelay: false,
+    anomalies: false,
+    users: [],
+    legal_name: 'KC North Pte Ltd',
+    trading_name: 'Kopi Corner North',
+    uen: '202633303N',
+    category: 'F&B',
+    gst: 0,
+    serialPrefix: 'KN',
   },
 ]
 
@@ -58,9 +120,35 @@ async function bulk(conn, table, columns, rows) {
   }
 }
 
+/**
+ * Create or refresh one demo login, and log out any old sessions it had.
+ * @param {import('mysql2/promise').Connection} conn
+ * @param {{userId: string, email: string, name: string}} u
+ * @param {string} passwordHash
+ */
+async function upsertUser(conn, u, passwordHash) {
+  await conn.query('DELETE FROM sessions WHERE user_id = ?', [u.userId])
+  await conn.query(
+    `INSERT INTO users (user_id, email, password_hash, name) VALUES (?, ?, ?, ?)
+     ON DUPLICATE KEY UPDATE password_hash = VALUES(password_hash), name = VALUES(name)`,
+    [u.userId, u.email, passwordHash, u.name],
+  )
+}
+
+/**
+ * The franchise group and its head-office login (group_users). Run before its merchants are seeded.
+ * Deleting the group unlinks its merchants (ON DELETE SET NULL) and removes its head-office links.
+ */
+async function seedGroup(conn, group, password) {
+  await conn.query('DELETE FROM merchant_groups WHERE group_id = ?', [group.groupId])
+  await conn.query('INSERT INTO merchant_groups (group_id, name) VALUES (?, ?)', [group.groupId, group.name])
+  await upsertUser(conn, group.hq, await hashPassword(password))
+  await conn.query("INSERT INTO group_users (group_id, user_id, role) VALUES (?, ?, 'hq_owner')", [group.groupId, group.hq.userId])
+}
+
 async function seedMerchant(conn, demo, password, nowIso, today) {
   const data = trimFuture(
-    generateDataset({ profile: demo.profile, seed: demo.seed, start: START, end: today, today }),
+    generateDataset({ profile: demo.profile, seed: demo.seed, start: START, end: today, today, outlets: demo.outlets, recentDelay: demo.recentDelay, anomalies: demo.anomalies }),
     nowIso,
   )
   const m = demo.merchantId
@@ -69,20 +157,18 @@ async function seedMerchant(conn, demo, password, nowIso, today) {
   await conn.beginTransaction()
   try {
     await conn.query('DELETE FROM merchants WHERE merchant_id = ?', [m])
-    await conn.query('DELETE FROM sessions WHERE user_id = ?', [demo.userId])
+    for (const u of demo.users) await upsertUser(conn, u, passwordHash)
     await conn.query(
-      `INSERT INTO users (user_id, email, password_hash, name) VALUES (?, ?, ?, ?)
-       ON DUPLICATE KEY UPDATE password_hash = VALUES(password_hash), name = VALUES(name)`,
-      [demo.userId, demo.email, passwordHash, demo.userName],
+      `INSERT INTO merchants (merchant_id, mid, group_id, legal_name, trading_name, uen, category, gst_registered) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      [m, demo.mid, demo.groupId ?? null, demo.legal_name, demo.trading_name, demo.uen, demo.category, demo.gst],
     )
-    await conn.query(
-      `INSERT INTO merchants (merchant_id, mid, legal_name, trading_name, uen, category, gst_registered) VALUES (?, ?, ?, ?, ?, ?, ?)`,
-      [m, demo.mid, demo.legal_name, demo.trading_name, demo.uen, demo.category, demo.gst],
-    )
-    await conn.query(`INSERT INTO merchant_users (merchant_id, user_id, role) VALUES (?, ?, 'owner')`, [m, demo.userId])
 
     await bulk(conn, 'outlets', ['outlet_id', 'merchant_id', 'name', 'address'],
       data.outlets.map((o) => [o.id, m, o.name, o.address]))
+    for (const u of demo.users) {
+      const outletId = u.outletIndex === undefined ? null : data.outlets[u.outletIndex].id
+      await conn.query('INSERT INTO merchant_users (merchant_id, user_id, role, outlet_id) VALUES (?, ?, ?, ?)', [m, u.userId, u.role, outletId])
+    }
     await bulk(conn, 'terminals', ['terminal_id', 'tid', 'merchant_id', 'outlet_id', 'serial_no', 'model', 'status'],
       data.terminals.map((t, i) => [t.id, `${demo.tidPrefix}${String(i + 1).padStart(4, '0')}`, m, t.outlet_id, `${demo.serialPrefix}-${String(i + 1).padStart(4, '0')}`, 'NETS Smart Terminal', 'active']))
     await bulk(conn, 'settlements',
@@ -178,11 +264,13 @@ async function main() {
   const today = sgtDate(nowIso)
   const conn = await mysql.createConnection({ uri: url, ssl: sslOptions() })
   try {
+    await seedGroup(conn, KOPI_GROUP, password)
+    console.log(`${KOPI_GROUP.name} group: head office login ${KOPI_GROUP.hq.email}`)
     for (const demo of DEMOS) {
       const c = await seedMerchant(conn, demo, password, nowIso, today)
       const nudgeCount = await seedNudges(conn, demo.merchantId, nowIso, today)
       console.log(
-        `${demo.legal_name} (${demo.email}): ${c.outlets} outlets, ${c.terminals} terminals, ` +
+        `${demo.legal_name} (${demo.users.map((u) => u.email).join(', ') || 'no login'}): ${c.outlets} outlets, ${c.terminals} terminals, ` +
           `${c.transactions} transactions, ${c.settlements} settlements, ${c.invoices} invoices, ${nudgeCount} alerts`,
       )
     }

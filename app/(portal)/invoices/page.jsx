@@ -1,4 +1,4 @@
-import { getCurrentMerchant } from '@/lib/data/merchant'
+import { requirePage } from '@/lib/data/merchant'
 import { listInvoiceLines, listInvoices } from '@/lib/data/invoices'
 import { sgtDate } from '@/lib/dates'
 import { buildInvoicesModel } from '@/lib/invoices/model'
@@ -14,7 +14,7 @@ const secondary =
 
 export default async function InvoicesPage({ searchParams }) {
   // The merchant comes only from the session, never from the address.
-  const merchant = await getCurrentMerchant()
+  const merchant = await requirePage('/invoices')
   const sp = await searchParams
   const openId = Array.isArray(sp?.open) ? sp.open[0] : sp?.open
 

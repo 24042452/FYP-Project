@@ -245,6 +245,20 @@ describe('buildHomeModel: settlements and attention', () => {
     const one = buildHomeModel({ ...EMPTY_INPUT, recon: { runAt: '2026-11-11T01:00:00.000Z', period: '2026-10-01', matchedCount: 1, exceptionCount: 1, openCount: 1 } })
     expect(one.tiles[2].value).toBe('1 thing')
   })
+  it('keeps items but drops links to pages the person cannot open (outlet manager)', () => {
+    const o = buildHomeModel({
+      ...EMPTY_INPUT,
+      todayRows: [row('2026-11-11', 'nets_qr', 1000, 5, 2)],
+      settlementSummary: { pendingCents: 0, nextExpectedDate: null, lateCount: 2, lateCents: 60870 },
+      recon: { runAt: '2026-11-10T16:30:00.000Z', period: '2026-10-01', matchedCount: 1, exceptionCount: 3, openCount: 3, wholeBusinessCount: 4 },
+      outletName: 'Bedok',
+      canLink: (p) => p === '/' || p === '/transactions',
+    })
+    expect(o.attention.items.map((i) => i.href)).toEqual([null, '/transactions?status=failed', null])
+    expect(o.attention.items[0].linkLabel).toBeNull()
+    expect(o.tiles[2]).toMatchObject({ value: '7 things', href: '/transactions?status=failed', linkLabel: 'See what to do' })
+    expect(o.attention.wholeBusiness).toBeUndefined()
+  })
 })
 
 describe('buildHomeModel: other periods', () => {
