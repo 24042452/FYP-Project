@@ -62,6 +62,9 @@ A 7-minute walkthrough of the MVP, then questions. One person **presents** (talk
 
 "Each one shows what we expected, what actually happened, and the difference. The 45 payments that simply didn't go through are kept to one line so they don't bury the real problems."
 
+**Do:** on **Money is short**, tap **How to fix this**. Point at step 3, then tap **Copy details**.
+**Say:** "You asked for a guide to reconciling. Every problem now has step-by-step help in plain words: why it usually happens, what to check first (with a link straight to those payments), and, if it's still wrong, the exact details NETS needs: the merchant ID, the date and the amounts. One tap copies them, so the merchant doesn't have to call and read numbers out. That should mean fewer support calls for NETS."
+
 **Do:** click **Download Excel**. Open the file briefly.
 **Say:** "And the accountant gets the whole thing as a spreadsheet."
 

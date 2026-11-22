@@ -22,6 +22,24 @@ Compares a month's payments with the money NETS paid into the bank and with the 
 - "Mark as sorted" stores an optional note (500 characters max) and moves the item to "Sorted".
 - Seeded October 2026 has exactly 3 money problems for the demo.
 
+## How to fix this (step-by-step guide)
+Asked for at the first NETS mock meeting (22 Nov 2026): "a guide for reconciling".
+- Every money problem card has a **How to fix this** bar (closed at first). It opens in place (`components/recon/FixGuide.jsx`; the steps slide open, no motion with reduced motion) and shows a yellow **Why this happens** line, then numbered steps.
+- Steps come from `buildGuide(problem, {mid, month, readOnly})` in `lib/recon/guide.js` (pure, unit-tested) and use the problem's own dates and amounts:
+
+| Problem | Steps |
+|---|---|
+| Money is short | refund or chargeback that day (link to the day's payments) → check the bank for the next 2 days → contact NETS with the details → mark as sorted |
+| More money arrived than expected | does the deposit also cover the day before → is every sale listed (link) → tell NETS → mark as sorted |
+| Money has not arrived | check the bank for the next 3 days → check the payments went through (link) → contact NETS → mark as sorted |
+| Money is late | weekend or public holiday? → check payouts again tomorrow (link to that month's payouts) → still late after 2 working days, contact NETS → mark as sorted |
+| Fees look wrong (charged more) | open the bill (link) → check the rate for that payment type → ask NETS to check the bill → mark as sorted |
+| Fees look wrong (charged less) | open the bill → watch for a correction next month → mark as sorted |
+
+- The "contact NETS" step lists what NETS needs: the **merchant ID (MID)**, the date or bill month, the payment type and the amounts. **Copy details** puts them on the clipboard as plain text (with the problem's message on top) and says "Copied ✓"; if the browser blocks it, it asks the person to select and copy them.
+- Head office (view only) sees the same steps; the last step says the franchisee marks it as sorted. Failed payments have no guide (they are one summary line).
+- The MID comes with the signed-in merchant (`Access.mid`, loaded with the membership).
+
 ## Progress bar
 - Running the check-up shows a progress bar, the current step in plain words and "About N seconds left". The form uses `useActionState`: `runReconciliation` returns `{ok, runId, month, durationMs}` (or a friendly message for a bad month). The bar is an estimate: it eases to 90% (using the last run's real server time from `localStorage` `checkupDurationMs`, 6 seconds by default), and goes to 100% only when the answer is back and the panel has shown for 2.5 seconds; then "Done ✓" for about 0.6 s and the result opens. The results card says "Checked in N seconds" only for runs started in this tab (`sessionStorage` key `checkup:<runId>`). Maths in `lib/recon/progress.js`, UI in `components/recon/RunProgress.jsx`.
 
@@ -29,4 +47,5 @@ Compares a month's payments with the money NETS paid into the bank and with the 
 - Unit: `tests/unit/reconcile.test.js`, `recon-export.test.js`
 - Integration: `tests/integration/recon.test.js`, `isolation.test.js`
 - Unit: `tests/unit/recon-progress.test.js`; end-to-end: `tests/e2e/ui-polish.spec.js` (TC-REC-02)
-- End-to-end: `tests/e2e/recon.spec.js` (TC-REC-01, TC-EXP-01)
+- End-to-end: `tests/e2e/recon.spec.js` (TC-REC-01, TC-EXP-01, TC-REC-03 the fix guide and Copy details)
+- Unit: `tests/unit/recon-guide.test.js` (steps for each problem type)
