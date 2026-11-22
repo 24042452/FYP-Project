@@ -1,0 +1,55 @@
+erDiagram
+  merchant_groups |o--o{ merchants : "franchisees"
+  merchant_groups ||--o{ group_users : "head office"
+  users ||--o{ group_users : "is HQ for"
+  merchants ||--o{ outlets : "has"
+  outlets ||--o{ terminals : "has"
+  merchants ||--o{ merchant_users : "staff"
+  users ||--o{ merchant_users : "works at"
+  outlets |o--o{ merchant_users : "outlet manager of"
+  merchant_groups {
+    CHAR36 group_id PK
+    VARCHAR name "brand, e.g. Kopi Corner"
+    DATETIME created_at
+  }
+  merchants {
+    CHAR36 merchant_id PK
+    VARCHAR15 mid UK "NETS merchant ID"
+    CHAR36 group_id FK "NULL if not a franchise"
+    VARCHAR legal_name
+    VARCHAR trading_name
+    VARCHAR uen
+    VARCHAR category
+    TINYINT gst_registered
+  }
+  outlets {
+    CHAR36 outlet_id PK
+    CHAR36 merchant_id FK
+    VARCHAR name
+    VARCHAR address
+  }
+  terminals {
+    CHAR36 terminal_id PK
+    VARCHAR8 tid UK "NETS terminal ID"
+    CHAR36 merchant_id FK
+    CHAR36 outlet_id FK
+    VARCHAR serial_no
+    VARCHAR status
+  }
+  users {
+    CHAR36 user_id PK
+    VARCHAR email UK
+    VARCHAR password_hash "bcrypt"
+    VARCHAR name
+  }
+  merchant_users {
+    CHAR36 merchant_id PK, FK
+    CHAR36 user_id PK, FK
+    ENUM role "owner, outlet_manager, ..."
+    CHAR36 outlet_id FK "set = one outlet only"
+  }
+  group_users {
+    CHAR36 group_id PK, FK
+    CHAR36 user_id PK, FK
+    ENUM role "hq_owner (view only)"
+  }

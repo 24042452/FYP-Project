@@ -1,0 +1,63 @@
+erDiagram
+  merchants ||--o{ transactions : "takes"
+  terminals ||--o{ transactions : "processes"
+  outlets |o--o{ transactions : "at"
+  settlements |o--o{ transactions : "pays out"
+  merchants ||--o{ settlements : "receives"
+  merchants ||--o{ invoices : "is billed"
+  invoices ||--|{ invoice_lines : "contains"
+  merchants {
+    CHAR36 merchant_id PK
+    VARCHAR15 mid UK
+  }
+  outlets {
+    CHAR36 outlet_id PK
+  }
+  terminals {
+    CHAR36 terminal_id PK
+    VARCHAR8 tid UK
+  }
+  transactions {
+    CHAR36 transaction_id PK
+    CHAR36 merchant_id FK
+    CHAR36 outlet_id FK
+    CHAR36 terminal_id FK
+    CHAR6 stan "trace number, per terminal"
+    ENUM channel "nets_qr, card, sgqr, ..."
+    ENUM status "success, failed, refunded"
+    BIGINT amount_cents
+    BIGINT fee_cents
+    VARCHAR failure_code
+    CHAR36 settlement_id FK "NULL until paid out"
+    DATETIME created_at "UTC"
+  }
+  settlements {
+    CHAR36 settlement_id PK
+    CHAR36 merchant_id FK
+    DATE business_date
+    ENUM channel
+    BIGINT gross_cents
+    BIGINT fee_cents
+    BIGINT net_cents
+    ENUM status "pending, paid, delayed"
+    DATE expected_date
+    DATE paid_date
+    VARCHAR bank_ref
+  }
+  invoices {
+    CHAR36 invoice_id PK
+    CHAR36 merchant_id FK
+    DATE period "first day of month"
+    BIGINT total_cents
+    ENUM status "unpaid, paid, overdue"
+    DATE due_date
+  }
+  invoice_lines {
+    CHAR36 invoice_line_id PK
+    CHAR36 merchant_id FK
+    CHAR36 invoice_id FK
+    VARCHAR charge_type "mdr, terminal_rental, ..."
+    ENUM channel "for MDR lines"
+    INT qty
+    BIGINT amount_cents
+  }

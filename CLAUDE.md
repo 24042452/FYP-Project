@@ -4,7 +4,7 @@ Final Year Project with industry partner **NETS** (Singapore payments): an enhan
 
 ## Where we left off (update this section at the end of every session)
 
-**Last updated:** 2026-11-15 (end of session: everything merged into `main` and live; no open PRs; no dev servers left running)
+**Last updated:** 2026-11-22 (after the first mock meeting with NETS: PRs #8 and #9 merged and live; live Azure database migrated to 0008 and re-seeded; Word document v1.1 in a PR)
 **Current phase: MVP LIVE, polishing and preparing the Touchpoint 1 demo.** The MVP is built, reviewed, merged into `main` and deployed.
 **Next deadline:** Touchpoint 1 MVP demo to NETS & RP, about 2026-11-25.
 **Start next session with:** read "Next steps" below, then `git checkout main && git pull`.
@@ -15,7 +15,7 @@ Where things are:
 - **Database (live):** the school's shared Azure MySQL 8.0 server, schema `SOI-2026-0021-sherwin` (the server shows it in lower case). Other schemas on that server belong to other people: only ever touch ours. Host and login live only in the git-ignored `.env.azure`. The schema came from `db/export/SOI-2026-0021-sherwin.sql` (`node scripts/export-schema.mjs <name>` regenerates it). Re-seed it with `node --env-file=.env.azure scripts/seed.mjs`
 - **Database (local):** MySQL 8 on this PC (`nets_portal`, `nets_portal_test`); settings in git-ignored `.env.local`
 - Tests: `npm test` (unit), `npm run test:integration` (MySQL `nets_portal_test`), `npm run test:e2e` (Playwright in installed Edge; builds and starts the app itself, so run `npm run seed` first). Results in `docs/04-documentation-and-test-plan.md`. CI (`.github/workflows/ci.yml`) runs lint, unit and integration on every PR
-- Docs: feature pages in `docs/features/`, open small issues and ideas in `docs/backlog.md`, build plan in `docs/superpowers/plans/2026-11-11-mvp.md`, **demo script** `docs/demo-script.md`, **technical document for NETS and RP** `docs/NETS-Merchant-Portal-Technical-Document.docx` (22 pages; built by a docx-js script that lived in the session scratchpad, so edit the .docx in Word from now on)
+- Docs: feature pages in `docs/features/`, open small issues and ideas in `docs/backlog.md`, build plan in `docs/superpowers/plans/2026-11-11-mvp.md`, **demo script** `docs/demo-script.md`, **technical document for NETS and RP** `docs/NETS-Merchant-Portal-Technical-Document.docx` (v1.1, 32 pages, ERDs on landscape pages; edit it in Word; diagram sources in `docs/diagrams/`). Converting it on this PC: Word COM in `pwsh -ExecutionPolicy Bypass` (no pandoc or LibreOffice installed); PyMuPDF is installed for PDF page images
 - Team (Programme DFT): Chow Sherwin (Team Coordinator), Deron Kwok Yu Hng, Dylan Teo Zhen Hwee, Lai Wei Jun Samuel. Student IDs and phone numbers are deliberately NOT in the repo (it is public)
 - Visual checks without Chrome: headless Microsoft Edge via the DevTools protocol works on this PC (Playwright e2e also uses `channel: 'msedge'`). Word is installed (export to PDF via Word COM in PowerShell). On Windows, stopping `npm run dev` leaves `next` node processes: kill node processes whose command line contains `FYP Project` and `next`; delete `.next` between `next build` and `next dev`
 
@@ -26,12 +26,15 @@ Merged so far (all 2026-11-15):
 - PR #4: docs housekeeping (README, project notes, `docs/backlog.md`)
 - PR #5: gentler business health score (start 75; labels Healthy / Okay / Needs a look) with a full-width "How we worked this out" panel
 - PR #6: working search (live suggestions on desktop, full-screen search on phones, last 12 months, follows the outlet), payment drawer slides out when closed, demo script, Word technical document
+- PR #8 (2026-11-22): every key named after its table (`merchant_id`, `transaction_id`, ...; ADR-002); NETS identifiers MID (merchants), TID (terminals), STAN (transactions, replaces customer_ref)
+- PR #9 (2026-11-22): franchise tiers (ADR-003, `docs/features/franchise.md`): head office (group overview `/group`, view only), franchisee owner, outlet manager (locked to one outlet). Demo: Kopi Corner (East, West, North) with logins kopi.hq@, kopi.east@, kopi.bedok.local
 
 Waiting on the user:
 - Ask the school owner to **change the Azure database password** (it was exposed once in a session log on 2026-11-15), then update `.env.azure` and `DATABASE_URL` in Vercel
 - An Anthropic API key (optional; without it the assistant stays in rules mode)
 
 Next steps:
+- **Remaining mock-meeting feedback (22 Nov):** dashboard with a quantified use case (% changes, "drives up by X %"), a step-by-step check-up guide for reconciling each problem type. Done: use cases, shorter business analysis, tiered ERD, token_hash explained, MID/TID/STAN, `<table>_id` keys, franchise tiers, data-load limits (Word doc 7.10). NETS processing fees for later: NETS 0.8 %, NETS Click 1.8-2 %, SGQR 0 %, cards up to 3.5 % (`lib/fees.js` still has synthetic rates)
 1. **Before every demo: re-seed that morning, after 9 am**, locally and on Azure (`node --env-file=.env.azure scripts/seed.mjs`). Pending/late/"today" figures are set relative to the seed day and nothing refreshes them
 2. Rehearse with `docs/demo-script.md` (presenter + driver), record a backup video, and prepare slides
 3. Optional before the demo: a usability test kit (`docs/usability-test.md`: 5 tasks for 3-5 non-technical users) for user-centred design evidence, and the quick wins in `docs/backlog.md`
@@ -42,6 +45,7 @@ Done:
 - [x] Planning docs 01-04, design (Option 1 · Clean Console) and `PRODUCT.md`
 - [x] 2026-11-14/15: MVP built (tasks 1-14a), final whole-branch review and fixes, deployed to Vercel with the school Azure database
 - [x] 2026-11-15: outlet menu, Log out button, check-up progress bar, health score with explanation, working search, demo script and Word technical document (PRs #1-6 merged)
+- [x] 2026-11-22: mock-meeting feedback, part 1: clear key names, MID/TID/STAN, franchise tiers, Word document v1.1 (ERDs, use cases, limits)
 
 ## Decisions made
 
