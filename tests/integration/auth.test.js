@@ -21,7 +21,7 @@ beforeAll(async () => {
   await resetTestDb()
   await insertFixture({ merchants: [{ id: MERCHANT, tradingName: 'Test Stall' }] })
   await adminExecute(
-    'INSERT INTO users (id, email, password_hash, name) VALUES (?, ?, ?, ?)',
+    'INSERT INTO users (user_id, email, password_hash, name) VALUES (?, ?, ?, ?)',
     [USER, EMAIL, await hashPassword('right-password'), 'Test User'],
   )
   await adminExecute(
@@ -32,7 +32,7 @@ beforeAll(async () => {
 
 describe('passwords', () => {
   it('accepts the right password and rejects a wrong one', async () => {
-    const [u] = await query('SELECT password_hash FROM users WHERE id = ?', [USER])
+    const [u] = await query('SELECT password_hash FROM users WHERE user_id = ?', [USER])
     expect(await verifyPassword('right-password', u.password_hash)).toBe(true)
     expect(await verifyPassword('wrong-password', u.password_hash)).toBe(false)
   })
@@ -76,7 +76,7 @@ describe('sessions', () => {
   it('removes the row when the session is destroyed', async () => {
     const token = await createSessionRecord(USER)
     await deleteSessionRecord(token)
-    const rows = await query('SELECT id FROM sessions WHERE token_hash = ?', [sha256(token)])
+    const rows = await query('SELECT session_id AS id FROM sessions WHERE token_hash = ?', [sha256(token)])
     expect(rows).toHaveLength(0)
     expect(await findSessionUser(token)).toBeNull()
   })

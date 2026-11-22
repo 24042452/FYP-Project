@@ -9,9 +9,10 @@ const base = {
   channel: 'card',
   status: 'success',
   failureCode: null,
-  customerRef: null,
+  stan: '000123',
   outletName: 'Tampines Mall',
   terminalSerial: 'TM-01',
+  tid: '11000001',
   settlementDate: '2026-11-14',
 }
 
@@ -57,6 +58,9 @@ describe('toDetailView', () => {
     expect(d.assistantHref).toBeNull()
     expect(d.action).toBeNull()
     expect(d.kv.find(([k]) => k === 'NETS fee')[1]).toBe('$1.50')
+    expect(d.kv.find(([k]) => k === 'Terminal')[1]).toBe('TM-01')
+    expect(d.kv.find(([k]) => k === 'Terminal ID (TID)')[1]).toBe('11000001')
+    expect(d.kv.find(([k]) => k === 'Trace number (STAN)')[1]).toBe('000123')
   })
   it('explains a refund', () => {
     expect(toDetailView({ ...base, status: 'refunded' }).plain).toContain('refunded')

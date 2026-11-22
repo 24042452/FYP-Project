@@ -45,14 +45,14 @@ export async function insertFixture({ merchants = [], transactions = [] }) {
     for (const m of merchants) {
       const name = m.tradingName ?? `Merchant ${m.id.slice(0, 8)}`
       await conn.execute(
-        'INSERT INTO merchants (id, legal_name, trading_name, uen, category) VALUES (?, ?, ?, ?, ?)',
+        'INSERT INTO merchants (merchant_id, legal_name, trading_name, uen, category) VALUES (?, ?, ?, ?, ?)',
         [m.id, name, name, `UEN${m.id.slice(0, 8)}`, 'F&B'],
       )
     }
     for (const t of transactions) {
       await conn.execute(
         `INSERT INTO transactions
-           (id, merchant_id, channel, status, amount_cents, fee_cents, failure_code, created_at)
+           (transaction_id, merchant_id, channel, status, amount_cents, fee_cents, failure_code, created_at)
          VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           t.id ?? randomUUID(), t.merchantId, t.channel ?? 'nets_qr', t.status ?? 'success',

@@ -13,7 +13,7 @@ const saved = { mode: process.env.DEMO_MODE, pw: process.env.DEMO_PASSWORD }
 beforeAll(async () => {
   await resetTestDb()
   await adminExecute(
-    'INSERT INTO users (id, email, password_hash, name) VALUES (?, ?, ?, ?)',
+    'INSERT INTO users (user_id, email, password_hash, name) VALUES (?, ?, ?, ?)',
     [USER, EMAIL, await hashPassword(DEMO_PW), 'Ah Hock'],
   )
   process.env.DEMO_PASSWORD = DEMO_PW

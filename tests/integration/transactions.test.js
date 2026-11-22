@@ -26,9 +26,9 @@ beforeAll(async () => {
     ],
   })
   const outlet = randomUUID()
-  await adminExecute(`INSERT INTO outlets (id, merchant_id, name) VALUES (?, ?, 'Tampines Mall')`, [outlet, A])
-  await adminExecute(`UPDATE transactions SET outlet_id = ?, customer_ref = 'VISA4821' WHERE id = ?`, [outlet, idOf(2)])
-  await adminExecute(`UPDATE transactions SET customer_ref = '50%_off' WHERE id = ?`, [idOf(7)])
+  await adminExecute(`INSERT INTO outlets (outlet_id, merchant_id, name) VALUES (?, ?, 'Tampines Mall')`, [outlet, A])
+  await adminExecute(`UPDATE transactions SET outlet_id = ?, stan = '048213' WHERE transaction_id = ?`, [outlet, idOf(2)])
+  await adminExecute(`UPDATE transactions SET stan = '50%_00' WHERE transaction_id = ?`, [idOf(7)])
 })
 
 const ids = (rows) => rows.map((r) => r.id)
@@ -52,10 +52,10 @@ describe('listTransactions', () => {
     expect(ids((await listTransactions(A, { from: '2026-11-11', to: '2026-11-11' })).rows)).toEqual([idOf(4)])
   })
 
-  it('searches by amount, id prefix and customer ref prefix', async () => {
+  it('searches by amount, id prefix and STAN prefix', async () => {
     expect(ids((await listTransactions(A, { q: '12.50' })).rows)).toEqual([idOf(1)])
     expect(ids((await listTransactions(A, { q: '$30' })).rows)).toEqual([idOf(3)])
-    expect(ids((await listTransactions(A, { q: 'visa' })).rows)).toEqual([idOf(2)])
+    expect(ids((await listTransactions(A, { q: '0482' })).rows)).toEqual([idOf(2)])
     expect(ids((await listTransactions(A, { q: idOf(5) })).rows)).toEqual([idOf(5)])
   })
 

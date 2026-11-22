@@ -13,13 +13,13 @@ beforeAll(async () => {
   await resetTestDb()
   await insertFixture({ merchants: [{ id: A, tradingName: 'Alpha Stall' }, { id: B }] })
   const ins = (id, m, period, total, status) =>
-    adminExecute(`INSERT INTO invoices (id, merchant_id, period, total_cents, status, due_date) VALUES (?, ?, ?, ?, ?, '2026-11-15')`, [id, m, period, total, status])
+    adminExecute(`INSERT INTO invoices (invoice_id, merchant_id, period, total_cents, status, due_date) VALUES (?, ?, ?, ?, ?, '2026-11-15')`, [id, m, period, total, status])
   await ins(OCT, A, '2026-10-01', 5000, 'unpaid')
   await ins(SEP, A, '2026-09-01', 3000, 'paid')
   await ins(OTHER, B, '2026-10-01', 999, 'unpaid')
   const line = (inv, m, type, ch, desc, amt) =>
     adminExecute(
-      `INSERT INTO invoice_lines (id, merchant_id, invoice_id, charge_type, channel, description, qty, amount_cents) VALUES (?, ?, ?, ?, ?, ?, 1, ?)`,
+      `INSERT INTO invoice_lines (invoice_line_id, merchant_id, invoice_id, charge_type, channel, description, qty, amount_cents) VALUES (?, ?, ?, ?, ?, ?, 1, ?)`,
       [randomUUID(), m, inv, type, ch, desc, amt],
     )
   await line(OCT, A, 'mdr', 'card', 'MDR fees – Cards', 4000)

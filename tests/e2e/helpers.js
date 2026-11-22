@@ -29,7 +29,7 @@ export async function retailTransactionId() {
   const conn = await mysql.createConnection(url)
   try {
     const [rows] = await conn.query(
-      `SELECT t.id FROM transactions t JOIN merchants m ON m.id = t.merchant_id
+      `SELECT t.transaction_id AS id FROM transactions t JOIN merchants m ON m.merchant_id = t.merchant_id
        WHERE m.trading_name LIKE 'Tan & Sons%' LIMIT 1`,
     )
     if (!rows[0]) throw new Error('No Tan & Sons transaction found. Run npm run seed first.')

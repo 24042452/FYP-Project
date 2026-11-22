@@ -7,7 +7,7 @@ const M = randomUUID()
 
 const insert = (businessDate, channel, net, status, expected) =>
   adminExecute(
-    `INSERT INTO settlements (id, merchant_id, business_date, channel, gross_cents, fee_cents, net_cents, status, expected_date)
+    `INSERT INTO settlements (settlement_id, merchant_id, business_date, channel, gross_cents, fee_cents, net_cents, status, expected_date)
      VALUES (?, ?, ?, ?, ?, 0, ?, ?, ?)`,
     [randomUUID(), M, businessDate, channel, net, net, status, expected],
   )

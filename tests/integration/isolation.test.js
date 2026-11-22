@@ -68,32 +68,32 @@ beforeAll(async () => {
   })
   for (const [id, cents] of [[A, A_CENTS], [B, B_CENTS]]) {
     const settleId = randomUUID()
-    await adminExecute(`INSERT INTO outlets (id, merchant_id, name) VALUES (?, ?, 'Outlet')`, [id === A ? OUT_A : OUT_B, id])
+    await adminExecute(`INSERT INTO outlets (outlet_id, merchant_id, name) VALUES (?, ?, 'Outlet')`, [id === A ? OUT_A : OUT_B, id])
     await adminExecute(
-      `INSERT INTO settlements (id, merchant_id, business_date, channel, gross_cents, fee_cents, net_cents, status, expected_date)
+      `INSERT INTO settlements (settlement_id, merchant_id, business_date, channel, gross_cents, fee_cents, net_cents, status, expected_date)
        VALUES (?, ?, ?, 'nets_qr', ?, 0, ?, 'pending', '2026-11-05')`,
       [settleId, id, DAY, cents, cents],
     )
-    await adminExecute(`UPDATE transactions SET outlet_id = ?, settlement_id = ? WHERE id = ?`, [id === A ? OUT_A : OUT_B, settleId, id === A ? TXN_A : TXN_B])
+    await adminExecute(`UPDATE transactions SET outlet_id = ?, settlement_id = ? WHERE transaction_id = ?`, [id === A ? OUT_A : OUT_B, settleId, id === A ? TXN_A : TXN_B])
     const invId = id === A ? INV_A : INV_B
     await adminExecute(
-      `INSERT INTO invoices (id, merchant_id, period, total_cents, status, due_date) VALUES (?, ?, '2026-10-01', ?, 'unpaid', '2026-11-15')`,
+      `INSERT INTO invoices (invoice_id, merchant_id, period, total_cents, status, due_date) VALUES (?, ?, '2026-10-01', ?, 'unpaid', '2026-11-15')`,
       [invId, id, cents],
     )
     await adminExecute(
-      `INSERT INTO invoice_lines (id, merchant_id, invoice_id, charge_type, description, qty, amount_cents) VALUES (?, ?, ?, 'portal_fee', 'Portal fee', 1, ?)`,
+      `INSERT INTO invoice_lines (invoice_line_id, merchant_id, invoice_id, charge_type, description, qty, amount_cents) VALUES (?, ?, ?, 'portal_fee', 'Portal fee', 1, ?)`,
       [randomUUID(), id, invId, cents],
     )
     for (const noteId of id === A ? [NOTE_A] : [NOTE_B, randomUUID()]) {
-      await adminExecute(`INSERT INTO notifications (id, merchant_id, kind, title) VALUES (?, ?, 'sales_up', 'Test')`, [noteId, id])
+      await adminExecute(`INSERT INTO notifications (notification_id, merchant_id, kind, title) VALUES (?, ?, 'sales_up', 'Test')`, [noteId, id])
     }
     const runId = id === A ? RUN_A : RUN_B
     await adminExecute(
-      `INSERT INTO recon_runs (id, merchant_id, period, run_at, matched_count, exception_count) VALUES (?, ?, '2026-10-01', '2026-11-03 04:00:00.000', ?, 1)`,
+      `INSERT INTO recon_runs (recon_run_id, merchant_id, period, run_at, matched_count, exception_count) VALUES (?, ?, '2026-10-01', '2026-11-03 04:00:00.000', ?, 1)`,
       [runId, id, cents],
     )
     await adminExecute(
-      `INSERT INTO recon_exceptions (id, merchant_id, run_id, type, status) VALUES (?, ?, ?, 'amount_mismatch', 'open')`,
+      `INSERT INTO recon_exceptions (recon_exception_id, merchant_id, recon_run_id, type, status) VALUES (?, ?, ?, 'amount_mismatch', 'open')`,
       [randomUUID(), id, runId],
     )
   }

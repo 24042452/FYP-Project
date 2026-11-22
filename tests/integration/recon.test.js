@@ -26,16 +26,16 @@ beforeAll(async () => {
   })
   const settle = (m, day, gross) =>
     adminExecute(
-      `INSERT INTO settlements (id, merchant_id, business_date, channel, gross_cents, fee_cents, net_cents, status, expected_date)
+      `INSERT INTO settlements (settlement_id, merchant_id, business_date, channel, gross_cents, fee_cents, net_cents, status, expected_date)
        VALUES (?, ?, ?, 'card', ?, 0, ?, 'paid', '2026-10-20')`,
       [randomUUID(), m, day, gross, gross],
     )
   await settle(A, '2026-10-17', 5000)
   await settle(A, '2026-10-18', 3000 - 500)
   const inv = randomUUID()
-  await adminExecute(`INSERT INTO invoices (id, merchant_id, period, total_cents, status, due_date) VALUES (?, ?, '2026-10-01', 200, 'unpaid', '2026-11-15')`, [inv, A])
+  await adminExecute(`INSERT INTO invoices (invoice_id, merchant_id, period, total_cents, status, due_date) VALUES (?, ?, '2026-10-01', 200, 'unpaid', '2026-11-15')`, [inv, A])
   await adminExecute(
-    `INSERT INTO invoice_lines (id, merchant_id, invoice_id, charge_type, channel, description, qty, amount_cents) VALUES (?, ?, ?, 'mdr', 'card', 'MDR fees – Cards', 1, 200)`,
+    `INSERT INTO invoice_lines (invoice_line_id, merchant_id, invoice_id, charge_type, channel, description, qty, amount_cents) VALUES (?, ?, ?, 'mdr', 'card', 'MDR fees – Cards', 1, 200)`,
     [randomUUID(), A, inv],
   )
 })
