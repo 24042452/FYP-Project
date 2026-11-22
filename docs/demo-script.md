@@ -50,6 +50,12 @@ A 7-minute walkthrough of the MVP, then questions. One person **presents** (talk
 **Do:** scroll to **This week in numbers**.
 **Say:** "You asked for numbers. Here are the four that matter, each with its change against the same days last week, and on the right, what drove it: for Ah Hock, most of the drop came from QR payments, so the advice is simple: check the QR stand. Switch to This month and it updates."
 
+### 3b. Insights: what the numbers mean (45 s)
+**Do:** click **Insights** in the menu.
+**Say:** "Home tells you how today and this week are going. Insights shows the patterns. For Ah Hock: Fridays and Saturdays bring in about 35% more than other days, lunch from 11 to 2 brings in 40% of his sales, and 3 to 5 pm is quiet, so a tea-time deal could fill it."
+**Do:** point at the charts (sales by month, best days, busiest hours, how customers pay), then press **Last 4 weeks**.
+**Say:** "Every finding comes from his own payments, worked out the same way every time. Later, the Offers module could turn that quiet-hour tip into a real promotion."
+
 ### 4. Check-up: the portal does the checking (75 s)
 **Do:** click **Check-up** in the menu. Choose **October 2026**, press **Run check-up** (or "Check again").
 **Say:** "Normally a merchant or their accountant has to tick off every sale against the bank and the bill. Our check-up does it for them." *(The progress bar shows the steps: adding up sales, matching with the bank, checking the bill.)*
