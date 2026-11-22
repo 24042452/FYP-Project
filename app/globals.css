@@ -188,6 +188,15 @@
 @media (prefers-reduced-motion: reduce) {
   .fx-in, .fx-ring { animation: none; }
 }
+/* Insights findings: fade up one after another (app/(portal)/insights/page.jsx). */
+@keyframes insight-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+.insight-in { animation: insight-in 350ms ease-out both; }
+@media (prefers-reduced-motion: reduce) {
+  .insight-in { animation: none; }
+}
 /* Health panel: grows and fades in (see components/dashboard/HealthTag.jsx). */
 .health-wrap {
   display: grid;

@@ -1,7 +1,7 @@
 import { beforeAll, describe, expect, it } from 'vitest'
 import { randomUUID } from 'node:crypto'
 import { adminExecute, insertFixture, resetTestDb } from './helpers.js'
-import { getDailySales, getFeeTotals, getHeatmap } from '../../lib/data/sales.js'
+import { getDailySales, getFeeTotals, getHeatmap, getOutletSales } from '../../lib/data/sales.js'
 import { getOutletSettlementShares, getRecentSettlements, getSettlementSummary, getSettlementTotals, listSettlements } from '../../lib/data/settlements.js'
 import { getTransaction, listTransactions, listTransactionsForExport } from '../../lib/data/transactions.js'
 import { getInvoiceLinesForMonth, getInvoiceWithLines, listInvoices } from '../../lib/data/invoices.js'
@@ -34,6 +34,7 @@ const TO = '2026-11-07'
 const CASES = [
   ['getDailySales', (id) => getDailySales(id, FROM, TO), (rows) => rows.reduce((s, r) => s + r.grossCents, 0)],
   ['getHeatmap', (id) => getHeatmap(id, FROM, TO), (rows) => rows.reduce((s, r) => s + r.grossCents, 0)],
+  ['getOutletSales', async (id) => (await getOutletSales(id, FROM, TO)).filter((r) => r.grossCents > 0), (rows) => rows.reduce((s, r) => s + r.grossCents, 0)],
   ['getFeeTotals', async (id) => { const r = await getFeeTotals(id, FROM, TO); return r.grossCents > 0 ? [r] : [] }, (rows) => rows.reduce((s, r) => s + r.grossCents, 0)],
   ['getRecentSettlements', (id) => getRecentSettlements(id, 5), (rows) => rows.reduce((s, r) => s + r.netCents, 0)],
   ['getSettlementSummary', async (id) => { const r = await getSettlementSummary(id, '2026-11-04'); return r.pendingCents > 0 ? [r] : [] }, (rows) => rows.reduce((s, r) => s + r.pendingCents, 0)],

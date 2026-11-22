@@ -18,7 +18,7 @@ describe('NAV', () => {
   it('marks exactly the MVP pages as built', () => {
     const built = items.filter((i) => i.built).map((i) => i.href).sort()
     expect(built).toEqual(
-      ['/', '/transactions', '/settlements', '/reconciliation', '/invoices', '/reports'].sort(),
+      ['/', '/transactions', '/insights', '/settlements', '/reconciliation', '/invoices', '/reports'].sort(),
     )
   })
 
@@ -36,7 +36,8 @@ describe('NAV', () => {
 
 describe('comingSoonEntry', () => {
   it('finds real entries and ignores prototype names', () => {
-    expect(comingSoonEntry('insights')).toBeDefined()
+    expect(comingSoonEntry('disputes')).toBeDefined()
+    expect(comingSoonEntry('insights')).toBeUndefined()
     for (const k of ['constructor', 'toString', '__proto__', 'hasOwnProperty']) expect(comingSoonEntry(k)).toBeUndefined()
   })
 })
@@ -46,7 +47,7 @@ describe('navFor', () => {
 
   it('gives a merchant owner every built page, and no group overview', () => {
     const n = navFor({ tier: 'merchant' })
-    expect(hrefs(n)).toEqual(['/', '/transactions', '/settlements', '/reconciliation', '/invoices', '/reports'])
+    expect(hrefs(n)).toEqual(['/', '/transactions', '/insights', '/settlements', '/reconciliation', '/invoices', '/reports'])
     expect(n.showAsk).toBe(true)
     expect(n.tabs.map((t) => t.href)).toEqual(['/', '/transactions', '/reconciliation', '/assistant'])
   })
@@ -57,7 +58,7 @@ describe('navFor', () => {
 
   it('shows an outlet manager only the pages that follow their outlet', () => {
     const n = navFor({ tier: 'outlet' })
-    expect(hrefs(n)).toEqual(['/', '/transactions'])
+    expect(hrefs(n)).toEqual(['/', '/transactions', '/insights'])
     expect(n.showAsk).toBe(false)
     expect(n.tabs.map((t) => t.href)).toEqual(['/', '/transactions'])
   })
