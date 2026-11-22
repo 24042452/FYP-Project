@@ -83,6 +83,18 @@ A 7-minute walkthrough of the MVP, then questions. One person **presents** (talk
 **Do:** in the menu, change **Showing** to **Tampines Mall #02-15**.
 **Say:** "Pick an outlet and the whole page switches: the headline now talks about Tampines Mall, the numbers count to that outlet's figures, and even the money coming to the bank shows this outlet's share of each NETS payout."
 
+### 7b. A franchise: three levels of access (60 s)
+**Do:** **Log out**, then **"Kopi Corner head office"** (under "A franchise, three levels of access").
+**Say:** "You told us some merchants are franchises. Head office lands on the group overview: the whole group's sales this week against the same days last week, each franchisee's share, and who needs a look. Kopi Corner North is healthy; West has late payouts."
+
+**Do:** click **Open Kopi Corner West**, then open **Check-up**.
+**Say:** "Head office can open any franchisee in its own group, but only to look: there is no Run check-up button here. The franchisee runs their own."
+
+**Do:** **Log out**, then **"Bedok outlet manager"**.
+**Say:** "The third level is one outlet. The manager of Bedok only sees Bedok's sales and payments; money to the bank, bills and the check-up belong to the whole business, so they are not in the menu, and the API refuses them too."
+
+**Say (IDs):** "We also now use NETS' own identifiers: every merchant has a MID, every terminal a TID, and every payment a STAN. Open any payment and you see its TID and trace number."
+
 ### 8. On a phone (30 s, optional)
 **Do:** show the same page on the phone: the bottom tabs (Home, Payments, Check-up, Ask, More), tap the search icon.
 **Say:** "Most hawkers will use this on their phone, so every screen is designed for a phone first."
@@ -113,6 +125,8 @@ A 7-minute walkthrough of the MVP, then questions. One person **presents** (talk
 | Why MySQL? | It was a project requirement. Transactions, payouts and invoices are related tables, which suits a relational database. |
 | Can it handle more outlets or merchants? | Yes. Every query is indexed by merchant and date, and the outlet menu works for any number of outlets. |
 | What about security of logins? | Passwords are hashed (bcrypt), sessions are stored as hashes, cookies are HTTP-only, and failed logins are rate-limited. |
+| How do franchises work? | Three tiers: head office (group), franchisee (merchant, has the MID) and outlet. Head office sees every franchisee in its group, view only; it can never pick a franchisee from another group. An outlet manager is locked to one outlet. See `docs/features/franchise.md`. |
+| Why is a payment identified by TID + STAN? | The STAN is a 6-digit counter each terminal gives its payments, so it repeats across terminals and restarts after 999999. TID + STAN + date is unique. |
 | What would you build next? | See section 10, and `docs/01-project-plan.md` (Phase 1). |
 
 ---

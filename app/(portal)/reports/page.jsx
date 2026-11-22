@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { getCurrentMerchant } from '@/lib/data/merchant'
+import { requirePage } from '@/lib/data/merchant'
 import { listLatestRunIds } from '@/lib/data/recon'
 import { addMonths, monthEnd, monthStart, sgtDate } from '@/lib/dates'
 import { monthName } from '@/lib/recon/reconcile'
@@ -13,7 +13,7 @@ const linkBtn =
   'inline-flex min-h-11 items-center justify-center rounded-lg border border-line-strong bg-white px-4 text-[14px] font-semibold text-ink-2 no-underline hover:bg-page'
 
 export default async function ReportsPage() {
-  const merchant = await getCurrentMerchant()
+  const merchant = await requirePage('/reports')
   const today = sgtDate(new Date().toISOString())
   const lastComplete = addMonths(monthStart(today), -1).slice(0, 7)
   const runs = new Map((await listLatestRunIds(merchant.id)).map((r) => [r.period.slice(0, 7), r.id]))

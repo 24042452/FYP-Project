@@ -14,6 +14,7 @@ import { OUTLET_COOKIE, validateOutletChoice } from '@/lib/outlets/selection'
  */
 export async function selectOutlet(choice) {
   const merchant = await getCurrentMerchant()
+  if (merchant.outletId) return { ok: false } // an outlet manager stays on their outlet
   const result = validateOutletChoice(await listOutlets(merchant.id), choice)
   if (!result.ok) return { ok: false }
   const jar = await cookies()

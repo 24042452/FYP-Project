@@ -1,4 +1,5 @@
 import { getCurrentMerchant } from '@/lib/data/merchant'
+import { canOpen } from '@/lib/access/rules'
 import { listTransactionsForExport } from '@/lib/data/transactions'
 import { loadReconExport } from '@/lib/recon/run'
 import { buildReconWorkbook, buildTransactionsWorkbook } from '@/lib/export/xlsx'
@@ -33,6 +34,7 @@ export async function GET(request, { params }) {
   const today = sgtDate(new Date().toISOString())
 
   if (kind === 'recon') {
+    if (!canOpen(merchant, '/reconciliation')) return fail(403, 'Not available for your login')
     if (format !== 'xlsx' && format !== 'pdf') return fail(400, 'Unknown format')
     const run = await loadReconExport(merchant.id, merchant.tradingName, sp.get('run') ?? '', today)
     if (!run) return fail(404, 'Not found')
@@ -47,7 +49,7 @@ export async function GET(request, { params }) {
     const to = sp.get('to')
     if (!isValidDate(from) || !isValidDate(to) || from > to) return fail(400, 'Please give a valid from and to date.')
     if (to > addDays(from, MAX_DAYS - 1)) return fail(400, `Please pick at most ${MAX_DAYS} days.`)
-    const rows = await listTransactionsForExport(merchant.id, from, to)
+    const rows = await listTransactionsForExport(merchant.id, from, to, merchant.outletId)
     return file(await buildTransactionsWorkbook(rows), XLSX, `payments-${from}-to-${to}.xlsx`)
   }
 

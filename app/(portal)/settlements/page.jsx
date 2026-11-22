@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { getCurrentMerchant } from '@/lib/data/merchant'
+import { requirePage } from '@/lib/data/merchant'
 import { getSettlementTotals, listSettlements } from '@/lib/data/settlements'
 import { sgtDate } from '@/lib/dates'
 import { buildSettlementsModel, monthBounds, parseMonth, parseSettlementStatus } from '@/lib/settlements/model'
@@ -15,7 +15,7 @@ const navLink =
 
 export default async function SettlementsPage({ searchParams }) {
   // The merchant comes only from the session, never from the address.
-  const merchant = await getCurrentMerchant()
+  const merchant = await requirePage('/settlements')
   const sp = await searchParams
   const today = sgtDate(new Date().toISOString())
   const month = parseMonth(Array.isArray(sp?.month) ? sp.month[0] : sp?.month, today)

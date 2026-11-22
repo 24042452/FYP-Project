@@ -139,3 +139,22 @@ describe('generateDataset', () => {
     }
   })
 })
+
+describe('generateDataset options for franchisees', () => {
+  const base = { profile: /** @type {const} */ ('cafe'), seed: 5005, start: '2026-05-01', end: '2026-11-15', today: '2026-11-15' }
+  it('uses the outlets it is given, and leaves out the October problems and recent delay when asked', () => {
+    const d = generateDataset({
+      ...base,
+      outlets: [{ name: 'Woodlands', address: 'x' }],
+      recentDelay: false,
+      anomalies: false,
+    })
+    expect(d.outlets.map((o) => o.name)).toEqual(['Woodlands'])
+    expect(d.settlements.filter((s) => s.status === 'delayed')).toEqual([])
+  })
+  it('scales sales with the number of outlets', () => {
+    const one = generateDataset({ ...base, outlets: [{ name: 'A', address: 'x' }] })
+    const two = generateDataset({ ...base, outlets: [{ name: 'A', address: 'x' }, { name: 'B', address: 'y' }] })
+    expect(two.transactions.length / one.transactions.length).toBeGreaterThan(1.8)
+  })
+})

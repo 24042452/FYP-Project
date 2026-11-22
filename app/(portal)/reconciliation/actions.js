@@ -2,13 +2,16 @@
 
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
-import { getCurrentMerchant } from '@/lib/data/merchant'
+import { requirePage } from '@/lib/data/merchant'
 import { markExceptionSorted } from '@/lib/data/recon'
 import { runAndSaveReconciliation } from '@/lib/recon/run'
 import { sgtDate } from '@/lib/dates'
 
 const FIRST_MONTH = '2026-05'
 const MONTH_RE = /^(\d{4})-(0[1-9]|1[0-2])$/
+
+/** HQ owners can look at a franchisee's check-up but not change it. */
+const VIEW_ONLY = 'Head office can view check-ups but not run them. The franchisee runs their own check-up.'
 
 /**
  * "Run check-up": compare the month's payments, deposits and bill and store the result. Used with
@@ -19,7 +22,8 @@ const MONTH_RE = /^(\d{4})-(0[1-9]|1[0-2])$/
  * @returns {Promise<{ok: true, runId: string, month: string, durationMs: number} | {ok: false, message: string}>}
  */
 export async function runReconciliation(_prev, formData) {
-  const merchant = await getCurrentMerchant()
+  const merchant = await requirePage('/reconciliation')
+  if (merchant.readOnly) return { ok: false, message: VIEW_ONLY }
   const month = String(formData.get('month'))
   const today = sgtDate(new Date().toISOString())
   if (!MONTH_RE.test(month) || month < FIRST_MONTH || month > today.slice(0, 7)) {
@@ -37,12 +41,12 @@ export async function runReconciliation(_prev, formData) {
  * @param {FormData} formData fields `exceptionId`, `note`, `month`
  */
 export async function markAsSorted(formData) {
-  const merchant = await getCurrentMerchant()
+  const merchant = await requirePage('/reconciliation')
   const id = String(formData.get('exceptionId') ?? '')
   const rawNote = String(formData.get('note') ?? '').trim()
   const month = String(formData.get('month') ?? '')
   const note = rawNote === '' ? null : rawNote.slice(0, 500)
-  await markExceptionSorted(merchant.id, id, note)
+  if (!merchant.readOnly) await markExceptionSorted(merchant.id, id, note)
   revalidatePath('/reconciliation')
   revalidatePath('/')
   redirect(`/reconciliation${MONTH_RE.test(month) ? `?month=${month}` : ''}`)

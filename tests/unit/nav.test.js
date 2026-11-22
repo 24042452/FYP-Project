@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { NAV, COMING_SOON, allNavItems, comingSoonEntry } from '../../lib/nav.js'
+import { NAV, COMING_SOON, allNavItems, comingSoonEntry, navFor } from '../../lib/nav.js'
 
 const slug = (/** @type {string} */ href) => href.replace(/^\//, '')
 
@@ -38,5 +38,27 @@ describe('comingSoonEntry', () => {
   it('finds real entries and ignores prototype names', () => {
     expect(comingSoonEntry('insights')).toBeDefined()
     for (const k of ['constructor', 'toString', '__proto__', 'hasOwnProperty']) expect(comingSoonEntry(k)).toBeUndefined()
+  })
+})
+
+describe('navFor', () => {
+  const hrefs = (/** @type {any} */ n) => n.nav.flatMap((g) => g.items.filter((i) => i.built).map((i) => i.href))
+
+  it('gives a merchant owner every built page, and no group overview', () => {
+    const n = navFor({ tier: 'merchant' })
+    expect(hrefs(n)).toEqual(['/', '/transactions', '/settlements', '/reconciliation', '/invoices', '/reports'])
+    expect(n.showAsk).toBe(true)
+    expect(n.tabs.map((t) => t.href)).toEqual(['/', '/transactions', '/reconciliation', '/assistant'])
+  })
+
+  it('puts the group overview first for head office', () => {
+    expect(hrefs(navFor({ tier: 'hq' }))[0]).toBe('/group')
+  })
+
+  it('shows an outlet manager only the pages that follow their outlet', () => {
+    const n = navFor({ tier: 'outlet' })
+    expect(hrefs(n)).toEqual(['/', '/transactions'])
+    expect(n.showAsk).toBe(false)
+    expect(n.tabs.map((t) => t.href)).toEqual(['/', '/transactions'])
   })
 })

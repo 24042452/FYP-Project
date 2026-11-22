@@ -5,7 +5,7 @@ import { randomUUID } from 'node:crypto'
 const TABLES = [
   'recon_exceptions', 'recon_runs', 'notifications', 'invoice_lines', 'invoices',
   'transactions', 'settlements', 'terminals', 'outlets',
-  'merchant_users', 'sessions', 'users', 'merchants',
+  'merchant_users', 'group_users', 'sessions', 'users', 'merchants', 'merchant_groups',
 ]
 
 async function adminConn() {

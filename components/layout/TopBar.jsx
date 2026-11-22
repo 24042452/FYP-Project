@@ -13,7 +13,7 @@ function initials(name) {
   return ((parts[0]?.[0] ?? '') + (parts.length > 1 ? parts[parts.length - 1][0] : '')).toUpperCase()
 }
 
-const ROLE_LABEL = { owner: 'Owner', manager: 'Manager', cashier: 'Cashier', accountant: 'Accountant' }
+const ROLE_LABEL = { owner: 'Owner', manager: 'Manager', cashier: 'Cashier', accountant: 'Accountant', outlet_manager: 'Outlet manager', hq_owner: 'Head office' }
 
 const iconBtn =
   'relative grid size-11 flex-none place-items-center rounded-lg border border-line bg-white text-ink-2 hover:border-line-strong hover:text-ink md:size-[42px]'

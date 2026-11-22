@@ -90,11 +90,13 @@ describe('lookups', () => {
   })
 
   it('finds the merchant a user belongs to', async () => {
-    expect(await findMerchantForUser(USER)).toEqual({
+    expect(await findMerchantForUser(USER)).toMatchObject({
       id: MERCHANT,
       tradingName: 'Test Stall',
       category: 'F&B',
       role: 'owner',
+      tier: 'merchant',
+      outletId: null,
     })
     expect(await findMerchantForUser(randomUUID())).toBeNull()
   })

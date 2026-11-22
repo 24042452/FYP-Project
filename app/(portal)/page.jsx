@@ -1,4 +1,6 @@
 import Link from 'next/link'
+import { redirect } from 'next/navigation'
+import { canOpen } from '@/lib/access/rules'
 import { getCurrentMerchant } from '@/lib/data/merchant'
 import { getSelectedOutlet } from '@/lib/outlets/server'
 import { getDailySales, getFeeTotals, getHeatmap } from '@/lib/data/sales'
@@ -27,6 +29,9 @@ const btnBase =
 
 export default async function HomePage({ searchParams }) {
   const merchant = await getCurrentMerchant()
+  // Head office starts on the group overview until it picks a franchisee.
+  if (merchant.tier === 'hq' && !merchant.chosen) redirect('/group')
+  const can = (/** @type {string} */ path) => canOpen(merchant, path)
   const sp = await searchParams
   const kind = parsePeriod(sp?.period)
   const { selected } = await getSelectedOutlet(merchant)
@@ -73,6 +78,7 @@ export default async function HomePage({ searchParams }) {
     settlementSummary: settlementTotals ?? { pendingCents: 0, nextExpectedDate: null, lateCount: 0, lateCents: 0 },
     recon,
     outletName: selected?.name,
+    canLink: can,
   })
 
   const fxKey = `${outletId ?? 'all'}|${kind}`
@@ -108,9 +114,11 @@ export default async function HomePage({ searchParams }) {
         <Panel
           title={m.chart.title}
           action={
+            can('/assistant') && (
             <Link href={`/assistant?q=${encodeURIComponent('Explain my sales this week')}`} className="inline-flex min-h-11 items-center text-[14px] font-semibold">
               Explain this
             </Link>
+            )
           }
         >
           {m.chart.hasData ? (
@@ -130,9 +138,11 @@ export default async function HomePage({ searchParams }) {
           tech="Settlements"
           caption={m.payoutNote || undefined}
           action={
+            can('/settlements') && (
             <Link href="/settlements" className="inline-flex min-h-11 items-center text-[14px] font-semibold">
               See all
             </Link>
+            )
           }
         >
           {m.settlements.length > 0 ? (
@@ -157,17 +167,21 @@ export default async function HomePage({ searchParams }) {
               </p>
             ) : null}
           </Panel>
-          <CheckupCard checkup={m.checkup} />
+          {can('/reconciliation') ? <CheckupCard checkup={m.checkup} /> : null}
         </div>
       </div>
 
       <div className="flex flex-wrap gap-2.5">
+        {can('/reconciliation') ? (
         <Link href="/reconciliation" className={`${btnBase} bg-nets-red text-white hover:bg-nets-red-hover`}>
           See what needs attention
         </Link>
+        ) : null}
+        {can('/assistant') ? (
         <Link href="/assistant" className={`${btnBase} border border-line-strong bg-white text-ink shadow-panel hover:border-ink-3`}>
           Ask the assistant
         </Link>
+        ) : null}
         <Link href="/transactions" className={`${btnBase} border border-line-strong bg-white text-ink shadow-panel hover:border-ink-3`}>
           See your payments
         </Link>
