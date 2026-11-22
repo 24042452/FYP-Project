@@ -9,11 +9,13 @@ import { shareDays, shareSummary } from '@/lib/settlements/outlet-share'
 import { getLatestRunSummary } from '@/lib/data/recon'
 import { addDays, periodRange, sgtDate, sgtHour } from '@/lib/dates'
 import { buildHomeModel, chartRange, parsePeriod } from '@/lib/dashboard/home-model'
+import { buildNumbersModel } from '@/lib/dashboard/numbers-model'
 import { Headline } from '@/components/dashboard/Headline'
 import { PeriodSwitcher } from '@/components/dashboard/PeriodSwitcher'
 import { HealthTag } from '@/components/dashboard/HealthTag'
 import { StatTile } from '@/components/dashboard/StatTile'
 import { MoneyFlow } from '@/components/dashboard/MoneyFlow'
+import { NumbersPanel } from '@/components/dashboard/NumbersPanel'
 import { WeekBars } from '@/components/dashboard/WeekBars'
 import { ChannelBars } from '@/components/dashboard/ChannelBars'
 import { SettlementList } from '@/components/dashboard/SettlementList'
@@ -81,6 +83,9 @@ export default async function HomePage({ searchParams }) {
     canLink: can,
   })
 
+  // Like for like, the same rows as the headline: the period so far against the same days before it.
+  const numbers = buildNumbersModel({ kind, currRows, prevRows })
+
   const fxKey = `${outletId ?? 'all'}|${kind}`
 
   return (
@@ -107,6 +112,8 @@ export default async function HomePage({ searchParams }) {
           <StatTile key={t.label} {...t} />
         ))}
       </section>
+
+      {numbers.hasData ? <NumbersPanel model={numbers} /> : null}
 
       <MoneyFlow flow={m.flow} />
 

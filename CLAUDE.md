@@ -34,7 +34,7 @@ Waiting on the user:
 - An Anthropic API key (optional; without it the assistant stays in rules mode)
 
 Next steps:
-- **Remaining mock-meeting feedback (22 Nov):** dashboard with a quantified use case (% changes, "drives up by X %"), a step-by-step check-up guide for reconciling each problem type. Done: use cases, shorter business analysis, tiered ERD, token_hash explained, MID/TID/STAN, `<table>_id` keys, franchise tiers, data-load limits (Word doc 7.10). NETS processing fees for later: NETS 0.8 %, NETS Click 1.8-2 %, SGQR 0 %, cards up to 3.5 % (`lib/fees.js` still has synthetic rates)
+- **Remaining mock-meeting feedback (22 Nov):** a step-by-step check-up guide for reconciling each problem type. Done: "This week in numbers" panel on Home (% changes + what drove them, PR #11), use cases, shorter business analysis, tiered ERD, token_hash explained, MID/TID/STAN, `<table>_id` keys, franchise tiers, data-load limits (Word doc 7.10). NETS processing fees for later: NETS 0.8 %, NETS Click 1.8-2 %, SGQR 0 %, cards up to 3.5 % (`lib/fees.js` still has synthetic rates)
 1. **Before every demo: re-seed that morning, after 9 am**, locally and on Azure (`node --env-file=.env.azure scripts/seed.mjs`). Pending/late/"today" figures are set relative to the seed day and nothing refreshes them
 2. Rehearse with `docs/demo-script.md` (presenter + driver), record a backup video, and prepare slides
 3. Optional before the demo: a usability test kit (`docs/usability-test.md`: 5 tasks for 3-5 non-technical users) for user-centred design evidence, and the quick wins in `docs/backlog.md`
