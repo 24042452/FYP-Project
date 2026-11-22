@@ -35,3 +35,10 @@ The answer first: one plain sentence about how business is ("You took $4,309.00 
 - Integration: `tests/integration/sales.test.js`, `isolation.test.js`
 - End-to-end: `tests/e2e/ui-polish.spec.js` (TC-OUT-01 to 04 outlet menu); also `tests/unit/outlet-selection.test.js`, `tests/integration/outlets.test.js`
 - End-to-end: `tests/e2e/dashboard.spec.js` (TC-DASH-01 headline and no NaN, TC-DASH-02 health panel opens with 5 boxes at full width and Escape closes it, TC-DASH-03 panel fits at 375px, TC-MOB-01 no sideways scroll at 375px)
+
+## "In numbers" panel (added 2026-11-23, NETS mock-meeting feedback)
+- Below the summary tiles: "This week in numbers" (or Today / This month), compared like for like with the same days of the previous period, using the same rows as the headline. It follows the period switch and the outlet menu.
+- Left: four key numbers with their change, Sales, Payments, Average sale (all % change) and Didn't go through (change in percentage points; up is bad). Each shows last period's figure underneath.
+- Right: what drove the change in sales, by payment type, biggest move first, as bars from a centre line (red = fell, green = grew) with the $ and % change, and one or two plain sentences ("Sales fell 8.2%. Most of the drop came from NETS QR (−$291.39) and SGQR (−$196.38). NETS Click grew 18.0%."). The second payment type is named only if it caused at least a fifth of the change; the move the other way is named if it is 5 % or more.
+- Edge cases: no sales in the previous period gives "No sales last week to compare with" and no % chips; no sales yet in the current period (early on a Monday) gives "No sales yet this week. Over the same days last week you made $X." instead of a "100 % drop".
+- Model: `lib/dashboard/numbers-model.js` (`buildNumbersModel`, pure, `tests/unit/numbers-model.test.js`); component `components/dashboard/NumbersPanel.jsx` (numbers count up, bars grow; both off with reduced motion). Browser test TC-DASH-04.

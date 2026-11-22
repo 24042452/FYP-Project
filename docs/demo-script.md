@@ -47,6 +47,9 @@ A 7-minute walkthrough of the MVP, then questions. One person **presents** (talk
 **Do:** point at **"Needs your attention"** and the **alerts bell** (top right).
 **Say:** "Anything that needs action is here, in words: payments that didn't go through, money that's late."
 
+**Do:** scroll to **This week in numbers**.
+**Say:** "You asked for numbers. Here are the four that matter, each with its change against the same days last week, and on the right, what drove it: for Ah Hock, most of the drop came from QR payments, so the advice is simple: check the QR stand. Switch to This month and it updates."
+
 ### 4. Check-up: the portal does the checking (75 s)
 **Do:** click **Check-up** in the menu. Choose **October 2026**, press **Run check-up** (or "Check again").
 **Say:** "Normally a merchant or their accountant has to tick off every sale against the bank and the bill. Our check-up does it for them." *(The progress bar shows the steps: adding up sales, matching with the bank, checking the bill.)*

@@ -66,3 +66,20 @@ test('TC-DASH-03: the health panel fits at 375px and the close button works', as
   await panel.getByRole('button', { name: 'Close' }).click()
   await expect(panel).toBeHidden()
 })
+
+test('TC-DASH-04: "in numbers" shows four key numbers and what drove the change, and follows the period', async ({ page }) => {
+  await loginWithForm(page, 'hawker@demo.local')
+  await page.goto('/?period=month')
+  const panel = page.getByTestId('numbers-panel')
+  await expect(panel.getByRole('heading', { name: 'This month in numbers' })).toBeVisible()
+  for (const label of ['Sales', 'Payments', 'Average sale', 'Didn’t go through']) {
+    await expect(panel.getByText(label, { exact: true })).toBeVisible()
+  }
+  // The month so far always has sales in the demo data, so there is a summary and a bar per payment type.
+  await expect(page.getByTestId('numbers-summary')).toContainText(/Sales (rose|fell) \d+\.\d%|Sales are the same/)
+  await expect(panel.getByRole('list', { name: 'Change in sales by payment type' }).getByRole('listitem')).not.toHaveCount(0)
+  expect(await panel.innerText()).not.toMatch(/NaN|Infinity|100\.0%/)
+
+  await page.goto('/?period=today')
+  await expect(panel.getByRole('heading', { name: 'Today in numbers' })).toBeVisible()
+})

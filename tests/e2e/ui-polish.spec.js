@@ -140,8 +140,9 @@ test('TC-UI-SEARCH: on a phone the top-bar search icon opens the search sheet wi
 
 test('TC-OUT-05: with an outlet picked the headline names it, the bank tile changes, and a message says what changed', async ({ page }) => {
   test.skip(isPhone(page), 'desktop sidebar')
+  // The month so far always has sales; this week can be empty early on a Monday.
   await loginWithForm(page, 'retail@demo.local')
-  await page.goto('/')
+  await page.goto('/?period=month')
   const h1 = page.getByRole('heading', { level: 1 })
   const bankTile = page.getByLabel('Summary').locator('> div').nth(1)
   await expect(h1).toContainText('Business is')
