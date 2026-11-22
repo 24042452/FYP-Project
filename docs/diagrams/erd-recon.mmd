@@ -1,0 +1,37 @@
+erDiagram
+  merchants ||--o{ recon_runs : "runs"
+  recon_runs ||--o{ recon_exceptions : "finds"
+  settlements |o..o{ recon_exceptions : "about"
+  transactions |o..o{ recon_exceptions : "about"
+  merchants {
+    CHAR36 merchant_id PK
+  }
+  recon_runs {
+    CHAR36 recon_run_id PK
+    CHAR36 merchant_id FK
+    DATE period "month checked"
+    DATETIME run_at
+    INT checked_count
+    INT matched_count
+    INT exception_count
+  }
+  recon_exceptions {
+    CHAR36 recon_exception_id PK
+    CHAR36 merchant_id FK
+    CHAR36 recon_run_id FK
+    ENUM type "amount_mismatch, settlement_delay, ..."
+    CHAR36 settlement_id "which payout"
+    CHAR36 transaction_id "which payment"
+    DATE day
+    VARCHAR message "plain-English sentence"
+    BIGINT expected_cents
+    BIGINT actual_cents
+    ENUM status "open, resolved"
+    VARCHAR note "merchant's note"
+  }
+  settlements {
+    CHAR36 settlement_id PK
+  }
+  transactions {
+    CHAR36 transaction_id PK
+  }

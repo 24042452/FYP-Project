@@ -1,0 +1,28 @@
+%%{init: {"flowchart": {"nodeSpacing": 10, "rankSpacing": 70, "padding": 6}} }%%
+flowchart LR
+  A1(["Hawker owner<br/>(Ah Hock)"]):::actor
+  A2(["Multi-outlet owner<br/>or accountant"]):::actor
+  A3(["Franchise head office<br/>(Kopi Corner HQ)"]):::actor
+  A4(["Outlet manager<br/>(Bedok)"]):::actor
+  A5(["Partner software<br/>(accounting app)"]):::actor
+  subgraph P["NETS Merchant Portal"]
+    direction TB
+    U1["UC1 Check today's takings"]
+    U2["UC2 Explain a failed payment"]
+    U3["UC3 See when money arrives"]
+    U9["UC9 Ask the assistant"]
+    U4["UC4 Month-end check-up"]
+    U5["UC5 Compare outlets"]
+    U6["UC6 Find a payment (amount or STAN)"]
+    U7["UC7 Monitor all franchisees"]
+    U8["UC8 Run one outlet"]
+    U10["UC10 Pull payments by API"]
+  end
+  A1 --- U1 & U2 & U3 & U9
+  A2 --- U4 & U5 & U6
+  A3 --- U7
+  A4 --- U8
+  A5 --- U10
+  classDef actor fill:#FDE8EA,stroke:#D3162B,color:#14213D
+  classDef default fill:#FFFFFF,stroke:#0B4DB8,color:#14213D
+  style P fill:#F5F7FA,stroke:#9AA8BC

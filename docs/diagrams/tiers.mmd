@@ -1,0 +1,23 @@
+%%{init: {"flowchart": {"nodeSpacing": 14, "rankSpacing": 34, "padding": 6}} }%%
+flowchart TB
+  G["<b>GROUP</b> (franchise HQ)<br/>Kopi Corner"]:::group
+  E["<b>MERCHANT</b><br/>MID 110000000030003<br/>Kopi Corner East"]:::merchant
+  W["<b>MERCHANT</b><br/>MID …040004<br/>KC West"]:::merchant
+  N["<b>MERCHANT</b><br/>MID …050005<br/>KC North"]:::merchant
+  O1["<b>OUTLET</b><br/>Tampines Hub"]:::outlet
+  O2["<b>OUTLET</b><br/>Bedok North"]:::outlet
+  T1["<b>TERMINAL</b><br/>TID 11030001"]:::terminal
+  T2["<b>TERMINAL</b><br/>TID 11030002"]:::terminal
+  P1["<b>PAYMENT</b><br/>STAN 004871"]:::payment
+  P2["<b>PAYMENT</b><br/>STAN 004872"]:::payment
+  P3["<b>PAYMENT</b><br/>STAN 004873"]:::payment
+  G --> E & W & N
+  E --> O1 & O2
+  O1 --> T1
+  O2 --> T2
+  T2 --> P1 & P2 & P3
+  classDef group fill:#FDE8EA,stroke:#D3162B,color:#14213D
+  classDef merchant fill:#E3ECFB,stroke:#0B4DB8,color:#14213D
+  classDef outlet fill:#FFFFFF,stroke:#0B4DB8,color:#14213D
+  classDef terminal fill:#F1F4F8,stroke:#5B6B82,color:#14213D
+  classDef payment fill:#FFFFFF,stroke:#5B6B82,color:#14213D,stroke-dasharray:4 3

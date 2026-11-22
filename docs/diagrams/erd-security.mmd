@@ -1,0 +1,32 @@
+erDiagram
+  users ||--o{ sessions : "logs in"
+  merchants ||--o{ notifications : "gets"
+  users {
+    CHAR36 user_id PK
+    VARCHAR email UK
+    VARCHAR password_hash "bcrypt, cost 12"
+    DATETIME last_login_at
+  }
+  sessions {
+    CHAR36 session_id PK
+    CHAR36 user_id FK
+    CHAR64 token_hash UK "SHA-256 of the login cookie"
+    DATETIME expires_at "8 hours"
+  }
+  merchants {
+    CHAR36 merchant_id PK
+  }
+  notifications {
+    CHAR36 notification_id PK
+    CHAR36 merchant_id FK
+    VARCHAR kind
+    VARCHAR title
+    VARCHAR link "inside the portal only"
+    DATETIME read_at "NULL = unread"
+  }
+  kb_chunks {
+    INT kb_chunk_id PK
+    VARCHAR source
+    VARCHAR heading "the question"
+    TEXT content "the answer, FULLTEXT"
+  }
