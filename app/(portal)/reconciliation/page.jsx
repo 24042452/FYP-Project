@@ -12,6 +12,8 @@ import { Panel, EmptyState } from '@/components/dashboard/Panel'
 import { CheckedIn, RunCheckup } from '@/components/recon/RunProgress'
 import { markAsSorted } from './actions'
 import { MerchantWideNote } from '@/components/layout/MerchantWideNote'
+import { FixGuide } from '@/components/recon/FixGuide'
+import { buildGuide } from '@/lib/recon/guide'
 
 export const metadata = { title: 'Check-up · Merchant Portal' }
 
@@ -54,8 +56,9 @@ function SortedForm({ e, month }) {
   )
 }
 
-/** @param {{e: import('@/lib/data/recon').StoredException, month: string, readOnly?: boolean}} props */
-function ExceptionCard({ e, month, readOnly = false }) {
+/** @param {{e: import('@/lib/data/recon').StoredException, month: string, mid: string | null, readOnly?: boolean}} props */
+function ExceptionCard({ e, month, mid, readOnly = false }) {
+  const guide = buildGuide(e, { mid, month, readOnly })
   const both = e.type !== 'failed_payment' && e.expectedCents != null && e.actualCents != null
   const diff = both ? /** @type {number} */ (e.actualCents) - /** @type {number} */ (e.expectedCents) : 0
   const seeHref =
@@ -81,6 +84,7 @@ function ExceptionCard({ e, month, readOnly = false }) {
           </div>
         </dl>
       ) : null}
+      {guide ? <FixGuide guide={guide} /> : null}
       <div className="flex flex-wrap items-center gap-x-4">
         {readOnly ? null : <SortedForm e={e} month={month} />}
         {seeHref ? (
@@ -187,7 +191,7 @@ export default async function ReconciliationPage({ searchParams }) {
             <Panel key={g.type} title={`${g.title} (${g.items.length})`} tech={g.tech}>
               <ul className="-mx-4 m-0 -mb-4 list-none p-0 sm:-mx-5 sm:-mb-5">
                 {g.items.map((e) => (
-                  <ExceptionCard key={e.id} e={e} month={month} readOnly={merchant.readOnly} />
+                  <ExceptionCard key={e.id} e={e} month={month} mid={merchant.mid} readOnly={merchant.readOnly} />
                 ))}
               </ul>
             </Panel>

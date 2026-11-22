@@ -4,7 +4,7 @@ Final Year Project with industry partner **NETS** (Singapore payments): an enhan
 
 ## Where we left off (update this section at the end of every session)
 
-**Last updated:** 2026-11-22 (after the first mock meeting with NETS: PRs #8 and #9 merged and live; live Azure database migrated to 0008 and re-seeded; Word document v1.1 in a PR)
+**Last updated:** 2026-11-23 (all NETS mock-meeting feedback done: PRs #10 and #11 merged; check-up "How to fix this" guide in PR #12)
 **Current phase: MVP LIVE, polishing and preparing the Touchpoint 1 demo.** The MVP is built, reviewed, merged into `main` and deployed.
 **Next deadline:** Touchpoint 1 MVP demo to NETS & RP, about 2026-11-25.
 **Start next session with:** read "Next steps" below, then `git checkout main && git pull`.
@@ -27,6 +27,8 @@ Merged so far (all 2026-11-15):
 - PR #5: gentler business health score (start 75; labels Healthy / Okay / Needs a look) with a full-width "How we worked this out" panel
 - PR #6: working search (live suggestions on desktop, full-screen search on phones, last 12 months, follows the outlet), payment drawer slides out when closed, demo script, Word technical document
 - PR #8 (2026-11-22): every key named after its table (`merchant_id`, `transaction_id`, ...; ADR-002); NETS identifiers MID (merchants), TID (terminals), STAN (transactions, replaces customer_ref)
+- PR #10 (2026-11-22): Word document v1.1 (use cases, tiered ERDs on landscape pages, token_hash, data-load limits)
+- PR #11 (2026-11-23): "This week in numbers" on Home (% changes and what drove them, by payment type)
 - PR #9 (2026-11-22): franchise tiers (ADR-003, `docs/features/franchise.md`): head office (group overview `/group`, view only), franchisee owner, outlet manager (locked to one outlet). Demo: Kopi Corner (East, West, North) with logins kopi.hq@, kopi.east@, kopi.bedok.local
 
 Waiting on the user:
@@ -34,7 +36,7 @@ Waiting on the user:
 - An Anthropic API key (optional; without it the assistant stays in rules mode)
 
 Next steps:
-- **Remaining mock-meeting feedback (22 Nov):** a step-by-step check-up guide for reconciling each problem type. Done: "This week in numbers" panel on Home (% changes + what drove them, PR #11), use cases, shorter business analysis, tiered ERD, token_hash explained, MID/TID/STAN, `<table>_id` keys, franchise tiers, data-load limits (Word doc 7.10). NETS processing fees for later: NETS 0.8 %, NETS Click 1.8-2 %, SGQR 0 %, cards up to 3.5 % (`lib/fees.js` still has synthetic rates)
+- **Mock-meeting feedback (22 Nov): all done.** Last item: check-up "How to fix this" guide (`lib/recon/guide.js`, `components/recon/FixGuide.jsx`, PR #12). Still unclear from the notes: "Why is the ERD diagram Id to 7" (ask NETS at the demo). Done earlier: "This week in numbers" panel on Home (% changes + what drove them, PR #11), use cases, shorter business analysis, tiered ERD, token_hash explained, MID/TID/STAN, `<table>_id` keys, franchise tiers, data-load limits (Word doc 7.10). NETS processing fees for later: NETS 0.8 %, NETS Click 1.8-2 %, SGQR 0 %, cards up to 3.5 % (`lib/fees.js` still has synthetic rates)
 1. **Before every demo: re-seed that morning, after 9 am**, locally and on Azure (`node --env-file=.env.azure scripts/seed.mjs`). Pending/late/"today" figures are set relative to the seed day and nothing refreshes them
 2. Rehearse with `docs/demo-script.md` (presenter + driver), record a backup video, and prepare slides
 3. Optional before the demo: a usability test kit (`docs/usability-test.md`: 5 tasks for 3-5 non-technical users) for user-centred design evidence, and the quick wins in `docs/backlog.md`
