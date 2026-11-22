@@ -36,6 +36,7 @@ Waiting on the user:
 - An Anthropic API key (optional; without it the assistant stays in rules mode)
 
 Next steps:
+- **Insights page built (23 Nov, PR #14, commits authored by teammate sherwinhp):** `/insights`, `docs/features/insights.md`.
 - **Mock-meeting feedback (22 Nov): all done.** Last item: check-up "How to fix this" guide (`lib/recon/guide.js`, `components/recon/FixGuide.jsx`, PR #12). Still unclear from the notes: "Why is the ERD diagram Id to 7" (ask NETS at the demo). Done earlier: "This week in numbers" panel on Home (% changes + what drove them, PR #11), use cases, shorter business analysis, tiered ERD, token_hash explained, MID/TID/STAN, `<table>_id` keys, franchise tiers, data-load limits (Word doc 7.10). NETS processing fees for later: NETS 0.8 %, NETS Click 1.8-2 %, SGQR 0 %, cards up to 3.5 % (`lib/fees.js` still has synthetic rates)
 1. **Before every demo: re-seed that morning, after 9 am**, locally and on Azure (`node --env-file=.env.azure scripts/seed.mjs`). Pending/late/"today" figures are set relative to the seed day and nothing refreshes them
 2. Rehearse with `docs/demo-script.md` (presenter + driver), record a backup video, and prepare slides
@@ -80,4 +81,4 @@ Done:
 - Architecture decisions go in `docs/adr/NNN-title.md`
 - Branches: `main` plus feature branches via PR (Vercel preview per PR)
 - Money is stored as integer cents; timestamps in `timestamptz` (Asia/Singapore for display)
-- Git author: `DylanT <dylanteo0504@gmail.com>`. **Commits and PRs must NOT include any Claude co-author / "Generated with Claude" lines**
+- Git author: `DylanT <dylanteo0504@gmail.com>`, except the Insights work, which the user asked to be authored by teammate `sherwinhp <218709316+sherwinhp@users.noreply.github.com>` (his GitHub noreply address; his school email holds his student ID, so it stays out of the public repo). Merge with a merge commit so his commits count as GitHub contributions. **Commits and PRs must NOT include any Claude co-author / "Generated with Claude" lines**
