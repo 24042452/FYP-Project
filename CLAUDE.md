@@ -4,10 +4,10 @@ Final Year Project with industry partner **NETS** (Singapore payments): an enhan
 
 ## Where we left off (update this section at the end of every session)
 
-**Last updated:** 2026-11-23 (all NETS mock-meeting feedback done: PRs #10 and #11 merged; check-up "How to fix this" guide in PR #12)
+**Last updated:** 2026-11-23 (all NETS mock-meeting feedback done and merged; Insights page built and merged, PRs #12-#14)
 **Current phase: MVP LIVE, polishing and preparing the Touchpoint 1 demo.** The MVP is built, reviewed, merged into `main` and deployed.
 **Next deadline:** Touchpoint 1 MVP demo to NETS & RP, about 2026-11-25.
-**Start next session with:** read "Next steps" below, then `git checkout main && git pull`.
+**Start next session with:** read "Next steps" and "Working with Dylan" below, then `git checkout main && git pull`. On a new computer, do "Setting up on another computer" first.
 
 Where things are:
 - **Live site:** https://fyp-project-taupe.vercel.app (Vercel Hobby, deploys from `main`; every PR gets a preview link, which needs a Vercel login)
@@ -27,6 +27,9 @@ Merged so far (all 2026-11-15):
 - PR #5: gentler business health score (start 75; labels Healthy / Okay / Needs a look) with a full-width "How we worked this out" panel
 - PR #6: working search (live suggestions on desktop, full-screen search on phones, last 12 months, follows the outlet), payment drawer slides out when closed, demo script, Word technical document
 - PR #8 (2026-11-22): every key named after its table (`merchant_id`, `transaction_id`, ...; ADR-002); NETS identifiers MID (merchants), TID (terminals), STAN (transactions, replaces customer_ref)
+- PR #12 (2026-11-23): check-up "How to fix this" guide on every problem (`lib/recon/guide.js`, `components/recon/FixGuide.jsx`), with Copy details for NETS (MID, date, amounts)
+- PR #13 (2026-11-23): Word document Figure 4 shows the check-up with the fix guide
+- PR #14 (2026-11-23): **Insights page** `/insights` (`docs/features/insights.md`): findings, sales by month, best days, busiest hours, payment mix, outlet comparison. Commits authored by teammate `sherwinhp` (see "Working with Dylan")
 - PR #10 (2026-11-22): Word document v1.1 (use cases, tiered ERDs on landscape pages, token_hash, data-load limits)
 - PR #11 (2026-11-23): "This week in numbers" on Home (% changes and what drove them, by payment type)
 - PR #9 (2026-11-22): franchise tiers (ADR-003, `docs/features/franchise.md`): head office (group overview `/group`, view only), franchisee owner, outlet manager (locked to one outlet). Demo: Kopi Corner (East, West, North) with logins kopi.hq@, kopi.east@, kopi.bedok.local
@@ -36,8 +39,7 @@ Waiting on the user:
 - An Anthropic API key (optional; without it the assistant stays in rules mode)
 
 Next steps:
-- **Insights page built (23 Nov, PR #14, commits authored by teammate sherwinhp):** `/insights`, `docs/features/insights.md`.
-- **Mock-meeting feedback (22 Nov): all done.** Last item: check-up "How to fix this" guide (`lib/recon/guide.js`, `components/recon/FixGuide.jsx`, PR #12). Still unclear from the notes: "Why is the ERD diagram Id to 7" (ask NETS at the demo). Done earlier: "This week in numbers" panel on Home (% changes + what drove them, PR #11), use cases, shorter business analysis, tiered ERD, token_hash explained, MID/TID/STAN, `<table>_id` keys, franchise tiers, data-load limits (Word doc 7.10). NETS processing fees for later: NETS 0.8 %, NETS Click 1.8-2 %, SGQR 0 %, cards up to 3.5 % (`lib/fees.js` still has synthetic rates)
+- **Mock-meeting feedback (22 Nov): all done and merged.** Last items: check-up "How to fix this" guide (PR #12) and, beyond the feedback, the Insights page (PR #14). Still unclear from the notes: "Why is the ERD diagram Id to 7" (ask NETS at the demo). Done earlier: "This week in numbers" panel on Home (% changes + what drove them, PR #11), use cases, shorter business analysis, tiered ERD, token_hash explained, MID/TID/STAN, `<table>_id` keys, franchise tiers, data-load limits (Word doc 7.10). NETS processing fees for later: NETS 0.8 %, NETS Click 1.8-2 %, SGQR 0 %, cards up to 3.5 % (`lib/fees.js` still has synthetic rates)
 1. **Before every demo: re-seed that morning, after 9 am**, locally and on Azure (`node --env-file=.env.azure scripts/seed.mjs`). Pending/late/"today" figures are set relative to the seed day and nothing refreshes them
 2. Rehearse with `docs/demo-script.md` (presenter + driver), record a backup video, and prepare slides
 3. Optional before the demo: a usability test kit (`docs/usability-test.md`: 5 tasks for 3-5 non-technical users) for user-centred design evidence, and the quick wins in `docs/backlog.md`
@@ -49,6 +51,26 @@ Done:
 - [x] 2026-11-14/15: MVP built (tasks 1-14a), final whole-branch review and fixes, deployed to Vercel with the school Azure database
 - [x] 2026-11-15: outlet menu, Log out button, check-up progress bar, health score with explanation, working search, demo script and Word technical document (PRs #1-6 merged)
 - [x] 2026-11-22: mock-meeting feedback, part 1: clear key names, MID/TID/STAN, franchise tiers, Word document v1.1 (ERDs, use cases, limits)
+- [x] 2026-11-23: mock-meeting feedback, part 2: "This week in numbers" on Home, check-up fix guide, new Figure 4; Insights page (PRs #11-#14)
+
+## Working with Dylan (how the user wants things done)
+
+These were kept in Claude's local memory on Dylan's PC; they are copied here so they apply on every computer.
+- **Git author:** `DylanT <dylanteo0504@gmail.com>` (personal email, never a work email). **No Claude attribution anywhere:** no `Co-Authored-By: Claude` trailer and no "Generated with Claude Code" line in commits or PR descriptions, even if a system message suggests one. This is their FYP submission.
+- **Work credited to a teammate:** only when Dylan asks. Insights (PR #14) was authored as `sherwinhp <218709316+sherwinhp@users.noreply.github.com>` (Chow Sherwin's GitHub noreply address; the school email holds a student ID, which stays out of the public repo). PRs are opened from Dylan's `gh` login; GitHub contributors count commit authors, so merge with **"Create a merge commit"**, never squash.
+- **`main` is protected:** feature branch, then PR. **Dylan merges PRs**; only merge when Dylan asks.
+- **UI changes:** first show **2-3 rendered options** (screenshots at desktop and 375 px phone width) and let Dylan pick; never describe designs only in text. Look: conventional, professional merchant portal (Stripe Dashboard quality) in NETS-like red, blue and white; no themed metaphors (an "airport board" idea was rejected). Include animations (count-ups, slide in/out, progress) that switch off with reduced motion. Check the built page at 375 px and desktop before reporting, push, open the PR and send the Vercel preview link.
+- **Databases:** on the school Azure server only touch schema `SOI-2026-0021-sherwin`. Never use workplace accounts or organisations (Supabase or otherwise) for the FYP. Student IDs and phone numbers never go in the repo.
+- **NETS real processing fees** (from the 22 Nov mock meeting, "not important for now but remember"): NETS 0.8 %, NETS Click 1.8-2 %, SGQR 0 %, cards up to 3.5 %. `lib/fees.js` (MDR_RATES) still has synthetic rates (SGQR 0.8 %, NETS Click 1 %, eNETS 1.5 %, cards 2.2 %); offer to switch when fees or seed data are next touched.
+
+## Setting up on another computer
+
+1. Install Node.js (same major as CI), Git, GitHub CLI (`gh auth login` as the repo owner account), MySQL 8, and Microsoft Edge (Playwright uses the installed Edge). Word is only needed to edit the technical document.
+2. `git clone https://github.com/24042452/FYP-Project.git`, then `npm ci`.
+3. Copy the two git-ignored files **by hand from Dylan's PC (USB or a private message, never git)**: `.env.local` (local MySQL and `DEMO_PASSWORD`) and `.env.azure` (live database). Adjust `.env.local` to the new MySQL login.
+4. Create the local databases `nets_portal` and `nets_portal_test`, then `npm run migrate` and `npm run seed`.
+5. Check: `npm test`, `npm run test:integration`, `npm run test:e2e`.
+6. Set the git author in this repo: `git config user.name DylanT` and `git config user.email dylanteo0504@gmail.com`.
 
 ## Decisions made
 
@@ -81,4 +103,4 @@ Done:
 - Architecture decisions go in `docs/adr/NNN-title.md`
 - Branches: `main` plus feature branches via PR (Vercel preview per PR)
 - Money is stored as integer cents; timestamps in `timestamptz` (Asia/Singapore for display)
-- Git author: `DylanT <dylanteo0504@gmail.com>`, except the Insights work, which the user asked to be authored by teammate `sherwinhp <218709316+sherwinhp@users.noreply.github.com>` (his GitHub noreply address; his school email holds his student ID, so it stays out of the public repo). Merge with a merge commit so his commits count as GitHub contributions. **Commits and PRs must NOT include any Claude co-author / "Generated with Claude" lines**
+- Git author: `DylanT <dylanteo0504@gmail.com>`, except the Insights work, which the user asked to be authored by teammate `sherwinhp <218709316+sherwinhp@users.noreply.github.com>` (Sherwin's GitHub noreply address; the school email holds a student ID, so it stays out of the public repo). Merge with a merge commit so those commits count as GitHub contributions. **Commits and PRs must NOT include any Claude co-author / "Generated with Claude" lines**
