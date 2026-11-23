@@ -204,7 +204,7 @@ describe('GET /api/v1/disputes and /api/v1/refunds', () => {
     expect(res.status).toBe(200)
     expect(res.headers.get('cache-control')).toBe('private, no-store')
     const b = await body(res)
-    expect(b).toMatchObject({ page: 1, pageSize: 50, hasMore: false })
+    expect(b).toMatchObject({ page: 1, page_size: 50, has_more: false })
     expect(b.data.map((r) => [r.id, r.status])).toEqual([[D1, 'open'], [D2, 'missed']])
     expect(b.data[0]).toMatchObject({
       transaction_id: idOf(1), amount_cents: 10000, reason: 'charged_twice', respond_by: '2026-11-20',
