@@ -6,7 +6,7 @@ import { getSessionUser } from '@/lib/auth/session'
 import { listOutlets } from '@/lib/data/outlets'
 import { startPromotion, stopPromotion } from '@/lib/data/promotions'
 import { promotionByKey, outletSuits } from '@/lib/promotions/catalogue'
-import { canTakeUp, datesFor } from '@/lib/promotions/rules'
+import { canTakeUp, datesFor, pickOutlets } from '@/lib/promotions/rules'
 import { CHANNEL_LABELS } from '@/lib/channels'
 import { formatDay } from '@/lib/transactions/format'
 import { sgtDate } from '@/lib/dates'
@@ -17,6 +17,7 @@ const VIEW_ONLY = 'Only the owner or an outlet manager can do this.'
 const NOT_FOUND = "We couldn't find that promotion."
 const NONE_PICKED = 'Pick at least one outlet.'
 const BAD_OUTLET = 'Pick an outlet that can take this payment type.'
+const NOT_YOURS = 'Only the owner can stop a promotion that runs at more than one outlet.'
 const FINISHED = 'That promotion has already finished.'
 
 /** Today's date in Singapore, 'YYYY-MM-DD'. */
@@ -48,19 +49,9 @@ export async function startPromotionAction(_prev, formData) {
   if (!promotion || !promotion.categories.includes(merchant.category)) return { ok: false, message: NOT_FOUND }
 
   const outlets = await listOutlets(merchant.id)
-  const asked = [...new Set(formData.getAll('outletIds').filter((v) => typeof v === 'string'))]
-  /** @type {string[]} */
-  let outletIds
-  if (merchant.outletId) {
-    // An outlet manager can only act for their own outlet, whatever the form says.
-    if (asked.some((id) => id !== merchant.outletId)) return { ok: false, message: BAD_OUTLET }
-    outletIds = [merchant.outletId]
-  } else if (asked.length === 0 && outlets.length === 1) {
-    outletIds = [outlets[0].id] // a one-outlet business has no outlet list to tick
-  } else {
-    outletIds = asked
-  }
-  if (outletIds.length === 0) return { ok: false, message: NONE_PICKED }
+  const picked = pickOutlets(merchant, outlets, formData.getAll('outletIds').filter((v) => typeof v === 'string'))
+  if (!picked.ok) return { ok: false, message: picked.reason === 'none' ? NONE_PICKED : BAD_OUTLET }
+  const { outletIds } = picked
   for (const id of outletIds) {
     const outlet = outlets.find((o) => o.id === id)
     if (!outlet || !outletSuits(promotion.channel, outlet)) return { ok: false, message: BAD_OUTLET }
@@ -92,7 +83,7 @@ export async function stopPromotionAction(_prev, formData) {
 
   const res = await stopPromotion(merchant.id, String(formData.get('runId') ?? ''), { userId, today: today(), outletId: merchant.outletId })
   if (!res.ok) {
-    if (res.reason === 'not_yours') return { ok: false, message: VIEW_ONLY }
+    if (res.reason === 'not_yours') return { ok: false, message: NOT_YOURS }
     return { ok: false, message: res.reason === 'already_finished' ? FINISHED : NOT_FOUND }
   }
   revalidatePath('/campaigns')

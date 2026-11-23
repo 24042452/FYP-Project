@@ -6,7 +6,7 @@ import { getSessionUser } from '@/lib/auth/session'
 import { listOutlets } from '@/lib/data/outlets'
 import { takeUpOffer } from '@/lib/data/offers'
 import { offerByKey } from '@/lib/offers/catalogue'
-import { canTakeUp } from '@/lib/promotions/rules'
+import { canTakeUp, pickOutlets } from '@/lib/promotions/rules'
 import { formatDay } from '@/lib/transactions/format'
 import { sgtDate } from '@/lib/dates'
 
@@ -34,20 +34,9 @@ export async function takeUpOfferAction(_prev, formData) {
   if (!offer || !(/** @type {string[]} */ (offer.categories)).includes(merchant.category)) return { ok: false, message: NOT_FOUND }
 
   const outlets = await listOutlets(merchant.id)
-  const asked = [...new Set(formData.getAll('outletIds').filter((v) => typeof v === 'string'))]
-  /** @type {string[]} */
-  let outletIds
-  if (merchant.outletId) {
-    // An outlet manager can only act for their own outlet, whatever the form says.
-    if (asked.some((id) => id !== merchant.outletId)) return { ok: false, message: BAD_OUTLET }
-    outletIds = [merchant.outletId]
-  } else if (asked.length === 0 && outlets.length === 1) {
-    outletIds = [outlets[0].id] // a one-outlet business has no outlet list to tick
-  } else {
-    outletIds = asked
-  }
-  if (outletIds.length === 0) return { ok: false, message: NONE_PICKED }
-  if (outletIds.some((id) => !outlets.some((o) => o.id === id))) return { ok: false, message: BAD_OUTLET }
+  const picked = pickOutlets(merchant, outlets, formData.getAll('outletIds').filter((v) => typeof v === 'string'))
+  if (!picked.ok) return { ok: false, message: picked.reason === 'none' ? NONE_PICKED : BAD_OUTLET }
+  const { outletIds } = picked
 
   const day = sgtDate(new Date().toISOString())
   const res = await takeUpOffer(merchant.id, { key: offer.key, months: offer.months, outletIds, userId: user.id, today: day })

@@ -102,6 +102,11 @@ describe('startPromotionAction', () => {
     expect(startPromotion).toHaveBeenCalledWith('m1', expect.objectContaining({ outletIds: ['o1'] }))
   })
 
+  it('maps the data layer bad_outlet to the bad-outlet message', async () => {
+    vi.mocked(startPromotion).mockResolvedValue({ ok: false, reason: 'bad_outlet' })
+    expect(await start({ key: 'qr_tuesday', outletIds: ['o1'] })).toEqual({ ok: false, message: 'Pick an outlet that can take this payment type.' })
+  })
+
   it('names the payment type when an outlet is busy', async () => {
     vi.mocked(startPromotion).mockResolvedValue({ ok: false, reason: 'busy', outletId: 'o1' })
     expect(await start({ key: 'qr_tuesday', outletIds: ['o1'] })).toEqual({
@@ -132,10 +137,10 @@ describe('stopPromotionAction', () => {
     expect(stopPromotion).not.toHaveBeenCalled()
   })
 
-  it('passes the outlet manager outlet, and shows the view-only message for not_yours', async () => {
+  it('passes the outlet manager outlet, and explains not_yours', async () => {
     as({ role: 'outlet_manager', tier: 'outlet', outletId: 'o2' })
     vi.mocked(stopPromotion).mockResolvedValue({ ok: false, reason: 'not_yours' })
-    expect(await stop()).toEqual({ ok: false, message: 'Only the owner or an outlet manager can do this.' })
+    expect(await stop()).toEqual({ ok: false, message: 'Only the owner can stop a promotion that runs at more than one outlet.' })
     expect(stopPromotion).toHaveBeenCalledWith('m1', 'r1', expect.objectContaining({ outletId: 'o2' }))
   })
 

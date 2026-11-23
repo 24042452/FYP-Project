@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import {
   runStatus, runPill, weekOf, outletSuits, outletChoices, startable, datesFor, startLabel,
-  compareResults, pageSentence, canTakeUp, viewOnlyNote,
+  compareResults, pageSentence, canTakeUp, viewOnlyNote, pickOutlets,
 } from '@/lib/promotions/rules'
 
 const TODAY = '2026-11-24' // a Tuesday
@@ -210,5 +210,30 @@ describe('permissions wording', () => {
       .toBe('You can look but not start promotions. The owner or outlet manager does that.')
     expect(viewOnlyNote({ role: 'owner', readOnly: true, tier: 'hq' }))
       .toBe('You can look but not start promotions. The franchisee does that.')
+  })
+})
+
+describe('pickOutlets', () => {
+  const two = [{ id: 'a' }, { id: 'b' }]
+  it('gives an outlet manager their own outlet, even when none is named', () => {
+    expect(pickOutlets({ outletId: 'b' }, two, [])).toEqual({ ok: true, outletIds: ['b'] })
+    expect(pickOutlets({ outletId: 'b' }, two, ['b', 'b'])).toEqual({ ok: true, outletIds: ['b'] })
+  })
+  it('refuses an outlet manager naming another outlet', () => {
+    expect(pickOutlets({ outletId: 'b' }, two, ['a'])).toEqual({ ok: false, reason: 'bad_outlet' })
+    expect(pickOutlets({ outletId: 'b' }, two, ['b', 'a'])).toEqual({ ok: false, reason: 'bad_outlet' })
+  })
+  it('defaults to the only outlet of a one-outlet business', () => {
+    expect(pickOutlets({ outletId: null }, [{ id: 'a' }], [])).toEqual({ ok: true, outletIds: ['a'] })
+  })
+  it('says none for a multi-outlet owner who ticked nothing', () => {
+    expect(pickOutlets({ outletId: null }, two, [])).toEqual({ ok: false, reason: 'none' })
+  })
+  it('removes duplicates and keeps the order', () => {
+    expect(pickOutlets({ outletId: null }, two, ['b', 'a', 'b'])).toEqual({ ok: true, outletIds: ['b', 'a'] })
+  })
+  it('refuses an id that is not one of the outlets', () => {
+    expect(pickOutlets({ outletId: null }, two, ['a', 'zzz'])).toEqual({ ok: false, reason: 'bad_outlet' })
+    expect(pickOutlets({ outletId: null }, [{ id: 'a' }], ['zzz'])).toEqual({ ok: false, reason: 'bad_outlet' })
   })
 })
