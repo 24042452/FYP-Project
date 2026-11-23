@@ -56,6 +56,13 @@ test('TC-PRO-03: stopping a running promotion removes it from Running now; a sch
   await expect(page.getByTestId('running-card').filter({ hasText: '10% off on Tuesdays' })).toHaveCount(0)
   await page.reload()
   await expect(page.getByTestId('running-card').filter({ hasText: '10% off on Tuesdays' })).toHaveCount(0)
+  const resultRow = page
+    .getByRole('region', { name: /Results/ })
+    .locator('tr, li')
+    .filter({ hasText: '10% off on Tuesdays' })
+    .filter({ hasText: 'Too short to compare' })
+    .locator('visible=true')
+  await expect(resultRow).toHaveCount(1)
 
   // A scheduled promotion: take it up, then stop it.
   await page.getByRole('button', { name: 'Take up 10% off weekends with Cards' }).click()
@@ -75,11 +82,17 @@ test('TC-PRO-04: outlet manager sees only their outlet and no outlet list', asyn
   await page.getByRole('button', { name: /^Take up / }).first().click()
   const panel = page.getByRole('dialog')
   await expect(panel).toBeVisible()
+  await expect(panel).toContainText('at your outlet')
   await expect(panel.getByTestId('outlet-choice')).toHaveCount(0)
   await expect(panel.getByText('Which outlets?')).toHaveCount(0)
   await expect(panel.getByRole('button', { name: 'Start promotion' })).toBeVisible()
   await closePanel(page)
   await expect(panel).toBeHidden()
+  // The page itself is scoped to Bedok, and each running card speaks of "this outlet".
+  await expect(page.getByRole('main')).toContainText('Bedok')
+  for (const card of await page.getByTestId('running-card').all()) {
+    await expect(card).toContainText('This outlet')
+  }
 })
 
 test('TC-PRO-05: accountant can look but not start or stop', async ({ page }) => {
