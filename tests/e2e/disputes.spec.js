@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test'
-import { loginWithForm, reopenOpenDispute } from './helpers.js'
+import { loginWithForm, reopenOpenDispute, retailTransactionId } from './helpers.js'
 
 // 1x1 transparent PNG
 const PNG = Buffer.from(
@@ -66,4 +66,39 @@ test('TC-DSP-05: the open form does not scroll sideways on a phone', async ({ pa
   await openDeclineForm(page)
   const width = await page.evaluate(() => document.documentElement.scrollWidth)
   expect(width).toBeLessThanOrEqual(390)
+})
+
+test('TC-DSP-06: payment details open in a side panel and close by clicking outside', async ({ page }) => {
+  await loginWithForm(page, 'hawker@demo.local')
+  await page.goto('/disputes')
+  await expect(page.getByText(/1 dispute needs your answer/)).toBeVisible()
+
+  // From the open dispute: the panel slides in, the page stays Refunds & disputes.
+  await page.getByRole('link', { name: 'See the payment' }).first().click()
+  const panel = page.getByRole('dialog')
+  await expect(panel).toBeVisible()
+  await expect(panel.getByText('What happened')).toBeVisible()
+  await expect(panel.getByRole('link', { name: 'Open in Sales & payments' })).toHaveAttribute('href', /^\/transactions\?id=/)
+  await expect(page).toHaveURL(/\/disputes\?payment=/)
+
+  // Clicking outside the panel closes it (on a phone the panel is full width, so use its close button).
+  const width = page.viewportSize()?.width ?? 1280
+  if (width > 640) await page.mouse.click(10, 300)
+  else await panel.getByRole('button', { name: /close/i }).click()
+  await expect(panel).toBeHidden()
+  await expect(page).toHaveURL(/\/disputes$/)
+
+  // A refund opens the same panel; Esc closes it.
+  await page.locator('section[aria-labelledby="refunds-h"] a[href*="payment="]:visible').first().click()
+  await expect(page.getByRole('dialog')).toBeVisible()
+  await page.keyboard.press('Escape')
+  await expect(page.getByRole('dialog')).toBeHidden()
+  await expect(page).toHaveURL(/\/disputes$/)
+})
+
+test('TC-DSP-07: the address cannot open another business payment', async ({ page }) => {
+  await loginWithForm(page, 'hawker@demo.local')
+  await page.goto(`/disputes?payment=${await retailTransactionId()}`)
+  await expect(page.getByText(/1 dispute needs your answer/)).toBeVisible()
+  await expect(page.getByRole('dialog')).toHaveCount(0)
 })

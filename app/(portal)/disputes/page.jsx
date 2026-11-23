@@ -2,16 +2,19 @@ import { requirePage } from '@/lib/data/merchant'
 import { getSelectedOutlet } from '@/lib/outlets/server'
 import { listDisputes } from '@/lib/data/disputes'
 import { listRefunds } from '@/lib/data/refunds'
+import { getTransaction } from '@/lib/data/transactions'
+import { toDetailView } from '@/lib/transactions/format'
+import { TxnDrawer } from '@/components/transactions/TxnDrawer'
 import { sgtDate } from '@/lib/dates'
 import { canRespond, viewOnlyNote } from '@/lib/disputes/rules'
-import { buildDisputesPage, refundsRange } from '@/lib/disputes/view'
+import { buildDisputesPage, paymentHref, refundsRange } from '@/lib/disputes/view'
 import { StatTile } from '@/components/dashboard/StatTile'
 import { DisputesPanel } from '@/components/disputes/DisputesPanel'
 import { RefundsTable } from '@/components/disputes/RefundsTable'
 
 export const metadata = { title: 'Refunds & disputes · Merchant Portal' }
 
-export default async function DisputesPage() {
+export default async function DisputesPage({ searchParams }) {
   // The merchant comes only from the session, never from the address. Like Home and Sales & payments, the
   // page follows the outlet picked in the "Showing" menu; an outlet manager always gets their own outlet.
   const merchant = await requirePage('/disputes')
@@ -24,6 +27,13 @@ export default async function DisputesPage() {
     listRefunds(merchant.id, { ...refundsRange(today), outletId }),
   ])
   const m = buildDisputesPage({ disputes, refunds, today })
+
+  // ?payment= opens that payment in the side panel. Only a payment of a dispute or refund on this page can open,
+  // so the address can never show another outlet's (or merchant's) payment.
+  const sp = await searchParams
+  const wanted = typeof sp?.payment === 'string' ? sp.payment : null
+  const onPage = new Set([...disputes.map((d) => d.transactionId), ...refunds.map((r) => r.transactionId)])
+  const payment = wanted && onPage.has(wanted) ? await getTransaction(merchant.id, wanted) : null
   const answers = canRespond(merchant)
   const note = viewOnlyNote(merchant)
 
@@ -71,6 +81,15 @@ export default async function DisputesPage() {
       <DisputesPanel cases={m.cases} closed={m.closed} canRespond={answers} />
 
       <RefundsTable rows={m.refunds} />
+
+      {payment ? (
+        <TxnDrawer
+          detail={toDetailView(payment)}
+          closeHref="/disputes"
+          moreHref={paymentHref(payment.id, payment.createdAt)}
+          moreLabel="Open in Sales & payments"
+        />
+      ) : null}
     </div>
   )
 }

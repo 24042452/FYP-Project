@@ -27,9 +27,10 @@ const BOX = {
  * Closing first lets the drawer slide out to the right, and only then changes the address
  * (changing it straight away would remove the drawer before its exit animation could play).
  * With reduced motion the drawer closes at once.
- * @param {{detail: ReturnType<import('@/lib/transactions/format').toDetailView>, closeHref: string}} props
+ * `moreHref`/`moreLabel` add a link to the full page (used where the panel opens on another page, e.g. Refunds & disputes).
+ * @param {{detail: ReturnType<import('@/lib/transactions/format').toDetailView>, closeHref: string, moreHref?: string, moreLabel?: string}} props
  */
-export function TxnDrawer({ detail, closeHref }) {
+export function TxnDrawer({ detail, closeHref, moreHref, moreLabel }) {
   const router = useRouter()
   const reduceMotion = useReducedMotion()
   const [open, setOpen] = useState(true)
@@ -83,6 +84,16 @@ export function TxnDrawer({ detail, closeHref }) {
                 </div>
               ))}
             </dl>
+            {moreHref ? (
+              <div className={`px-5 ${detail.assistantHref ? '' : 'pb-6'}`}>
+                <Link
+                  href={moreHref}
+                  className="inline-flex min-h-11 w-full items-center justify-center rounded-lg border border-line-strong bg-white px-4 text-[15px] font-semibold text-ink no-underline shadow-panel hover:border-ink-3"
+                >
+                  {moreLabel ?? 'Open the full page'}
+                </Link>
+              </div>
+            ) : null}
             {detail.assistantHref ? (
               <div className="px-5 pb-6">
                 <Link
