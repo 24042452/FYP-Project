@@ -51,6 +51,7 @@ export function OfferCards({ cards, chips, onTakeUp }) {
               {c.length}
             </p>
             <div className="mt-auto flex flex-col gap-1.5 pt-1.5">
+              {c.note ? <p className="text-[13px] text-ink-3">{c.note}</p> : null}
               {c.can ? (
                 <button type="button" onClick={() => onTakeUp(c.key)} className={`${acceptBtn} sm:self-start`} aria-label={`Take up ${c.name}`}>
                   Take up
@@ -62,7 +63,6 @@ export function OfferCards({ cards, chips, onTakeUp }) {
                   {c.activeNote}
                 </p>
               ) : null}
-              {c.note ? <p className="text-[13px] text-ink-3">{c.note}</p> : null}
             </div>
           </li>
         ))}

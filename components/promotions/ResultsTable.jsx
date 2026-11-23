@@ -55,7 +55,10 @@ export function ResultsTable({ rows }) {
                       <b className="font-semibold">{r.name}</b>
                       <span className="block text-[13px] text-ink-3">{r.sub}</span>
                     </td>
-                    <td className="px-4 py-3 text-right font-semibold whitespace-nowrap tabular-nums">{r.sales}</td>
+                    <td className="px-4 py-3 text-right whitespace-nowrap tabular-nums">
+                      <b className="font-semibold">{r.sales}</b>
+                      {r.before ? <span className="block text-[13px] text-ink-3">{r.before}</span> : null}
+                    </td>
                     <td className="px-5 py-3 text-right whitespace-nowrap">
                       <Change row={r} />
                     </td>
@@ -70,7 +73,10 @@ export function ResultsTable({ rows }) {
                 <span className="font-semibold">{r.name}</span>
                 <span className="text-[13px] text-ink-3">{r.sub}</span>
                 <span className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 text-[15px]">
-                  <span className="font-semibold tabular-nums">{r.sales}</span>
+                  <span className="flex flex-col">
+                    <span className="font-semibold tabular-nums">{r.sales}</span>
+                    {r.before ? <span className="text-[13px] text-ink-3 tabular-nums">{r.before}</span> : null}
+                  </span>
                   <Change row={r} />
                 </span>
               </li>

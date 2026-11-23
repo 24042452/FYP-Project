@@ -62,8 +62,27 @@ describe('resultsPlan', () => {
 describe('buildPromotionsPage', () => {
   it('sentence with the last result as the blue figure', () => {
     const m = page({ runs: [run(), past()], sales: { p1: { promoDays: days(8, 114000), baseDays: days(8, 100000) } } })
-    expect(m.sentence).toEqual({ before: '1 promotion is running. Your last one, ', figure: 'weekend Cards', after: ', brought in about 14% more.' })
+    expect(m.sentence).toEqual({ before: '1 promotion is running. Your last one, ', figure: 'weekend Cards', after: ', brought in about 14% more in Cards sales on weekends.' })
     expect(m.sub).toBe('Take up a promotion and NETS shows it to your customers when they pay. Each one runs for 4 weeks.')
+  })
+
+  it('the sentence names the payment type and its days, from the catalogue', () => {
+    const sales = (key) => ({ [key]: { promoDays: days(8, 112000), baseDays: days(8, 100000) } })
+    const tue = page({ runs: [run(), past({ id: 'p9', key: 'qr_tuesday', channel: 'nets_qr', startsOn: '2026-10-06', endsOn: '2026-11-02' })], sales: sales('p9') })
+    expect(tue.sentence).toEqual({ before: '1 promotion is running. Your last one, ', figure: 'Tuesday NETS QR', after: ', brought in about 12% more in NETS QR sales on Tuesdays.' })
+    const lunch = page({ category: 'F&B', runs: [past({ id: 'p9', key: 'qr_lunch', channel: 'nets_qr' })], sales: sales('p9') })
+    expect(lunch.sentence.after).toBe(', brought in about 12% more in NETS QR sales on weekday lunchtimes.')
+    const drink = page({ category: 'F&B', runs: [past({ id: 'p9', key: 'sgqr_drink', channel: 'sgqr' })], sales: sales('p9') })
+    expect(drink.sentence.after).toBe(', brought in about 12% more in SGQR sales every day.')
+  })
+
+  it('a scheduled run is not counted as running in the sentence', () => {
+    const soon = run({ id: 'r2', key: 'card_weekend', channel: 'card', startsOn: '2026-11-25', endsOn: '2026-12-22' })
+    expect(page({ runs: [run(), soon] }).sentence.before).toBe('1 promotion is running and 1 starts tomorrow.')
+    expect(page({ runs: [soon] }).sentence.before).toBe('1 promotion starts tomorrow.')
+    expect(page({ runs: [run()] }).sentence.before).toBe('1 promotion is running.')
+    expect(page({ runs: [soon] }).running[0].scheduled).toBe(true)
+    expect(page({ runs: [run()] }).running[0].scheduled).toBe(false)
   })
 
   it('no runs and no results', () => {
@@ -106,7 +125,7 @@ describe('buildPromotionsPage', () => {
     const qr = m.cards[0]
     expect(qr).toMatchObject({
       channel: 'nets_qr', channelLabel: 'NETS QR', when: 'Every Tuesday · 4 weeks', can: true,
-      note: 'Already running a NETS QR promotion at 1 of your 2 outlets',
+      note: 'Running at Tampines Mall until Tue 15 Dec. You can start it at Bedok Mall.',
       dates: 'Every Tuesday · 4 weeks, from tomorrow (Wed 25 Nov) to Tue 22 Dec',
       info: 'NETS shows this deal to your customers when they pay by NETS QR at the outlets you pick. The discount comes off the price they pay; you see the results when it ends.',
     })
@@ -157,9 +176,9 @@ describe('buildPromotionsPage', () => {
       },
     })
     expect(m.results).toEqual([
-      { id: 'p2', name: '$2 off online orders over $20', sub: 'NETS Click · Mon 2 Nov to Wed 4 Nov', sales: '$50 a day', label: 'Too short to compare', tone: 'mute' },
-      { id: 'p1', name: '10% off weekends with Cards', sub: 'Cards · Sat 3 Oct to Fri 30 Oct', sales: '$1,240 a weekend day', label: '+14%', tone: 'ok' },
-      { id: 'p3', name: '10% off on Tuesdays', sub: 'NETS QR · Tue 4 Aug to Mon 31 Aug', sales: '$101 a Tuesday', label: 'About the same', tone: 'mute' },
+      { id: 'p2', name: '$2 off online orders over $20', sub: 'NETS Click · Mon 2 Nov to Wed 4 Nov', sales: '$50 a day', before: '$50 a day before', label: 'Too short to compare', tone: 'mute' },
+      { id: 'p1', name: '10% off weekends with Cards', sub: 'Cards · Sat 3 Oct to Fri 30 Oct', sales: '$1,240 a weekend day', before: '$1,088 a weekend day before', label: '+14%', tone: 'ok' },
+      { id: 'p3', name: '10% off on Tuesdays', sub: 'NETS QR · Tue 4 Aug to Mon 31 Aug', sales: '$101 a Tuesday', before: '$100 a Tuesday before', label: 'About the same', tone: 'mute' },
     ])
     expect(m.sentence.after).toBe(', ran too short to compare.')
   })

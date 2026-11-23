@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import {
   runStatus, runPill, weekOf, outletSuits, outletChoices, startable, datesFor, startLabel,
-  compareResults, pageSentence, canTakeUp, viewOnlyNote, pickOutlets,
+  compareResults, pageSentence, canTakeUp, viewOnlyNote, pickOutlets, listText,
 } from '@/lib/promotions/rules'
 
 const TODAY = '2026-11-24' // a Tuesday
@@ -87,10 +87,25 @@ describe('outletChoices', () => {
 
 describe('startable', () => {
   const promo = { key: 'qr_tuesday', channel: 'nets_qr' }
-  it('free at some outlets: still startable with a note', () => {
+  it('free at some outlets: still startable, and the note names the busy and the free outlets', () => {
     const three = [...shop.slice(0, 2), { id: 'd', name: 'Pasir Ris', online: false }]
     const s = startable({ promotion: promo, outlets: three, runs: [run({ outletIds: ['a', 'b'] })], today: TODAY, access: owner })
-    expect(s).toEqual({ can: true, note: 'Already running a NETS QR promotion at 2 of your 3 outlets' })
+    expect(s).toEqual({ can: true, note: 'Running at Tampines Mall and Bedok Mall until Tue 15 Dec. You can start it at Pasir Ris.' })
+    // The seed's Tan & Sons case: running at one outlet, one free, the online store unsuitable (not named).
+    expect(startable({ promotion: promo, outlets: shop, runs: [run()], today: TODAY, access: owner }))
+      .toEqual({ can: true, note: 'Running at Tampines Mall until Tue 15 Dec. You can start it at Bedok Mall.' })
+  })
+  it('another promotion of the same payment type, or a scheduled one, is named as such', () => {
+    const lunch = { key: 'qr_lunch', channel: 'nets_qr' }
+    expect(startable({ promotion: lunch, outlets: shop, runs: [run()], today: TODAY, access: owner }).note)
+      .toBe('Another NETS QR promotion is on at Tampines Mall until Tue 15 Dec. You can start it at Bedok Mall.')
+    const soon = run({ startsOn: '2026-11-25', endsOn: '2026-12-22' })
+    expect(startable({ promotion: promo, outlets: shop, runs: [soon], today: TODAY, access: owner }).note)
+      .toBe('Starts Wed 25 Nov at Tampines Mall. You can start it at Bedok Mall.')
+  })
+  it('view-only users see where it runs, without "You can start it"', () => {
+    const s = startable({ promotion: promo, outlets: shop, runs: [run()], today: TODAY, access: { ...owner, role: 'accountant' } })
+    expect(s).toEqual({ can: false, note: 'Running at Tampines Mall until Tue 15 Dec.' })
   })
   it('free everywhere: no note', () => {
     expect(startable({ promotion: promo, outlets: shop, runs: [], today: TODAY, access: owner })).toEqual({ can: true, note: null })
@@ -140,11 +155,11 @@ describe('compareResults', () => {
   const days = (n, cents) => Array.from({ length: n }, (_, i) => ({ day: `2026-11-${10 + i}`, cents }))
   it('plus, minus and about the same', () => {
     expect(compareResults({ promoDays: days(8, 114000), baseDays: days(8, 100000), ranDays: 28 }))
-      .toEqual({ avgCents: 114000, changePct: 14, label: '+14%', tone: 'ok' })
+      .toEqual({ avgCents: 114000, baseAvgCents: 100000, changePct: 14, label: '+14%', tone: 'ok' })
     expect(compareResults({ promoDays: days(8, 95000), baseDays: days(8, 100000), ranDays: 28 }))
-      .toEqual({ avgCents: 95000, changePct: -5, label: '−5%', tone: 'bad' })
+      .toEqual({ avgCents: 95000, baseAvgCents: 100000, changePct: -5, label: '−5%', tone: 'bad' })
     expect(compareResults({ promoDays: days(8, 102000), baseDays: days(8, 100000), ranDays: 28 }))
-      .toEqual({ avgCents: 102000, changePct: 2, label: 'About the same', tone: 'mute' })
+      .toEqual({ avgCents: 102000, baseAvgCents: 100000, changePct: 2, label: 'About the same', tone: 'mute' })
     expect(compareResults({ promoDays: days(8, 98000), baseDays: days(8, 100000), ranDays: 28 }).label).toBe('About the same')
     expect(compareResults({ promoDays: days(8, 103000), baseDays: days(8, 100000), ranDays: 28 }).label).toBe('+3%')
   })
@@ -154,6 +169,7 @@ describe('compareResults', () => {
       baseDays: [{ day: 'c', cents: 100000 }], ranDays: 28,
     })
     expect(r.avgCents).toBe(125000)
+    expect(r.baseAvgCents).toBe(100000)
     expect(r.changePct).toBe(25)
   })
   it('stopped after fewer than 7 days: too short', () => {
@@ -173,7 +189,7 @@ describe('compareResults', () => {
   })
   it('no promotion days at all', () => {
     const r = compareResults({ promoDays: [], baseDays: [], ranDays: 28 })
-    expect(r).toEqual({ avgCents: 0, changePct: null, label: 'Too short to compare', tone: 'mute' })
+    expect(r).toEqual({ avgCents: 0, baseAvgCents: 0, changePct: null, label: 'Too short to compare', tone: 'mute' })
   })
 })
 
@@ -194,6 +210,33 @@ describe('pageSentence', () => {
       .toEqual({ text: 'No promotions running. Take one up and NETS shows it to your customers when they pay.', figure: '' })
     expect(pageSentence({ running: 0, last: { shortName: 'weekend Cards', changePct: 14 } }).text)
       .toBe('No promotions running. Your last one, {figure}, brought in about 14% more.')
+  })
+  it('names what was measured', () => {
+    const last = { shortName: 'Tuesday NETS QR', measured: 'in NETS QR sales on Tuesdays' }
+    expect(pageSentence({ running: 1, last: { ...last, changePct: 12 } }).text)
+      .toBe('1 promotion is running. Your last one, {figure}, brought in about 12% more in NETS QR sales on Tuesdays.')
+    expect(pageSentence({ running: 1, last: { ...last, changePct: 0 } }).text)
+      .toBe('1 promotion is running. Your last one, {figure}, did about the same as before in NETS QR sales on Tuesdays.')
+    expect(pageSentence({ running: 1, last: { ...last, changePct: -6 } }).text)
+      .toBe('1 promotion is running. Your last one, {figure}, was lower than before in NETS QR sales on Tuesdays.')
+  })
+  it('scheduled promotions are not counted as running', () => {
+    expect(pageSentence({ running: 1, scheduled: 1, last: null }).text).toBe('1 promotion is running and 1 starts tomorrow.')
+    expect(pageSentence({ running: 2, scheduled: 2, last: null }).text).toBe('2 promotions are running and 2 start tomorrow.')
+    expect(pageSentence({ running: 0, scheduled: 1, last: null })).toEqual({ text: '1 promotion starts tomorrow.', figure: '' })
+    expect(pageSentence({ running: 0, scheduled: 2, startsWhen: 'soon', last: null }).text).toBe('2 promotions start soon.')
+    expect(pageSentence({ running: 0, scheduled: 1, last: { shortName: 'weekend Cards', changePct: 14 } }).text)
+      .toBe('1 promotion starts tomorrow. Your last one, {figure}, brought in about 14% more.')
+    expect(pageSentence({ running: 1, scheduled: 0, last: null }).text).toBe('1 promotion is running.')
+  })
+})
+
+describe('listText', () => {
+  it('joins names', () => {
+    expect(listText([])).toBe('')
+    expect(listText(['A'])).toBe('A')
+    expect(listText(['A', 'B'])).toBe('A and B')
+    expect(listText(['A', 'B', 'C'])).toBe('A, B and C')
   })
 })
 

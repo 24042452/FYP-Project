@@ -10,7 +10,8 @@ import { FilterChips } from './FilterChips'
 /**
  * "Promotions you can start": payment-type filter chips and a grid of cards (3 columns on desktop, 2 on
  * tablets, 1 on phones). Take up is white with a blue outline (like Accept on Refunds & disputes); when a
- * promotion cannot be taken up, a grey note says why instead.
+ * promotion cannot be taken up, a grey note says why instead. Notes sit above the button, so every Take up in a
+ * row lines up on the card's bottom edge.
  * @param {{cards: CardView[], chips: {value: string, label: string}[], onTakeUp: (key: string) => void}} props
  */
 export function PromotionCards({ cards, chips, onTakeUp }) {
@@ -36,12 +37,12 @@ export function PromotionCards({ cards, chips, onTakeUp }) {
             <h3 className="text-[17px] leading-snug font-[650]">{c.name}</h3>
             <p className="text-[14px] text-ink-2">{c.when}</p>
             <div className="mt-auto flex flex-col gap-1.5 pt-1.5">
+              {c.note ? <p className="text-[13px] text-ink-3">{c.note}</p> : null}
               {c.can ? (
                 <button type="button" onClick={() => onTakeUp(c.key)} className={`${acceptBtn} sm:self-start`} aria-label={`Take up ${c.name}`}>
                   Take up
                 </button>
               ) : null}
-              {c.note ? <p className="text-[13px] text-ink-3">{c.note}</p> : null}
             </div>
           </li>
         ))}

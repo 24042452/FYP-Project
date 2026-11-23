@@ -97,7 +97,7 @@ export function RunningCard({ r, className = '', onStopped }) {
         <form action={formAction} className="mt-1 flex flex-col gap-3 rounded-lg border border-line bg-page p-3.5 sm:p-4">
           <input type="hidden" name="runId" value={r.id} />
           <p ref={questionRef} tabIndex={-1} className="m-0 text-[15px] font-semibold outline-none">
-            Stop this promotion? It ends today at all its outlets.
+            {r.scheduled ? "Stop this promotion? It won't start." : 'Stop this promotion? It ends today at all its outlets.'}
           </p>
           {state && !state.ok ? (
             <p role="alert" className="m-0 text-[14px] font-medium text-bad">
