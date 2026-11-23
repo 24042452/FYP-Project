@@ -65,3 +65,28 @@ export async function reopenOpenDispute(email) {
     await conn.end()
   }
 }
+
+/**
+ * Undo what the promotion and offer tests did for one demo merchant (admin database user): delete promotion runs and
+ * offer take-ups created in the last 2 days (the seeded ones are older; their outlet rows cascade), and un-stop
+ * any remaining run.
+ * @param {string} email a demo login of that merchant
+ */
+export async function resetPromotions(email) {
+  const url = process.env.DATABASE_ADMIN_URL
+  if (!url) throw new Error('DATABASE_ADMIN_URL is not set (it comes from .env.local)')
+  const conn = await mysql.createConnection(url)
+  try {
+    const [rows] = await conn.query(
+      'SELECT mu.merchant_id AS id FROM merchant_users mu JOIN users u ON u.user_id = mu.user_id WHERE u.email = ? LIMIT 1',
+      [email],
+    )
+    if (!rows[0]) throw new Error(`No merchant found for ${email}. Run npm run seed first.`)
+    const id = rows[0].id
+    await conn.query('DELETE FROM promotion_runs WHERE merchant_id = ? AND created_at > NOW() - INTERVAL 2 DAY', [id])
+    await conn.query('DELETE FROM offer_takeups WHERE merchant_id = ? AND created_at > NOW() - INTERVAL 2 DAY', [id])
+    await conn.query('UPDATE promotion_runs SET stopped_on = NULL, stopped_by = NULL WHERE merchant_id = ?', [id])
+  } finally {
+    await conn.end()
+  }
+}
