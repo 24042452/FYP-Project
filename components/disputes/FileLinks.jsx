@@ -12,26 +12,30 @@ export function PillIcon({ icon }) {
 }
 
 /**
- * "2 files sent" with a link to open each evidence file (in a new tab).
+ * "2 files sent" with a link to open each evidence file (in a new tab). On phones the files are a list under
+ * the label; from 640px they sit on one line after it.
  * @param {{files: import('@/lib/disputes/view').FileView[], label: string, className?: string}} props
  */
 export function FileLinks({ files, label, className = '' }) {
   return (
-    <div className={`flex flex-wrap items-center gap-x-3 gap-y-1 text-[14px] text-ink-2 ${className}`}>
+    <div className={`flex flex-col gap-x-3 text-[14px] text-ink-2 sm:flex-row sm:flex-wrap sm:items-center ${className}`}>
       <span>{label}:</span>
-      {files.map((f) => (
-        <a
-          key={f.id}
-          href={f.href}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex min-h-11 max-w-full items-center gap-1.5 font-semibold text-info underline-offset-[3px] hover:text-ink sm:min-h-0"
-        >
-          <FileText className="size-4 flex-none" aria-hidden="true" />
-          <span className="min-w-0 truncate">{f.name}</span>
-          <span className="sr-only">(opens in a new tab, {f.size})</span>
-        </a>
-      ))}
+      <ul className="m-0 flex min-w-0 list-none flex-col p-0 sm:flex-row sm:flex-wrap sm:gap-x-3">
+        {files.map((f) => (
+          <li key={f.id} className="min-w-0">
+            <a
+              href={f.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex min-h-11 max-w-full items-center gap-1.5 font-semibold text-info underline-offset-[3px] hover:text-ink sm:min-h-0"
+            >
+              <FileText className="size-4 flex-none" aria-hidden="true" />
+              <span className="min-w-0 truncate">{f.name}</span>
+              <span className="sr-only">(opens in a new tab, {f.size})</span>
+            </a>
+          </li>
+        ))}
+      </ul>
     </div>
   )
 }

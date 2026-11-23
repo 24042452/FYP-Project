@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { Check, Download } from 'lucide-react'
+import { Download } from 'lucide-react'
 import { Pill } from '@/components/dashboard/Pill'
 import { EmptyState } from '@/components/dashboard/Panel'
 
@@ -9,12 +9,9 @@ import { EmptyState } from '@/components/dashboard/Panel'
  * @param {{rows: import('@/lib/disputes/view').RefundView[]}} props
  */
 export function RefundsTable({ rows }) {
-  const payoutPill = (/** @type {import('@/lib/disputes/view').RefundView['payout']} */ p) => (
-    <Pill tone={p.tone}>
-      {p.tone === 'ok' ? <Check className="mr-1.5 -ml-0.5 size-3.5 stroke-[2.4]" aria-hidden="true" /> : null}
-      {p.text}
-    </Pill>
-  )
+  // Paid: plain text (money leaving is not a success state). Still to come: a blue pill.
+  const payoutCell = (/** @type {import('@/lib/disputes/view').RefundView['payout']} */ p) =>
+    p.paid ? <span className="text-ink-2">{p.text}</span> : <Pill tone="info">{p.text}</Pill>
   return (
     <section aria-labelledby="refunds-h" className="min-w-0 rounded-[12px] border border-line bg-white shadow-panel">
       <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 px-4 pt-3 sm:px-5 sm:pt-[10px]">
@@ -61,7 +58,7 @@ export function RefundsTable({ rows }) {
                   <td className="px-4 py-3 whitespace-nowrap">{r.channel}</td>
                   <td className="px-4 py-3">{r.reason}</td>
                   <td className="px-4 py-3 text-right font-semibold tabular-nums">{r.amount}</td>
-                  <td className="px-5 py-3 whitespace-nowrap">{payoutPill(r.payout)}</td>
+                  <td className="px-5 py-3 whitespace-nowrap">{payoutCell(r.payout)}</td>
                 </tr>
               ))}
             </tbody>
@@ -78,7 +75,7 @@ export function RefundsTable({ rows }) {
                   <span className="text-[13px] text-ink-3">
                     Refunded {r.refundedOn} · {r.channel} · bought {r.boughtOn}
                   </span>
-                  <span>{payoutPill(r.payout)}</span>
+                  <span className="text-[13px]">{r.payout.paid ? <span className="text-ink-2">Taken from the {r.payout.text}</span> : payoutCell(r.payout)}</span>
                 </Link>
               </li>
             ))}

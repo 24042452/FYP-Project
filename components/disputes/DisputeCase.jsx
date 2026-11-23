@@ -71,7 +71,7 @@ export function DisputeCase({ d, canRespond, onKeep }) {
       data-status={d.status}
       className="grid grid-cols-1 gap-x-4 gap-y-1 border-t border-line p-4 first:border-t-0 sm:grid-cols-[40px_minmax(0,1fr)] sm:p-5"
     >
-      <span aria-hidden="true" className={`mb-2 grid size-10 place-items-center rounded-[10px] sm:row-span-2 sm:mb-0 ${tile.cls}`}>
+      <span aria-hidden="true" className={`hidden size-10 place-items-center rounded-[10px] sm:row-span-2 sm:grid ${tile.cls}`}>
         <tile.Icon className="size-5" />
       </span>
       <div className="min-w-0">

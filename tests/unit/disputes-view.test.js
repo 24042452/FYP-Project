@@ -19,7 +19,7 @@ const refund = (over) => ({
 describe('buildDisputesPage', () => {
   it('leads with the open dispute: sentence, red tile, case with meta, hint and decline reasons', () => {
     const m = buildDisputesPage({ disputes: [dispute({})], refunds: [], today: TODAY })
-    expect(`${m.sentence.before}${m.sentence.figure}${m.sentence.after}`).toBe('1 dispute needs your answer by Mon 30 Nov. $46.50 is at stake.')
+    expect(m.sentence).toEqual({ lead: '1 dispute needs your answer by Mon 30 Nov.', before: '', figure: '$46.50', after: ' is at stake.' })
     expect(m.tiles[0]).toEqual({ label: 'Needs your answer', value: '1 dispute', hint: 'Answer by Mon 30 Nov · 7 days left', tone: 'attention' })
     const c = m.cases[0]
     expect(c.meta).toBe('Cards · paid Sat 14 Nov, 12:41 pm · TID 70012345 · STAN 004512')
@@ -45,14 +45,14 @@ describe('buildDisputesPage', () => {
     expect(m.cases[1].files.map((f) => [f.size, f.href])).toEqual([['640 KB', '/disputes/files/f1'], ['1.5 MB', '/disputes/files/f2']])
     expect(m.tiles[1]).toEqual({ label: 'Waiting for NETS', value: '$18.20', hint: '1 dispute you declined on 9 Nov' })
     expect(m.closed.map((c) => [c.short, c.closedSub, c.pill.text])).toEqual([
-      ['Not received · $46.50', 'Cards · Oct · you declined with 1 file', 'Won, money kept'],
+      ['Food or goods not received · $46.50', 'Cards · Oct · you declined with 1 file', 'Won, money kept'],
       ['Charged the wrong amount · $46.50', 'Cards · Sep · you accepted', 'Accepted, refunded'],
     ])
   })
 
   it('with nothing at all, says so without a blue figure', () => {
     const m = buildDisputesPage({ disputes: [], refunds: [], today: TODAY })
-    expect(m.sentence).toEqual({ before: 'Nothing to answer, and no refunds this month.', figure: '', after: '' })
+    expect(m.sentence).toEqual({ lead: '', before: 'Nothing to answer, and no refunds this month.', figure: '', after: '' })
   })
 
   it('with nothing open or waiting, talks about this month’s refunds', () => {
@@ -61,7 +61,7 @@ describe('buildDisputesPage', () => {
       refunds: [refund({}), refund({ id: 'r2', amountCents: 600 }), refund({ id: 'old', refundedAt: '2026-10-20T03:00:00.000Z' })],
       today: TODAY,
     })
-    expect(`${m.sentence.before}${m.sentence.figure}${m.sentence.after}`).toBe('Nothing to answer. You had 2 refunds ($18.80) this month.')
+    expect(m.sentence).toEqual({ lead: 'Nothing to answer.', before: 'You had ', figure: '2 refunds', after: ' ($18.80) this month.' })
     expect(m.tiles[0]).toEqual({ label: 'Needs your answer', value: 'None', hint: 'Nothing to answer' })
     expect(m.tiles[2]).toEqual({ label: 'Refunds this month', value: '$18.80', hint: '2 refunds · taken from your payouts' })
     expect(m.refunds).toHaveLength(3)
@@ -69,10 +69,10 @@ describe('buildDisputesPage', () => {
 })
 
 describe('toRefundView', () => {
-  it('says which payout the refund came from, or "Next payout" when it is not paid yet', () => {
-    expect(toRefundView(refund({}))).toMatchObject({ refundedOn: 'Sat 21 Nov', boughtOn: 'Sun 15 Nov', channel: 'NETS QR', reason: 'Wrong order', amount: '$12.80', payout: { tone: 'ok', text: 'Taken from payout Mon 23 Nov' } })
-    expect(toRefundView(refund({ payout: { id: 's', businessDate: '2026-11-23', status: 'pending', expectedDate: '2026-11-24', paidDate: null } })).payout).toEqual({ tone: 'info', text: 'Next payout' })
-    expect(toRefundView(refund({ payout: null })).payout).toEqual({ tone: 'info', text: 'Next payout' })
+  it('says which payout the refund came from, as plain text, or "Next payout" when it is not paid yet', () => {
+    expect(toRefundView(refund({}))).toMatchObject({ refundedOn: 'Sat 21 Nov', boughtOn: 'Sun 15 Nov', channel: 'NETS QR', reason: 'Wrong order', amount: '$12.80', payout: { paid: true, text: 'Mon 23 Nov payout' } })
+    expect(toRefundView(refund({ payout: { id: 's', businessDate: '2026-11-23', status: 'pending', expectedDate: '2026-11-24', paidDate: null } })).payout).toEqual({ paid: false, text: 'Next payout' })
+    expect(toRefundView(refund({ payout: null })).payout).toEqual({ paid: false, text: 'Next payout' })
   })
 })
 

@@ -28,25 +28,23 @@ export default async function DisputesPage() {
   const note = viewOnlyNote(merchant)
 
   return (
-    <div className="flex flex-col gap-5 sm:gap-6">
+    <div className="flex flex-col gap-5">
       <div>
         <h1 className="text-[28px] leading-tight font-bold">Refunds &amp; disputes</h1>
         <p className="mt-1 text-[14px] text-ink-3">
           Chargebacks · money customers asked for back{selected ? ` · ${selected.name}` : ''}
         </p>
-      </div>
-
-      <div>
         <p
           data-testid="disputes-answer"
-          className="max-w-[34ch] text-[clamp(1.35rem,1.05rem+1.1vw,1.85rem)] leading-[1.3] font-semibold tracking-[-0.015em] text-balance"
+          className="mt-4 max-w-[46ch] text-[clamp(1.35rem,1.05rem+1.1vw,1.85rem)] leading-[1.3] font-semibold tracking-[-0.015em]"
         >
+          {m.sentence.lead ? <span className="block">{m.sentence.lead}</span> : null}
           {m.sentence.before}
           {m.sentence.figure ? <em className="text-info not-italic tabular-nums">{m.sentence.figure}</em> : null}
           {m.sentence.after}
         </p>
         {m.hasOpen && answers ? (
-          <p className="mt-2 max-w-[70ch] text-base text-ink-2">
+          <p className="mt-2 text-base text-ink-2">
             A customer&apos;s bank asked for their money back. Accept it, or decline it and show NETS why the payment was right.
           </p>
         ) : null}
@@ -66,7 +64,7 @@ export default async function DisputesPage() {
         className="grid grid-cols-1 divide-y divide-line rounded-[12px] border border-line bg-white shadow-panel sm:grid-cols-3 sm:divide-x sm:divide-y-0"
       >
         {m.tiles.map((t) => (
-          <StatTile key={t.label} {...t} />
+          <StatTile key={t.label} {...t} countUp />
         ))}
       </section>
 

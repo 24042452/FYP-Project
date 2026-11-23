@@ -12,7 +12,7 @@ describe('wording tables', () => {
     expect(REASON_TEXT.not_received).toBe("Customer says they didn't get their food or goods")
     expect(REASON_TEXT.not_recognised).toBe("Customer doesn't recognise this payment")
     expect(REASON_TEXT.wrong_amount).toBe('Customer says they were charged the wrong amount')
-    expect(Object.values(REASON_SHORT)).toEqual(['Charged twice', 'Not received', "Doesn't recognise the payment", 'Charged the wrong amount'])
+    expect(Object.values(REASON_SHORT)).toEqual(['Charged twice', 'Food or goods not received', "Doesn't recognise the payment", 'Charged the wrong amount'])
     expect(REFUND_REASON_TEXT).toEqual({
       wrong_order: 'Wrong order', charged_twice: 'Charged twice', sold_out: 'Item sold out',
       changed_mind: 'Customer changed their mind', other: 'Other',

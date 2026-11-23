@@ -5,7 +5,7 @@ Shows a merchant the money they gave back to customers (refunds) and the cases w
 
 ## Where it lives
 - Page: `/disputes` ("Refunds & disputes", sub-label "Chargebacks"), `app/(portal)/disputes/page.jsx`; server actions in `app/(portal)/disputes/actions.js`; evidence downloads in `app/(portal)/disputes/files`
-- Components: `components/disputes/` (`DisputeCase`, `Track`, `DeclineForm`, `AcceptConfirm`, `FileLinks`, `ClosedList`, `RefundsTable`, `shrink-image.js`)
+- Components: `components/disputes/` (`DisputesPanel`, `DisputeCase`, `Track`, `DeclineForm`, `AcceptConfirm`, `FileLinks`, `ClosedList`, `RefundsTable`, `shrink-image.js`)
 - Data: `lib/data/disputes.js`, `lib/data/refunds.js` (every query filters by the session merchant)
 
 ## How a dispute is answered
@@ -27,6 +27,11 @@ Shows a merchant the money they gave back to customers (refunds) and the cases w
 - A refund is taken from the payout of the day it was given: `settlements.refund_cents`, and net = gross - fee - refunds.
 - The check-up counts successful and refunded payments when it works out a payout's expected gross, so refunds do not show as false problems.
 - "Money to my bank" shows a line "Refunds -$X". Each outlet's payout share does the same.
+
+## Assumptions to confirm with NETS
+- **Answer window: 10 days.** `respond_by` = the day the dispute opened + 10 days. The demo dispute opens 3 days before the seed day, so it shows "7 days left". NETS's real deadline may differ.
+- **"NETS usually decides within about 30 days."** After a decline, `decide_by` = answer day + 30 days, and the confirmation line says so. This is our estimate, not a published NETS figure.
+- **Refunds 1 to 14 days after the purchase.** This is a common shop practice used for the demo data, not a NETS rule.
 
 ## Known simplifications
 - A chargeback does not change the stored money or the sales totals. Only the case and its status change.
