@@ -7,7 +7,7 @@ import { toDetailView } from '@/lib/transactions/format'
 import { TxnDrawer } from '@/components/transactions/TxnDrawer'
 import { sgtDate } from '@/lib/dates'
 import { canRespond, viewOnlyNote } from '@/lib/disputes/rules'
-import { buildDisputesPage, paymentHref, refundsRange } from '@/lib/disputes/view'
+import { buildDisputesPage, disputeNotice, paymentHref, refundsRange } from '@/lib/disputes/view'
 import { StatTile } from '@/components/dashboard/StatTile'
 import { DisputesPanel } from '@/components/disputes/DisputesPanel'
 import { RefundsTable } from '@/components/disputes/RefundsTable'
@@ -34,6 +34,7 @@ export default async function DisputesPage({ searchParams }) {
   const wanted = typeof sp?.payment === 'string' ? sp.payment : null
   const onPage = new Set([...disputes.map((d) => d.transactionId), ...refunds.map((r) => r.transactionId)])
   const payment = wanted && onPage.has(wanted) ? await getTransaction(merchant.id, wanted) : null
+  const disputedPayment = payment ? disputes.find((d) => d.transactionId === payment.id) ?? null : null
   const answers = canRespond(merchant)
   const note = viewOnlyNote(merchant)
 
@@ -88,6 +89,7 @@ export default async function DisputesPage({ searchParams }) {
           closeHref="/disputes"
           moreHref={paymentHref(payment.id, payment.createdAt)}
           moreLabel="Open in Sales & payments"
+          notice={disputedPayment ? { ...disputeNotice(disputedPayment, today), tone: 'warn' } : undefined}
         />
       ) : null}
     </div>

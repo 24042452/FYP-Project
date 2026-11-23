@@ -78,6 +78,7 @@ test('TC-DSP-06: payment details open in a side panel and close by clicking outs
   const panel = page.getByRole('dialog')
   await expect(panel).toBeVisible()
   await expect(panel.getByText('What happened')).toBeVisible()
+  await expect(panel.getByTestId('payment-notice')).toContainText('Disputed by the customer')
   await expect(panel.getByRole('link', { name: 'Open in Sales & payments' })).toHaveAttribute('href', /^\/transactions\?id=/)
   await expect(page).toHaveURL(/\/disputes\?payment=/)
 

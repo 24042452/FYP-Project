@@ -10,7 +10,7 @@ Shows a merchant the money they gave back to customers (refunds) and the cases w
 
 ## Payment details
 
-"See the payment" and the refund dates open the payment in the same side panel Sales & payments uses (`/disputes?payment=<id>`). Clicking outside, Esc or × closes it and the page keeps its place. Only payments of disputes or refunds shown on the page can open, so an outlet manager cannot open another outlet's payment by editing the address. "Open in Sales & payments" inside the panel goes to the full list.
+"See the payment" and the refund dates open the payment in the same side panel Sales & payments uses (`/disputes?payment=<id>`). A disputed payment shows an amber "Disputed by the customer" note above "What happened", with the reason, the date and where the dispute stands (amber picked over red, so it does not look like a failed payment). Clicking outside, Esc or × closes it and the page keeps its place. Only payments of disputes or refunds shown on the page can open, so an outlet manager cannot open another outlet's payment by editing the address. "Open in Sales & payments" inside the panel goes to the full list.
 
 ## How a dispute is answered
 - Each open dispute shows a 3-step track (Customer disputed, Your answer, NETS decides), the reason in plain words, a hint on what proof helps, and the deadline.
