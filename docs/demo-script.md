@@ -110,7 +110,7 @@ A 7-minute walkthrough of the MVP, then questions. One person **presents** (talk
 ### 7b. Refunds & disputes: answer a chargeback (45 s)
 **Do:** log in as **Ah Hock**, open **Refunds & disputes**. Read the open "charged twice" case and the hint on what proof helps.
 **Say:** "A customer's bank asked for this money back. We show it as a case with a 3-step track and a deadline, and a hint on what proof helps."
-**Do:** click **Decline**, write a short reason, add a receipt photo, send. The case moves to **Waiting for NETS**.
+**Do:** click **Decline**, pick **"The customer paid only once. I can show the one payment."**, tick **Receipt or order slip**, add a receipt photo, then send. The case moves to **Waiting for NETS**.
 **Say:** "Only owners and outlet managers can answer; an accountant can look but not press anything."
 **Note:** re-seeding resets this case, so it is open again for the next run.
 

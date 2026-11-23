@@ -65,7 +65,7 @@ Refunds & disputes rows:
 |---|---|---|
 | Unit (Vitest) | `npm test` | 40 files, 412 tests passed |
 | Integration (Vitest + MySQL 8, `nets_portal_test`) | `npm run test:integration` | 14 files, 148 tests passed |
-| End-to-end (Playwright, Microsoft Edge, desktop 1280x800 and iPhone 13) | `npm run test:e2e` | 76 passed, 14 skipped by design (single-project or multi-outlet-only cases), 90 total across desktop and iPhone 13, against `npm run build && npm start` |
+| End-to-end (Playwright, Microsoft Edge, desktop 1280x800 and iPhone 13) | `npm run test:e2e` | 76 passed, 14 skipped (tests that run on one viewport only, by design: desktop-only or phone-only), 90 total across desktop and iPhone 13, against `npm run build && npm start` |
 | Lint | `npm run lint` | no problems |
 
 Not yet done: AI evaluation set against a live model, accessibility scan (axe), usability sessions, UAT. GitHub Actions (`.github/workflows/ci.yml`) runs lint, unit and integration tests; e2e is run locally only because it needs a seeded database and a browser.

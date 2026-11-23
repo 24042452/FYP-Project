@@ -9,9 +9,9 @@ Shows a merchant the money they gave back to customers (refunds) and the cases w
 - Data: `lib/data/disputes.js`, `lib/data/refunds.js` (every query filters by the session merchant)
 
 ## How a dispute is answered
-- Each open dispute shows a 3-step track (Raised, Waiting for NETS, Decided), the reason in plain words, a hint on what proof helps, and the deadline.
+- Each open dispute shows a 3-step track (Customer disputed, Your answer, NETS decides), the reason in plain words, a hint on what proof helps, and the deadline.
 - **Accept** (white button, blue outline): asks "Are you sure?", then gives the money back to the customer.
-- **Decline** (solid red button): opens an inline form. Write why, and add up to 3 files as proof. After sending, the case moves to "Waiting for NETS".
+- **Decline** (solid red button): opens an inline form: pick why you disagree (required), tick at least one kind of proof (required), add an optional note of up to 500 characters (required only for "Something else"), and optionally add files (up to 3 JPG, PNG or PDF, 2 MB each, 4 MB together). After sending, the case moves to "Waiting for NETS".
 - **Evidence files:** JPG, PNG or PDF, up to 2 MB each and 4 MB in total. Photos are shrunk in the browser to 1600 px JPEG before they are sent, so a phone photo usually fits.
 - A file that is too big or the wrong type is refused with a plain sentence and nothing is sent.
 - If the deadline passes with no answer, the case shows "Missed, money refunded".
