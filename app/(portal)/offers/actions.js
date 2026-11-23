@@ -7,7 +7,7 @@ import { listOutlets } from '@/lib/data/outlets'
 import { takeUpOffer } from '@/lib/data/offers'
 import { offerByKey } from '@/lib/offers/catalogue'
 import { canTakeUp, pickOutlets } from '@/lib/promotions/rules'
-import { formatDay } from '@/lib/transactions/format'
+import { offerDay } from '@/lib/offers/rules'
 import { sgtDate } from '@/lib/dates'
 
 /** @typedef {{ok: true, message: string} | {ok: false, message: string}} ActionResult */
@@ -42,5 +42,5 @@ export async function takeUpOfferAction(_prev, formData) {
   const res = await takeUpOffer(merchant.id, { key: offer.key, months: offer.months, outletIds, userId: user.id, today: day })
   if (!res.ok) return { ok: false, message: res.reason === 'busy' ? BUSY : BAD_OUTLET }
   revalidatePath('/offers')
-  return { ok: true, message: `Taken up. Active until ${formatDay(res.endsOn)}.` }
+  return { ok: true, message: `Taken up. Active until ${offerDay(res.endsOn, day)}.` }
 }

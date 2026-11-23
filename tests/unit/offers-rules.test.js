@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { offerStatus, offerPill, offerOutletChoices, offerSentence, offersFor } from '@/lib/offers/rules'
+import { offerStatus, offerPill, offerOutletChoices, offerSentence, offersFor, offerDay } from '@/lib/offers/rules'
 
 const TODAY = '2026-11-24'
 const owner = { role: 'owner', readOnly: false, tier: 'merchant', outletId: null }
@@ -61,5 +61,21 @@ describe('offersFor', () => {
     expect(offersFor('F&B').map((o) => o.key)).toEqual(['qr_fee_cut', 'qr_standee', 'packaging_partner', 'delivery_listing'])
     expect(offersFor('Retail').map((o) => o.key)).toEqual(['qr_fee_cut', 'qr_standee', 'second_terminal', 'shelf_labels'])
     expect(offersFor('Other')).toEqual([])
+  })
+})
+
+describe('dates far ahead carry the year', () => {
+  // A 12-month offer taken up today ends on 23 Nov next year: without the year it reads like yesterday.
+  it('offerDay adds the year when the date is more than 6 months away', () => {
+    expect(offerDay('2027-02-23', TODAY)).toBe('Tue 23 Feb')
+    expect(offerDay('2027-11-23', TODAY)).toBe('Tue 23 Nov 2027')
+  })
+  it('pill, outlet reason and sentence use it', () => {
+    const far = takeup({ key: 'qr_standee', startsOn: TODAY, endsOn: '2027-11-23' })
+    expect(offerPill(far, TODAY).text).toBe('Active until Tue 23 Nov 2027')
+    const [a] = offerOutletChoices({ offer: { key: 'qr_standee' }, outlets, takeups: [far], today: TODAY, access: owner })
+    expect(a.reason).toBe('Already active until Tue 23 Nov 2027')
+    expect(offerSentence({ active: 1, first: { name: 'Free NETS QR standee', endsOn: '2027-11-23' }, today: TODAY }).text)
+      .toBe('You have 1 offer active: {figure} until 23 Nov 2027.')
   })
 })

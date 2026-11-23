@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { acceptBtn } from '@/components/disputes/buttons'
 import { ChannelTag } from './RunningCard'
+import { FilterChips } from './FilterChips'
 
 /** @typedef {ReturnType<typeof import('@/lib/promotions/view').buildPromotionsPage>['cards'][number]} CardView */
 
@@ -22,24 +23,7 @@ export function PromotionCards({ cards, chips, onTakeUp }) {
         Promotions you can start
       </h2>
       {chips.length > 2 ? (
-        <div role="group" aria-label="Payment type" className="flex flex-wrap gap-2">
-          {chips.map((c) => {
-            const on = filter === c.value
-            return (
-              <button
-                key={c.value}
-                type="button"
-                aria-pressed={on}
-                onClick={() => setFilter(c.value)}
-                className={`inline-flex min-h-11 cursor-pointer items-center rounded-full border px-3.5 text-[14px] font-semibold transition-colors duration-[140ms] ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-nets-blue ${
-                  on ? 'border-nets-blue bg-nets-blue-soft text-info' : 'border-line-strong bg-white text-ink-2 hover:border-ink-3'
-                }`}
-              >
-                {c.label}
-              </button>
-            )
-          })}
-        </div>
+        <FilterChips chips={chips} value={filter} onChange={setFilter} label="Payment type" />
       ) : null}
       <ul key={filter} className="fx-in m-0 grid list-none grid-cols-1 gap-4 p-0 sm:grid-cols-2 lg:grid-cols-3">
         {shown.map((c) => (
