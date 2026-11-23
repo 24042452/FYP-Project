@@ -1,0 +1,58 @@
+/* Refunds & disputes: shared pieces for the three layout options (mockup only).
+   Uses the tokens in portal.css; no new colours, sizes or corners. */
+
+/* Accept = white with a blue outline; Decline = solid red (user's rule, 2026-11-23) */
+.btn-accept { background: var(--surface); color: var(--accent-ink); border: 1px solid var(--accent); box-shadow: var(--shadow); }
+.btn-accept:hover { background: var(--accent-soft); }
+.btn-decline { background: var(--red); color: #fff; border: 1px solid var(--red); box-shadow: 0 1px 2px rgba(176, 18, 36, 0.25); }
+.btn-decline:hover { background: var(--red-hover); border-color: var(--red-hover); }
+
+.kv { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 6px 16px; font-size: 14px; }
+.kv dt { color: var(--ink-2); }
+.kv dd { margin: 0; font-variant-numeric: tabular-nums; text-align: right; }
+
+/* Three-step track: customer disputed -> your answer -> NETS decides */
+.track3 { list-style: none; margin: 14px 0 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0; }
+.track3 li { position: relative; padding: 22px 8px 0 0; font-size: 14px; color: var(--ink-2); display: flex; flex-direction: column; gap: 2px; }
+.track3 li::before { content: ""; position: absolute; left: 0; right: 0; top: 7px; height: 2px; background: var(--border-strong); }
+.track3 li::after { content: ""; position: absolute; left: 0; top: 1px; width: 14px; height: 14px; border-radius: 50%; background: var(--surface); border: 2px solid var(--border-strong); }
+.track3 li b { color: var(--ink); font-weight: 600; }
+.track3 li.done::before { background: var(--accent); }
+.track3 li.done::after { background: var(--accent); border-color: var(--accent); }
+.track3 li.now::after { border-color: var(--red); box-shadow: 0 0 0 4px var(--red-soft); }
+.track3 li.now b { color: var(--red-ink); }
+.track3 li:last-child::before { right: auto; width: 0; }
+
+/* Decline form */
+.form { display: flex; flex-direction: column; gap: 18px; }
+.form h3 { font-size: 18px; font-weight: 650; }
+.field { display: flex; flex-direction: column; gap: 8px; }
+.field > .lab { font-size: 15px; font-weight: 600; }
+.field > .hint { font-size: 14px; color: var(--ink-2); margin-top: -4px; }
+.choice { display: flex; align-items: flex-start; gap: 10px; min-height: 44px; padding: 10px 12px; border: 1px solid var(--border-strong); border-radius: var(--r); background: var(--surface); font-size: 15px; cursor: pointer; }
+.choice input { width: 18px; height: 18px; margin: 2px 0 0; accent-color: var(--accent); flex: none; }
+.choice.on { border-color: var(--accent); background: var(--accent-soft); }
+.choices { display: grid; gap: 8px; }
+.choices.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+textarea.input { width: 100%; min-height: 88px; padding: 12px 14px; border: 1px solid var(--border-strong); border-radius: var(--r); font: inherit; font-size: 16px; color: var(--ink); resize: vertical; }
+textarea.input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+.drop { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; padding: 14px; border: 1px dashed var(--border-strong); border-radius: var(--r); background: var(--bg); font-size: 14px; color: var(--ink-2); }
+.file { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border: 1px solid var(--border); border-radius: var(--r); background: var(--surface); font-size: 14px; }
+.file .icon { color: var(--accent); }
+.file .sz { color: var(--ink-3); margin-left: auto; font-variant-numeric: tabular-nums; }
+.form-acts { display: flex; flex-wrap: wrap; gap: 10px; }
+
+.money { font-variant-numeric: tabular-nums; font-weight: 650; }
+.type-ic { width: 36px; height: 36px; border-radius: 10px; display: grid; place-items: center; flex: none; }
+.type-ic.dispute { background: var(--red-soft); color: var(--red-ink); }
+.type-ic.refund { background: var(--mute-bg); color: var(--ink-2); }
+
+@media (max-width: 640px) {
+  .choices.two { grid-template-columns: 1fr; }
+  .form-acts .btn { flex: 1 1 100%; }
+  .track3 li { font-size: 13px; }
+}
+
+[hidden] { display: none !important; }
+.track3 li.wait::after { border-color: var(--accent); box-shadow: 0 0 0 4px var(--accent-soft); }
+.track3 li.wait b { color: var(--accent-ink); }
