@@ -38,3 +38,30 @@ export async function retailTransactionId() {
     await conn.end()
   }
 }
+
+/**
+ * Put a demo merchant's seeded open dispute (the one with the latest respond-by date) back to `open`,
+ * with no answer and no files, so each test starts clean (read and written with the admin database user).
+ * @param {string} email a demo login of that merchant
+ */
+export async function reopenOpenDispute(email) {
+  const url = process.env.DATABASE_ADMIN_URL
+  if (!url) throw new Error('DATABASE_ADMIN_URL is not set (it comes from .env.local)')
+  const conn = await mysql.createConnection(url)
+  try {
+    const [rows] = await conn.query(
+      `SELECT d.dispute_id AS id FROM disputes d JOIN merchant_users mu ON mu.merchant_id = d.merchant_id JOIN users u ON u.user_id = mu.user_id
+       WHERE u.email = ? ORDER BY d.respond_by DESC, d.opened_at DESC LIMIT 1`,
+      [email],
+    )
+    if (!rows[0]) throw new Error(`No dispute found for ${email}. Run npm run seed first.`)
+    await conn.query('DELETE FROM dispute_files WHERE dispute_id = ?', [rows[0].id])
+    await conn.query(
+      `UPDATE disputes SET status = 'open', answered_at = NULL, answered_by = NULL, decline_reason = NULL,
+         evidence = NULL, note = NULL, decide_by = NULL, decided_at = NULL WHERE dispute_id = ?`,
+      [rows[0].id],
+    )
+  } finally {
+    await conn.end()
+  }
+}
