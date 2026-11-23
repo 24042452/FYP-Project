@@ -1,7 +1,7 @@
 import { beforeAll, describe, expect, it } from 'vitest'
 import { randomUUID } from 'node:crypto'
 import { adminExecute, insertFixture, resetTestDb } from './helpers.js'
-import { getRecentSettlements, getSettlementSummary, getSettlementTotals, listSettlements } from '../../lib/data/settlements.js'
+import { getRecentSettlements, getSettlementSummary, getSettlementTotals, getOutletSettlementShares, listSettlements } from '../../lib/data/settlements.js'
 
 const M = randomUUID()
 
@@ -48,6 +48,41 @@ describe('refunds in payouts', () => {
     const recent = await getRecentSettlements(M, 50)
     expect(recent.find((d) => d.businessDate === '2026-10-20').refundCents).toBe(1280)
     await adminExecute(`DELETE FROM settlements WHERE settlement_id = ?`, [id])
+  })
+})
+
+describe('outlet shares with refunds', () => {
+  it('keeps a later-refunded payment in its own day and takes only this outlet refund on the refund day', async () => {
+    const O1 = randomUUID(), O2 = randomUUID(), S1 = randomUUID(), S2 = randomUUID()
+    const T1 = randomUUID(), T2 = randomUUID(), T3 = randomUUID()
+    for (const o of [O1, O2]) await adminExecute(`INSERT INTO outlets (outlet_id, merchant_id, name) VALUES (?, ?, 'O')`, [o, M])
+    await insertFixture({
+      transactions: [
+        { id: T1, merchantId: M, channel: 'card', status: 'refunded', amountCents: 2000, feeCents: 50, createdAt: '2026-10-01T04:00:00.000Z' },
+        { id: T2, merchantId: M, channel: 'card', amountCents: 3000, feeCents: 75, createdAt: '2026-10-05T04:00:00.000Z' },
+        { id: T3, merchantId: M, channel: 'card', status: 'refunded', amountCents: 900, feeCents: 20, createdAt: '2026-10-02T04:00:00.000Z' },
+      ],
+    })
+    const ins = (id, day, gross, fee, refund) => adminExecute(
+      `INSERT INTO settlements (settlement_id, merchant_id, business_date, channel, gross_cents, fee_cents, refund_cents, net_cents, status, expected_date)
+       VALUES (?, ?, ?, 'card', ?, ?, ?, ?, 'paid', '2026-10-09')`, [id, M, day, gross, fee, refund, gross - fee - refund])
+    await ins(S1, '2026-10-01', 2000, 50, 0)
+    await ins(S2, '2026-10-05', 3000, 75, 2900) // T1 (O1) and T3 (O2) refunded here
+    await adminExecute(`UPDATE transactions SET outlet_id = ?, settlement_id = ? WHERE transaction_id = ?`, [O1, S1, T1])
+    await adminExecute(`UPDATE transactions SET outlet_id = ?, settlement_id = ? WHERE transaction_id = ?`, [O1, S2, T2])
+    await adminExecute(`UPDATE transactions SET outlet_id = ?, settlement_id = ? WHERE transaction_id = ?`, [O2, S1, T3])
+    await adminExecute(`INSERT INTO refunds (refund_id, merchant_id, transaction_id, amount_cents, reason, refunded_at, settlement_id) VALUES (?, ?, ?, 2000, 'other', '2026-10-05 05:00:00', ?)`, [randomUUID(), M, T1, S2])
+    await adminExecute(`INSERT INTO refunds (refund_id, merchant_id, transaction_id, amount_cents, reason, refunded_at, settlement_id) VALUES (?, ?, ?, 900, 'other', '2026-10-05 05:00:00', ?)`, [randomUUID(), M, T3, S2])
+    const o1 = await getOutletSettlementShares(M, O1, { since: '2000-01-01' })
+    expect(o1.map((r) => [r.businessDate, r.grossCents, r.feeCents, r.refundCents, r.netCents])).toEqual([
+      ['2026-10-05', 3000, 75, 2000, 925],
+      ['2026-10-01', 2000, 50, 0, 1950],
+    ])
+    const o2 = await getOutletSettlementShares(M, O2, { since: '2000-01-01' })
+    expect(o2.map((r) => [r.businessDate, r.grossCents, r.refundCents, r.netCents])).toEqual([
+      ['2026-10-05', 0, 900, -900], // refund-only payout row
+      ['2026-10-01', 900, 0, 880],
+    ])
   })
 })
 
