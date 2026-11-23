@@ -29,10 +29,13 @@ export function OfferCards({ cards, chips, onTakeUp }) {
 
   return (
     <section aria-labelledby="for-you-h" className="flex min-w-0 flex-col gap-3">
-      <h2 id="for-you-h" className="text-[17px] font-semibold">
-        Offers for you
-      </h2>
-      {chips.length > 2 ? <FilterChips chips={chips} value={filter} onChange={setFilter} label="Kind of offer" /> : null}
+      {/* Title left, filter chips right on wide screens (they wrap below it on phones). */}
+      <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3">
+        <h2 id="for-you-h" className="text-[17px] font-semibold">
+          Offers for you
+        </h2>
+        {chips.length > 2 ? <FilterChips chips={chips} value={filter} onChange={setFilter} label="Kind of offer" /> : null}
+      </div>
       <ul key={filter} className="fx-in m-0 grid list-none grid-cols-1 gap-4 p-0 sm:grid-cols-2 lg:grid-cols-3">
         {shown.map((c) => (
           <li

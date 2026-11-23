@@ -32,7 +32,7 @@ export default async function OffersPage() {
         </p>
         <p
           data-testid="offers-answer"
-          className="mt-4 max-w-[46ch] text-[clamp(1.35rem,1.05rem+1.1vw,1.85rem)] leading-[1.3] font-semibold tracking-[-0.015em]"
+          className="mt-3 max-w-[46ch] text-[clamp(1.35rem,1.05rem+1.1vw,1.85rem)] leading-[1.3] font-semibold tracking-[-0.015em]"
         >
           {m.sentence.before}
           {m.sentence.figure ? <em className="text-info not-italic">{m.sentence.figure}</em> : null}

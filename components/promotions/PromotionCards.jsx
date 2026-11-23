@@ -20,12 +20,15 @@ export function PromotionCards({ cards, chips, onTakeUp }) {
 
   return (
     <section aria-labelledby="start-h" className="flex min-w-0 flex-col gap-3">
-      <h2 id="start-h" className="text-[17px] font-semibold">
-        Promotions you can start
-      </h2>
-      {chips.length > 2 ? (
-        <FilterChips chips={chips} value={filter} onChange={setFilter} label="Payment type" />
-      ) : null}
+      {/* Title left, filter chips right on wide screens (they wrap below it on phones). */}
+      <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3">
+        <h2 id="start-h" className="text-[17px] font-semibold">
+          Promotions you can start
+        </h2>
+        {chips.length > 2 ? (
+          <FilterChips chips={chips} value={filter} onChange={setFilter} label="Payment type" />
+        ) : null}
+      </div>
       <ul key={filter} className="fx-in m-0 grid list-none grid-cols-1 gap-4 p-0 sm:grid-cols-2 lg:grid-cols-3">
         {shown.map((c) => (
           <li
