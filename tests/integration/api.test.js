@@ -130,6 +130,7 @@ describe('GET /api/v1/settlements', () => {
       ['2026-11-10', 1000, 'paid'],
       ['2026-11-09', 700, 'late'],
     ])
+    expect(a.data.map((r) => r.refund_cents)).toEqual([0, 0])
     const b = await body(await settlementsResponse(B, { month: '2026-11' }, TODAY))
     expect(b.data.map((r) => r.net_cents)).toEqual([55555])
   })

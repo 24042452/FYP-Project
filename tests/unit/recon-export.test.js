@@ -9,8 +9,8 @@ const exceptions = [
   { id: 'e3', type: 'failed_payment', settlementId: null, transactionId: 't1', day: '2026-10-20', channel: 'card', expectedCents: 800, actualCents: null, status: 'open', note: null, message: "$8.00 payment didn't go through" },
 ]
 const settlements = [
-  { id: 's1', businessDate: '2026-10-17', channel: 'card', grossCents: 10000, feeCents: 250, netCents: 9750, status: 'paid', expectedDate: '2026-10-19', paidDate: '2026-10-19' },
-  { id: 's2', businessDate: '2026-10-18', channel: 'card', grossCents: 45790, feeCents: 1145, netCents: 44645, status: 'paid', expectedDate: '2026-10-20', paidDate: '2026-10-20' },
+  { id: 's1', businessDate: '2026-10-17', channel: 'card', grossCents: 10000, feeCents: 250, refundCents: 0, netCents: 9750, status: 'paid', expectedDate: '2026-10-19', paidDate: '2026-10-19' },
+  { id: 's2', businessDate: '2026-10-18', channel: 'card', grossCents: 45790, feeCents: 1145, refundCents: 500, netCents: 44145, status: 'paid', expectedDate: '2026-10-20', paidDate: '2026-10-20' },
 ]
 
 describe('check-up view', () => {
@@ -45,7 +45,13 @@ describe('Excel exports', () => {
     expect(st.getCell('C3').value).toBe(457.9)
     const gross = (st.getCell('C2').value + st.getCell('C3').value) * 100
     expect(Math.round(gross)).toBe(55790)
-    expect(wb.getWorksheet('Summary').getCell('B10').value).toBe(557.9)
+    const sm = wb.getWorksheet('Summary')
+    expect(sm.getCell('B10').value).toBe(557.9)
+    expect(sm.getCell('A12').value).toBe('Refunds taken from payouts')
+    expect(sm.getCell('B12').value).toBe(5)
+    expect(Math.round((sm.getCell('B10').value - sm.getCell('B11').value - sm.getCell('B12').value) * 100)).toBe(Math.round(sm.getCell('B13').value * 100))
+    expect(st.getCell('E1').value).toBe('Refunds')
+    expect(st.getCell('E3').value).toBe(5)
     expect(wb.getWorksheet('Exceptions').getCell('G2').value).toBe(-42.1)
   })
   it('the payments workbook formats amounts in dollars', async () => {
@@ -75,7 +81,7 @@ describe('Excel exports', () => {
     expect(Math.round((ws.getCell('E2').value + ws.getCell('E3').value) * 100)).toBe(rows.reduce((s, r) => s + r.amountCents, 0))
     expect(ws.getCell('C2').value).toBe('NETS QR')
     expect(ws.getCell('D3').value).toBe('Charged twice')
-    expect(ws.getCell('F2').value).toMatch(/^Taken from payout/)
+    expect(ws.getCell('F2').value).toBe('Tue 10 Nov payout')
     expect(ws.getCell('F3').value).toBe('Next payout')
     expect(ws.rowCount).toBe(3)
   })
