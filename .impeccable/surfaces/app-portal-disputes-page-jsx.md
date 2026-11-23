@@ -15,7 +15,7 @@ Audience and job: merchant owners and outlet managers see refunds and disputes a
 
 THESIS: Each dispute is a case that shows where it stands (customer disputed, your answer, NETS decides) and what to do now; refuses a flat table of chargebacks with a status column.
 OWN-WORLD: Clean Console: cool-paper page, white 12px panels, hairlines, Inter, blue for data and progress, red only for the open case, Decline and the send button; Accept is white with a blue outline.
-STORY: The merchant reads one sentence (what needs an answer, by when, how much is held), opens the case, reads the hint, and declines with proof or accepts in under a minute.
+STORY: The merchant reads one sentence (what needs an answer, by when, how much is at stake), opens the case, reads the hint, and declines with proof or accepts in under a minute. ("At stake" / "taken back from a future payout" replaces "held": approved spec 2026-11-23, Money effects — disputes move no stored money in the demo, so "held" would be untrue.)
 FIRST VIEWPORT: Title + Chargebacks subtitle; answer sentence with the held amount in blue; three-part summary strip; the open case with its 3-step track, blue hint box, red Decline and outlined Accept within the first 800px on desktop.
 FORM: Case cards with a 3-step track, fifth on my list of seven ranked structures; dealt as THE ROLL, seed key 061e37a9.
 FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance
