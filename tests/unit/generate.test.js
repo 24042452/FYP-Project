@@ -102,7 +102,7 @@ describe('generateDataset', () => {
     const oct = hawker.invoices.find((i) => i.period === '2026-10-01')
     const line = hawker.invoiceLines.find((l) => l.invoice_id === oct.id && l.channel === 'card')
     const computed = hawker.transactions
-      .filter((t) => t.channel === 'card' && t.status === 'success' && sgtDate(t.created_at).startsWith('2026-10'))
+      .filter((t) => t.channel === 'card' && t.status !== 'failed' && sgtDate(t.created_at).startsWith('2026-10'))
       .reduce((a, t) => a + t.fee_cents, 0)
     expect(line.amount_cents).toBe(computed + 360)
     const lines = hawker.invoiceLines.filter((l) => l.invoice_id === oct.id)
@@ -195,6 +195,7 @@ describe('refunds and disputes in the demo data', () => {
       for (const r of d.refunds) {
         const t = txns.get(r.transaction_id)
         expect(t.status).toBe('refunded')
+        expect(['nets_qr', 'card', 'nets_click']).toContain(t.channel)
         expect(r.amount_cents).toBe(t.amount_cents)
         const gap = dayDiff(sgtDate(r.refunded_at), sgtDate(t.created_at))
         expect(gap).toBeGreaterThanOrEqual(1)
