@@ -127,7 +127,7 @@ A 7-minute walkthrough of the MVP, then questions. One person **presents** (talk
 - "All data is made up by our own generator. No real merchants or customers."
 
 ### 10. What's next (30 s)
-**Say:** "Next we'd add automatic nightly check-ups and alerts by email, refunds and disputes, reports for accountants, staff roles, and API keys so systems like Xero can connect. We'd love NETS' input on which matters most to your merchants, and real sandbox data when it's available."
+**Say:** "Next we'd add automatic nightly check-ups and alerts by email, reports for accountants, staff roles, and API keys so systems like Xero can connect. We'd love NETS' input on which matters most to your merchants, and real sandbox data when it's available."
 
 **Then:** "Thank you, happy to take questions."
 

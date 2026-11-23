@@ -26,7 +26,7 @@ Shows a merchant the money they gave back to customers (refunds) and the cases w
 - A refund happens 1 to 14 days after the purchase. This is a common shop practice, not a NETS rule.
 - A refund is taken from the payout of the day it was given: `settlements.refund_cents`, and net = gross - fee - refunds.
 - The check-up counts successful and refunded payments when it works out a payout's expected gross, so refunds do not show as false problems.
-- "Money to my bank" shows a line "Refunds -$X". Each outlet's payout share does the same.
+- On "Money to my bank" the "Refunds -$X" label sits on each payout row that had refunds taken off. The totals tiles are net, so they already include the refunds. Each outlet's payout share also nets refunds off, but shows no separate "Refunds" line.
 
 ## Assumptions to confirm with NETS
 - **Answer window: 10 days.** `respond_by` = the day the dispute opened + 10 days. The demo dispute opens 3 days before the seed day, so it shows "7 days left". NETS's real deadline may differ.
@@ -34,6 +34,7 @@ Shows a merchant the money they gave back to customers (refunds) and the cases w
 - **Refunds 1 to 14 days after the purchase.** This is a common shop practice used for the demo data, not a NETS rule.
 
 ## Known simplifications
+- "Where your money went" on Home is successful sales minus their fees, so fees on later-refunded payments are not shown there (a few cents).
 - A chargeback does not change the stored money or the sales totals. Only the case and its status change.
 - No bell alerts for disputes yet: notifications have no `outlet_id`, so an outlet manager could not be shown only their own (see `docs/backlog.md`).
 
