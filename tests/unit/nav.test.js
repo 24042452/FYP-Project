@@ -18,7 +18,7 @@ describe('NAV', () => {
   it('marks exactly the MVP pages as built', () => {
     const built = items.filter((i) => i.built).map((i) => i.href).sort()
     expect(built).toEqual(
-      ['/', '/transactions', '/insights', '/settlements', '/reconciliation', '/invoices', '/reports', '/disputes'].sort(),
+      ['/', '/transactions', '/insights', '/settlements', '/reconciliation', '/invoices', '/reports', '/disputes', '/offers', '/campaigns'].sort(),
     )
   })
 
@@ -43,9 +43,21 @@ describe('Refunds & disputes', () => {
   })
 })
 
+describe('Offers and Promotions', () => {
+  it('are built pages in Grow, with no Coming Soon entries', () => {
+    const items = allNavItems()
+    expect(items.find((i) => i.href === '/offers')).toEqual({ label: 'Offers', href: '/offers', built: true, icon: 'tag' })
+    expect(items.find((i) => i.href === '/campaigns')).toEqual({ label: 'Promotions', sub: 'Marketing campaigns', href: '/campaigns', built: true, icon: 'megaphone' })
+    for (const k of ['offers', 'campaigns']) {
+      expect(Object.hasOwn(COMING_SOON, k)).toBe(false)
+      expect(comingSoonEntry(k)).toBeUndefined()
+    }
+  })
+})
+
 describe('comingSoonEntry', () => {
   it('finds real entries and ignores prototype names', () => {
-    expect(comingSoonEntry('offers')).toBeDefined()
+    expect(comingSoonEntry('lending')).toBeDefined()
     expect(comingSoonEntry('insights')).toBeUndefined()
     for (const k of ['constructor', 'toString', '__proto__', 'hasOwnProperty']) expect(comingSoonEntry(k)).toBeUndefined()
   })
@@ -56,7 +68,7 @@ describe('navFor', () => {
 
   it('gives a merchant owner every built page, and no group overview', () => {
     const n = navFor({ tier: 'merchant' })
-    expect(hrefs(n)).toEqual(['/', '/transactions', '/insights', '/settlements', '/reconciliation', '/invoices', '/reports', '/disputes'])
+    expect(hrefs(n)).toEqual(['/', '/transactions', '/insights', '/settlements', '/reconciliation', '/invoices', '/reports', '/disputes', '/offers', '/campaigns'])
     expect(n.showAsk).toBe(true)
     expect(n.tabs.map((t) => t.href)).toEqual(['/', '/transactions', '/reconciliation', '/assistant'])
   })
@@ -67,7 +79,7 @@ describe('navFor', () => {
 
   it('shows an outlet manager only the pages that follow their outlet', () => {
     const n = navFor({ tier: 'outlet' })
-    expect(hrefs(n)).toEqual(['/', '/transactions', '/insights', '/disputes'])
+    expect(hrefs(n)).toEqual(['/', '/transactions', '/insights', '/disputes', '/offers', '/campaigns'])
     expect(n.showAsk).toBe(false)
     expect(n.tabs.map((t) => t.href)).toEqual(['/', '/transactions'])
   })
