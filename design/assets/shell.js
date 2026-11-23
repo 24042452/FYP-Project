@@ -55,7 +55,7 @@
 
   var MERCHANTS = {
     ahhock: { name: 'Ah Hock Chicken Rice', outlets: ['Tampines Round Market #01-23'], user: 'Tan Ah Hock', role: 'Owner', initials: 'AH' },
-    tansons: { name: 'Tan & Sons Retail', outlets: ['All 3 outlets', 'Tampines Mall #02-15', 'Bedok Mall #B1-30', 'Online store'], user: 'Priya Nair', role: 'Accountant', initials: 'PN' }
+    tansons: { name: 'Tan & Sons Retail', outlets: ['All 3 outlets', 'Tampines Mall #02-15', 'Bedok Mall #B1-30', 'Online store'], user: 'Mr Tan', role: 'Owner', initials: 'MT' }
   };
 
   var NAV = [
@@ -72,8 +72,8 @@
       { id: 'refunds', n: 'Refunds & disputes', s: 'Chargebacks', i: 'refund', href: 'refunds.html' }
     ] },
     { t: 'Grow', items: [
-      { id: 'offers', n: 'Offers', i: 'tag', soon: true },
-      { id: 'promos', n: 'Promotions', s: 'Marketing campaigns', i: 'megaphone', soon: true },
+      { id: 'offers', n: 'Offers', i: 'tag', href: 'offers.html' },
+      { id: 'promos', n: 'Promotions', s: 'Marketing campaigns', i: 'megaphone', href: 'promotions.html' },
       { id: 'loans', n: 'Business loans', s: 'Merchant lending', i: 'cash', soon: true }
     ] },
     { t: 'Settings', items: [
