@@ -61,7 +61,7 @@ Refunds & disputes rows:
 | TC-DSP-06 | Payment side panel | Owner on Refunds & disputes | Click See the payment, then outside; open a refund, press Esc | Panel opens over the page and closes; address back to /disputes | e2e `disputes.spec.js` | Pass |
 | TC-DSP-07 | Payment panel isolation | Signed in as Ah Hock | Open /disputes?payment=<Tan & Sons payment> | No panel opens | e2e `disputes.spec.js` | Pass |
 | TC-PRO-01 | Take up a promotion | Tan & Sons owner on Promotions | Take up a promotion, keep all outlets ticked, start it | Panel closes; promotion appears in Running now | e2e `promotions.spec.js` | Pass |
-| TC-PRO-02 | Busy and unsuitable outlets | Owner, panel open | Open a promotion where an outlet is busy or online; click outside | Busy outlet disabled with its reason; clicking outside starts nothing | e2e `promotions.spec.js` | Pass |
+| TC-PRO-02 | Busy and unsuitable outlets | Owner, panel open | Open "10% off on Tuesdays" (NETS QR), where Tampines Mall is busy and the Online store is online only; click outside | Busy outlet disabled with its reason; clicking outside starts nothing | e2e `promotions.spec.js` | Pass |
 | TC-PRO-03 | Stop a promotion | A running and a scheduled promotion | Stop each and confirm | Both leave Running now | e2e `promotions.spec.js` | Pass |
 | TC-PRO-04 | Outlet manager scope | Logged in as an outlet manager | Open Promotions and the panel | Only their outlet, no outlet list | e2e `promotions.spec.js` (server also refuses, integration) | Pass |
 | TC-PRO-05 | Role rules | Logged in as the accountant | Open Promotions | Everything visible, no Take up or Stop | e2e `promotions.spec.js` (server also refuses, integration) | Pass |

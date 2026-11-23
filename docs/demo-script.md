@@ -117,7 +117,8 @@ A 7-minute walkthrough of the MVP, then questions. One person **presents** (talk
 ### 7c. Offers & Promotions: take up a promotion (45 s)
 **Do:** log in as **Tan & Sons owner**, open **Promotions**. Point at the running "10% off on Tuesdays" card and the answer sentence.
 **Say:** "NETS shows these deals to your customers when they pay. Each one runs for 4 weeks."
-**Do:** click **Take up** on the weekend **Cards** promotion. In the slide-out, tick two outlets with **Select all outlets that can run it**, and press **Start at 2 outlets**. (To show a busy outlet, open the NETS QR "10% off on Tuesdays" one instead: Tampines Mall is greyed out with the reason.)
+**Do:** click **Take up** on **"10% off on Tuesdays"** (NETS QR). In the slide-out, point at Tampines Mall greyed out ("Already running ...") and the Online store greyed out ("Online only"). Click outside the panel to close it; nothing starts.
+**Do:** click **Take up** on **"10% off weekends with Cards"**. Untick the Online store, so two outlets stay ticked, and press **Start at 2 outlets**.
 **Say:** "One promotion per payment type per outlet, so nobody runs two deals at once. Stop is one tap, with a check."
 **Do:** scroll to **Results** and point at a finished promotion.
 **Say:** "When it ends we compare its days with the same days before. It is an estimate, and we say so."
