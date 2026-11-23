@@ -31,12 +31,19 @@ describe('seed promotions and offer', () => {
     expect(p.runs.filter((r) => !r.running)).toHaveLength(2)
   })
 
-  it('other businesses run it at all physical outlets, and each takes up the offer at all outlets', () => {
+  it('other businesses run it at all physical outlets, and each takes up the in-store offer at its physical outlets', () => {
     for (const demo of DEMOS) {
       const { data, p } = plan(demo)
       const run = p.runs.find((r) => r.running)
       if (demo !== tan) expect(run.outletIds).toEqual(data.outlets.filter((o) => !o.online).map((o) => o.id))
-      expect(p.offer).toMatchObject({ key: 'qr_fee_cut', starts_on: '2026-11-14', ends_on: '2027-02-13', outletIds: data.outlets.map((o) => o.id) })
+      expect(p.offer).toMatchObject({ key: 'qr_fee_cut', starts_on: '2026-11-14', ends_on: '2027-02-13', outletIds: data.outlets.filter((o) => !o.online).map((o) => o.id) })
     }
+  })
+
+  it('the QR fee cut is not seeded at Tan & Sons online store', () => {
+    const { data, p } = plan(tan)
+    const online = data.outlets.find((o) => o.online)
+    expect(p.offer.outletIds).not.toContain(online.id)
+    expect(p.offer.outletIds).toHaveLength(data.outlets.length - 1)
   })
 })

@@ -10,7 +10,7 @@ import { pathToFileURL } from 'node:url'
 import { addDays, periodRange, sgtDate, sgtToIso } from '../lib/dates.js'
 import { offerEndsOn } from '../lib/offers/rules.js'
 import { outletSuits } from '../lib/promotions/catalogue.js'
-import { offerByKey } from '../lib/offers/catalogue.js'
+import { offerByKey, offerSuits } from '../lib/offers/catalogue.js'
 import { buildNudges } from '../lib/nudges/build.js'
 import { effectiveInvoiceStatus } from '../lib/invoices/status.js'
 import { loadFaq } from '../lib/assistant/kb.js'
@@ -158,19 +158,21 @@ async function seedGroup(conn, group, password) {
 /**
  * The promotions and offer each demo business starts with: its 2 finished promotions (from the dataset),
  * one running NETS QR promotion (started 6 days ago, 4 weeks long; Tan & Sons at Tampines Mall only so its
- * picker shows a busy, an unsuitable and a free outlet), and the QR fee-cut offer taken up 10 days ago.
+ * picker shows a busy, an unsuitable and a free outlet), and the QR fee-cut offer taken up 10 days ago at the
+ * outlets that suit it (it is in-store only, so not at an online store).
  */
 export function planPromotionsAndOffer(demo, data, today) {
   const physical = data.outlets.filter((o) => outletSuits('nets_qr', o))
   const runOutlets = demo.profile === 'retail' ? physical.filter((o) => o.name === 'Tampines Mall #02-15') : physical
   const startsOn = addDays(today, -6)
   const offerStart = addDays(today, -10)
+  const offer = offerByKey('qr_fee_cut')
   return {
     runs: [
       ...data.pastPromotions.map((r) => ({ key: r.key, channel: r.channel, outletIds: r.outletIds, starts_on: r.starts_on, ends_on: r.ends_on, running: false })),
       { key: 'qr_tuesday', channel: 'nets_qr', outletIds: runOutlets.map((o) => o.id), starts_on: startsOn, ends_on: addDays(startsOn, 27), running: true },
     ],
-    offer: { key: 'qr_fee_cut', starts_on: offerStart, ends_on: offerEndsOn(offerStart, offerByKey('qr_fee_cut').months), outletIds: data.outlets.map((o) => o.id) },
+    offer: { key: offer.key, starts_on: offerStart, ends_on: offerEndsOn(offerStart, offer.months), outletIds: data.outlets.filter((o) => offerSuits(offer, o)).map((o) => o.id) },
   }
 }
 

@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { offerStatus, offerPill, offerOutletChoices, offerSentence, offersFor, offerDay } from '@/lib/offers/rules'
+import { OFFERS, offerByKey, offerSuits } from '@/lib/offers/catalogue'
 
 const TODAY = '2026-11-24'
 const owner = { role: 'owner', readOnly: false, tier: 'merchant', outletId: null }
@@ -43,6 +44,22 @@ describe('offerOutletChoices', () => {
   it('outlet manager gets only their outlet', () => {
     const c = offerOutletChoices({ offer, outlets, takeups: [], today: TODAY, access: { role: 'outlet_manager', readOnly: false, outletId: 'b' } })
     expect(c.map((x) => x.id)).toEqual(['b'])
+  })
+})
+
+describe('offerOutletChoices: in-store offers', () => {
+  it('an online outlet is greyed out for an in-store offer, not for a partner deal', () => {
+    const qr = offerByKey('qr_fee_cut')
+    expect(offerOutletChoices({ offer: qr, outlets, takeups: [], today: TODAY, access: owner })[2])
+      .toEqual({ id: 'c', name: 'Online store', can: false, ticked: false, reason: 'In-store only' })
+    expect(offerOutletChoices({ offer: offerByKey('shelf_labels'), outlets, takeups: [], today: TODAY, access: owner })[2])
+      .toEqual({ id: 'c', name: 'Online store', can: true, ticked: true, reason: null })
+  })
+  it('the catalogue marks the counter offers as in-store and the partner deals as not', () => {
+    expect(OFFERS.filter((o) => o.inStore).map((o) => o.key)).toEqual(['qr_fee_cut', 'qr_standee', 'second_terminal'])
+    expect(offerSuits(offerByKey('qr_standee'), { online: true })).toBe(false)
+    expect(offerSuits(offerByKey('qr_standee'), { online: false })).toBe(true)
+    expect(offerSuits(offerByKey('delivery_listing'), { online: true })).toBe(true)
   })
 })
 

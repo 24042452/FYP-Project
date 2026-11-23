@@ -76,6 +76,22 @@ describe('takeUpOfferAction', () => {
     expect(takeUpOffer).not.toHaveBeenCalled()
   })
 
+  it('refuses an in-store offer at an online outlet (a forged form), but takes a partner deal there', async () => {
+    vi.mocked(listOutlets).mockResolvedValue(/** @type {any} */ ([...OUTLETS, { id: 'o3', name: 'Online store', online: true }]))
+    expect(await take({ key: 'qr_fee_cut', outletIds: ['o1', 'o3'] })).toEqual({ ok: false, message: 'Pick an outlet that can take this offer.' })
+    expect(await take({ key: 'qr_standee', outletIds: ['o3'] })).toEqual({ ok: false, message: 'Pick an outlet that can take this offer.' })
+    expect(takeUpOffer).not.toHaveBeenCalled()
+    await take({ key: 'delivery_listing', outletIds: ['o3'] })
+    expect(takeUpOffer).toHaveBeenCalledWith('m1', expect.objectContaining({ key: 'delivery_listing', outletIds: ['o3'] }))
+  })
+
+  it('refuses an outlet manager of an online outlet an in-store offer', async () => {
+    vi.mocked(listOutlets).mockResolvedValue(/** @type {any} */ ([...OUTLETS, { id: 'o3', name: 'Online store', online: true }]))
+    as({ role: 'outlet_manager', tier: 'outlet', outletId: 'o3' })
+    expect(await take({ key: 'qr_fee_cut' })).toEqual({ ok: false, message: 'Pick an outlet that can take this offer.' })
+    expect(takeUpOffer).not.toHaveBeenCalled()
+  })
+
   it('says so when the offer is already active at an outlet', async () => {
     vi.mocked(takeUpOffer).mockResolvedValue({ ok: false, reason: 'busy', outletId: 'o1' })
     expect(await take({ key: 'qr_fee_cut', outletIds: ['o1'] })).toEqual({ ok: false, message: 'That outlet already has this offer. Pick another outlet.' })

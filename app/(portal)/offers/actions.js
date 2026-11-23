@@ -5,7 +5,7 @@ import { requirePage } from '@/lib/data/merchant'
 import { getSessionUser } from '@/lib/auth/session'
 import { listOutlets } from '@/lib/data/outlets'
 import { takeUpOffer } from '@/lib/data/offers'
-import { offerByKey } from '@/lib/offers/catalogue'
+import { offerByKey, offerSuits } from '@/lib/offers/catalogue'
 import { canTakeUp, pickOutlets } from '@/lib/promotions/rules'
 import { offerDay } from '@/lib/offers/rules'
 import { sgtDate } from '@/lib/dates'
@@ -37,6 +37,9 @@ export async function takeUpOfferAction(_prev, formData) {
   const picked = pickOutlets(merchant, outlets, formData.getAll('outletIds').filter((v) => typeof v === 'string'))
   if (!picked.ok) return { ok: false, message: picked.reason === 'none' ? NONE_PICKED : BAD_OUTLET }
   const { outletIds } = picked
+  // In-store offers (NETS QR, terminals, standees) cannot go to an online outlet, even from a forged form.
+  const suits = (/** @type {string} */ id) => outlets.some((o) => o.id === id && offerSuits(offer, o))
+  if (!outletIds.every(suits)) return { ok: false, message: BAD_OUTLET }
 
   const day = sgtDate(new Date().toISOString())
   const res = await takeUpOffer(merchant.id, { key: offer.key, months: offer.months, outletIds, userId: user.id, today: day })

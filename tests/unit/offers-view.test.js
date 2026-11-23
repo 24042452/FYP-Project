@@ -87,7 +87,7 @@ describe('buildOffersPage: sentence and Your offers', () => {
     expect(m.yours[0].pill.text).toBe('Active until Tue 23 Nov 2027')
     const card = m.cards.find((c) => c.key === 'qr_standee')
     expect(card?.dates).toBe('12 months, from today to Tue 23 Nov 2027')
-    expect(card?.activeNote).toBe('Active at all your outlets until 23 Nov 2027')
+    expect(card?.activeNote).toBe('Active at all your in-store outlets until Tue 23 Nov 2027')
   })
 
   it('two offers: names the one that ends first; ended take-ups are left out', () => {
@@ -151,17 +151,35 @@ describe('buildOffersPage: Offers for you', () => {
     expect(c.sampleNote).toBe('Sample offer: NETS has not set real terms yet.')
   })
 
-  it('active at every outlet: no Take up, the real end date instead', () => {
-    const c = page({ takeups: [takeup()] }).cards[0]
-    expect(c).toMatchObject({ can: false, activeNote: 'Active at all your outlets until 13 Feb', note: null })
+  it('active at every outlet: no Take up, the real end date instead (same date format as the Your offers pill)', () => {
+    const m = page({ takeups: [takeup()] })
+    expect(m.cards[0]).toMatchObject({ can: false, activeNote: 'Active at all your in-store outlets until Sat 13 Feb', note: null })
+    expect(m.yours[0].pill.text).toBe('Active until Sat 13 Feb')
+    // A partner deal suits the online store too, so "all your outlets" means all of them.
+    const labels = takeup({ key: 'shelf_labels' })
+    expect(page({ takeups: [labels] }).cards.find((c) => c.key === 'shelf_labels')?.activeNote).toBe('Active at all your outlets until Sat 13 Feb')
+  })
+
+  it('in-store offers grey out the online store ("In-store only"); partner deals do not', () => {
+    const m = page()
+    for (const key of ['qr_fee_cut', 'qr_standee', 'second_terminal']) {
+      expect(m.cards.find((c) => c.key === key)?.choices.find((x) => x.id === 'b')).toEqual({ id: 'b', name: 'Online store', can: false, ticked: false, reason: 'In-store only' })
+    }
+    expect(m.cards.find((c) => c.key === 'shelf_labels')?.choices.find((x) => x.id === 'b')).toMatchObject({ can: true, reason: null })
+    // Active at both physical outlets: nothing left to take up (the online store does not count).
+    const both = page({ takeups: [takeup({ outletIds: ['a', 'c'], outletNames: ['Bedok Mall', 'Tampines Mall'] })] }).cards[0]
+    expect(both).toMatchObject({ can: false, activeNote: 'Active at all your in-store outlets until Sat 13 Feb' })
+    // An outlet manager of an online outlet cannot take up an in-store offer.
+    const online = page({ access: manager('b') }).cards[0]
+    expect(online).toMatchObject({ can: false, note: 'In-store only', activeNote: null })
   })
 
   it('active at some outlets: Take up stays, the panel greys those outlets out', () => {
     const c = page({ takeups: [takeup({ outletIds: ['a'], outletNames: ['Bedok Mall'] })] }).cards[0]
-    expect(c).toMatchObject({ can: true, activeNote: null, note: 'Active at 1 of your 3 outlets' })
+    expect(c).toMatchObject({ can: true, activeNote: null, note: 'Active at 1 of your 2 in-store outlets' })
     expect(c.choices).toEqual([
       { id: 'a', name: 'Bedok Mall', can: false, ticked: false, reason: 'Already active until Sat 13 Feb' },
-      { id: 'b', name: 'Online store', can: true, ticked: true, reason: null },
+      { id: 'b', name: 'Online store', can: false, ticked: false, reason: 'In-store only' },
       { id: 'c', name: 'Tampines Mall', can: true, ticked: true, reason: null },
     ])
   })
@@ -173,13 +191,13 @@ describe('buildOffersPage: Offers for you', () => {
         takeup({ id: 't2', outletIds: ['c'], outletNames: ['Tampines Mall'], endsOn: '2027-02-13' }),
       ],
     }).cards[0]
-    expect(c.activeNote).toBe('Active at all your outlets until 13 Feb')
+    expect(c.activeNote).toBe('Active at all your in-store outlets until Sat 13 Feb')
   })
 
   it('a one-outlet business: no picker, "your outlet" wording', () => {
     const m = page({ category: 'F&B', outlets: stall, takeups: [takeup({ outletIds: ['s'], outletNames: ['Maxwell stall'] })] })
     expect(m.picker).toBe(false)
-    expect(m.cards[0]).toMatchObject({ can: false, activeNote: 'Active at your outlet until 13 Feb', choices: [] })
+    expect(m.cards[0]).toMatchObject({ can: false, activeNote: 'Active at your outlet until Sat 13 Feb', choices: [] })
     expect(m.cards[1]).toMatchObject({ can: true, note: null, choices: [] })
   })
 
@@ -188,7 +206,7 @@ describe('buildOffersPage: Offers for you', () => {
     expect(m.picker).toBe(false)
     expect(m.cards[0]).toMatchObject({ can: true, note: null, activeNote: null, choices: [] })
     const busy = page({ takeups: [takeup({ outletIds: ['c'], outletNames: ['Tampines Mall'] })], access: manager('c') })
-    expect(busy.cards[0]).toMatchObject({ can: false, activeNote: 'Active at your outlet until 13 Feb' })
+    expect(busy.cards[0]).toMatchObject({ can: false, activeNote: 'Active at your outlet until Sat 13 Feb' })
   })
 
   it('people who can only look: no Take up and a note saying who does it', () => {
@@ -196,7 +214,7 @@ describe('buildOffersPage: Offers for you', () => {
     expect(m.canAct).toBe(false)
     expect(m.note).toBe('You can look but not take up offers. The owner or outlet manager does that.')
     expect(m.cards.every((c) => c.can === false)).toBe(true)
-    expect(m.cards[0].activeNote).toBe('Active at all your outlets until 13 Feb')
+    expect(m.cards[0].activeNote).toBe('Active at all your in-store outlets until Sat 13 Feb')
     expect(m.cards[1].note).toBe(null)
     expect(page({ access: hq }).note).toBe('You can look but not take up offers. The franchisee does that.')
     expect(page().note).toBe(null)
