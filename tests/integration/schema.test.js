@@ -151,3 +151,25 @@ describe('refunds and disputes tables', () => {
     expect(fks).toHaveLength(3)
   })
 })
+
+describe('offers and promotions tables', () => {
+  it('has promotion and offer tables with merchant-scoped keys, and outlets.is_online', async () => {
+    const cols = await query(
+      `SELECT TABLE_NAME AS t, COLUMN_NAME AS c, COLUMN_DEFAULT AS d, COLUMN_TYPE AS ty
+       FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE()
+         AND TABLE_NAME IN ('outlets','transactions','promotion_runs','promotion_run_outlets','offer_takeups','offer_takeup_outlets')`,
+    )
+    const col = (t, c) => cols.find((r) => r.t === t && r.c === c)
+    expect(String(col('outlets', 'is_online')?.d)).toBe('0')
+    for (const t of ['promotion_runs', 'promotion_run_outlets', 'offer_takeups', 'offer_takeup_outlets']) {
+      expect(cols.some((r) => r.t === t)).toBe(true)
+    }
+    expect(col('promotion_runs', 'channel').ty).toBe(col('transactions', 'channel').ty)
+    const fks = await query(
+      `SELECT CONSTRAINT_NAME AS n FROM information_schema.TABLE_CONSTRAINTS
+       WHERE TABLE_SCHEMA = DATABASE() AND CONSTRAINT_TYPE = 'FOREIGN KEY'
+         AND CONSTRAINT_NAME IN ('fk_pro_run','fk_pro_outlet','fk_oto_takeup','fk_oto_outlet')`,
+    )
+    expect(fks).toHaveLength(4)
+  })
+})
