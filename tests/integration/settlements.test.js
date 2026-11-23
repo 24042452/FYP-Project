@@ -26,10 +26,28 @@ describe('getRecentSettlements', () => {
   it('merges channels into one row per day, newest first, and honours the limit', async () => {
     const rows = await getRecentSettlements(M, 3)
     expect(rows).toEqual([
-      { businessDate: '2026-11-10', netCents: 1500, status: 'pending', expectedDate: '2026-11-13' },
-      { businessDate: '2026-11-09', netCents: 700, status: 'delayed', expectedDate: '2026-11-11' },
-      { businessDate: '2026-11-08', netCents: 300, status: 'paid', expectedDate: '2026-11-10' },
+      { businessDate: '2026-11-10', netCents: 1500, refundCents: 0, status: 'pending', expectedDate: '2026-11-13' },
+      { businessDate: '2026-11-09', netCents: 700, refundCents: 0, status: 'delayed', expectedDate: '2026-11-11' },
+      { businessDate: '2026-11-08', netCents: 300, refundCents: 0, status: 'paid', expectedDate: '2026-11-10' },
     ])
+  })
+})
+
+describe('refunds in payouts', () => {
+  it('returns refundCents and net = gross − fee − refunds', async () => {
+    const id = randomUUID()
+    await adminExecute(
+      `INSERT INTO settlements (settlement_id, merchant_id, business_date, channel, gross_cents, fee_cents, refund_cents, net_cents, status, expected_date)
+       VALUES (?, ?, '2026-10-20', 'card', 10000, 220, 1280, 8500, 'paid', '2026-10-23')`,
+      [id, M],
+    )
+    const rows = await listSettlements(M, { from: '2026-10-20', to: '2026-10-20', today: '2026-11-11' })
+    expect(rows).toHaveLength(1)
+    expect(rows[0].refundCents).toBe(1280)
+    expect(rows[0].netCents).toBe(rows[0].grossCents - rows[0].feeCents - rows[0].refundCents)
+    const recent = await getRecentSettlements(M, 50)
+    expect(recent.find((d) => d.businessDate === '2026-10-20').refundCents).toBe(1280)
+    await adminExecute(`DELETE FROM settlements WHERE settlement_id = ?`, [id])
   })
 })
 

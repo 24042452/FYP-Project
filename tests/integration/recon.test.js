@@ -49,6 +49,23 @@ describe('check-up inputs', () => {
     ])
   })
 
+  it('does not flag a payout whose payment was refunded later', async () => {
+    const C = randomUUID()
+    await insertFixture({
+      merchants: [{ id: C }],
+      transactions: [txn(C, '2026-08-05', '04', { amountCents: 2000, feeCents: 50, status: 'refunded' })],
+    })
+    await adminExecute(
+      `INSERT INTO settlements (settlement_id, merchant_id, business_date, channel, gross_cents, fee_cents, net_cents, status, expected_date)
+       VALUES (?, ?, '2026-08-05', 'card', 2000, 50, 1950, 'paid', '2026-08-08')`,
+      [randomUUID(), C],
+    )
+    const rows = await getReconTransactions(C, '2026-08')
+    expect(rows[0]).toMatchObject({ day: '2026-08-05', grossCents: 2000, feeCents: 50 })
+    const r = await computeReconciliation(C, '2026-08', TODAY)
+    expect(r.exceptions.map((e) => e.type)).not.toContain('amount_mismatch')
+  })
+
   it('reads the invoice lines for the month only', async () => {
     expect(await getInvoiceLinesForMonth(A, '2026-10')).toEqual([{ chargeType: 'mdr', channel: 'card', amountCents: 200 }])
     expect(await getInvoiceLinesForMonth(A, '2026-09')).toEqual([])

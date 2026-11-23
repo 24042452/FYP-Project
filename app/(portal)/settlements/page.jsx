@@ -95,6 +95,7 @@ export default async function SettlementsPage({ searchParams }) {
                         <div className="min-w-0">
                           <span className="block text-[15px] font-semibold">{r.channelLabel}</span>
                           <span className="block text-[13px] text-ink-3">{r.detail}</span>
+                          {r.refundsLabel && <span className="block text-[13px] text-ink-3">{r.refundsLabel}</span>}
                         </div>
                         <div className="flex flex-wrap items-center gap-x-3 gap-y-1 sm:justify-end">
                           <span className="text-[20px] leading-tight font-semibold tabular-nums">{r.net}</span>
