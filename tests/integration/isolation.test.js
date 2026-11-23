@@ -10,6 +10,8 @@ import { listOutlets } from '../../lib/data/outlets.js'
 import { getLatestRunForMonth, getLatestRunSummary, getReconRun, getReconTransactions, listLatestRunIds } from '../../lib/data/recon.js'
 import { getDisputeFile, listDisputes } from '../../lib/data/disputes.js'
 import { listRefunds } from '../../lib/data/refunds.js'
+import { getPromotionSales, listPromotionRuns, startPromotion, stopPromotion } from '../../lib/data/promotions.js'
+import { listOfferTakeups, takeUpOffer } from '../../lib/data/offers.js'
 
 // Merchant isolation: for every data function, A's call must never return B's rows.
 // Each later data task adds one line to CASES: [name, call(merchantId), total(rows)].
@@ -30,6 +32,10 @@ const NOTE_A = randomUUID()
 const NOTE_B = randomUUID()
 const FILE_A = randomUUID()
 const FILE_B = randomUUID()
+const PRUN_A = randomUUID()
+const PRUN_B = randomUUID()
+const OTU_A = randomUUID()
+const OTU_B = randomUUID()
 const DAY = '2026-11-03'
 const FROM = '2026-11-01'
 const TO = '2026-11-07'
@@ -62,6 +68,10 @@ const CASES = [
   ['listLatestRunIds', (id) => listLatestRunIds(id), (rows) => (rows.length === 0 ? 0 : rows[0].id === RUN_A ? A_CENTS : B_CENTS)],
   ['listDisputes', (id) => listDisputes(id), (rows) => rows.reduce((s, r) => s + r.amountCents, 0)],
   ['listRefunds', (id) => listRefunds(id, { from: FROM, to: TO }), (rows) => rows.reduce((s, r) => s + r.amountCents, 0)],
+  ['listPromotionRuns', (id) => listPromotionRuns(id), (rows) => (rows.length === 0 ? 0 : rows[0].id === PRUN_A ? A_CENTS : B_CENTS)],
+  ['listPromotionRuns (outlet)', (id) => listPromotionRuns(id, { outletId: id === A ? OUT_A : OUT_B }), (rows) => (rows.length === 0 ? 0 : rows[0].id === PRUN_A ? A_CENTS : B_CENTS)],
+  ['getPromotionSales', async (id) => (await getPromotionSales(id, { channel: 'nets_qr', outletIds: [OUT_A, OUT_B], from: FROM, to: TO, days: [0, 1, 2, 3, 4, 5, 6] })).filter((r) => r.cents > 0), (rows) => rows.reduce((s, r) => s + r.cents, 0)],
+  ['listOfferTakeups', (id) => listOfferTakeups(id), (rows) => (rows.length === 0 ? 0 : rows[0].id === OTU_A ? A_CENTS : B_CENTS)],
   ['getDisputeFile', async (id) => { const r = await getDisputeFile(id, id === A ? FILE_A : FILE_B); return r ? [r] : [] }, (rows) => rows.reduce((s, r) => s + r.data.length, 0)],
 ]
 
@@ -118,6 +128,19 @@ beforeAll(async () => {
       `INSERT INTO refunds (refund_id, merchant_id, transaction_id, amount_cents, reason, refunded_at, settlement_id) VALUES (?, ?, ?, ?, 'other', '2026-11-04 04:00:00.000', NULL)`, // no payout link: keeps the payout cases above unchanged
       [randomUUID(), id, txnId, cents],
     )
+    const outletId = id === A ? OUT_A : OUT_B
+    const prunId = id === A ? PRUN_A : PRUN_B
+    await adminExecute(
+      `INSERT INTO promotion_runs (promotion_run_id, merchant_id, promotion_key, channel, starts_on, ends_on, created_at) VALUES (?, ?, 'qr_tuesday', 'nets_qr', '2026-11-18', '2026-12-15', '2026-11-17 04:00:00.000')`,
+      [prunId, id],
+    )
+    await adminExecute('INSERT INTO promotion_run_outlets (promotion_run_id, merchant_id, outlet_id) VALUES (?, ?, ?)', [prunId, id, outletId])
+    const otuId = id === A ? OTU_A : OTU_B
+    await adminExecute(
+      `INSERT INTO offer_takeups (offer_takeup_id, merchant_id, offer_key, starts_on, ends_on, created_at) VALUES (?, ?, 'qr_fee_cut', '2026-11-01', '2027-01-31', '2026-11-01 04:00:00.000')`,
+      [otuId, id],
+    )
+    await adminExecute('INSERT INTO offer_takeup_outlets (offer_takeup_id, merchant_id, outlet_id) VALUES (?, ?, ?)', [otuId, id, outletId])
   }
 })
 
@@ -136,6 +159,20 @@ describe('merchant isolation', () => {
       expect(await call(randomUUID())).toEqual([])
     })
   }
+})
+
+describe('merchant isolation: promotion and offer writes', () => {
+  const TODAY = '2026-11-24'
+  it("startPromotion and takeUpOffer refuse another merchant's outlet and write nothing", async () => {
+    expect(await startPromotion(A, { key: 'card_weekend', channel: 'card', outletIds: [OUT_B], userId: null, today: TODAY })).toEqual({ ok: false, reason: 'bad_outlet' })
+    expect(await takeUpOffer(A, { key: 'qr_standee', months: 12, outletIds: [OUT_B], userId: null, today: TODAY })).toEqual({ ok: false, reason: 'bad_outlet' })
+    expect(await listPromotionRuns(B)).toHaveLength(1)
+    expect(await listOfferTakeups(B)).toHaveLength(1)
+  })
+  it("stopPromotion never stops another merchant's run", async () => {
+    expect(await stopPromotion(A, PRUN_B, { userId: null, today: TODAY })).toEqual({ ok: false, reason: 'not_found' })
+    expect((await listPromotionRuns(B))[0].stoppedOn).toBeNull()
+  })
 })
 
 describe('merchant isolation: single invoice', () => {

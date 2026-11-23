@@ -35,7 +35,7 @@ beforeAll(async () => {
     ],
   })
   await adminExecute(`INSERT INTO outlets (outlet_id, merchant_id, name) VALUES (?, ?, 'Tampines Mall')`, [OUT_TAMPINES, A])
-  await adminExecute(`INSERT INTO outlets (outlet_id, merchant_id, name) VALUES (?, ?, 'Online Store')`, [OUT_ONLINE, A])
+  await adminExecute(`INSERT INTO outlets (outlet_id, merchant_id, name, is_online) VALUES (?, ?, 'Online Store', 1)`, [OUT_ONLINE, A])
   await adminExecute(`INSERT INTO outlets (outlet_id, merchant_id, name) VALUES (?, ?, 'Aardvark Stall')`, [OUT_B, B])
   await adminExecute(`UPDATE transactions SET outlet_id = ? WHERE transaction_id IN (?, ?, ?)`, [OUT_TAMPINES, idOf(1), idOf(2), idOf(4)])
   await adminExecute(`UPDATE transactions SET outlet_id = ? WHERE transaction_id = ?`, [OUT_ONLINE, idOf(3)])
@@ -58,10 +58,10 @@ const sum = (rows, k) => rows.reduce((s, r) => s + r[k], 0)
 describe('listOutlets', () => {
   it('lists this merchants outlets by name, and nobody elses', async () => {
     expect(await listOutlets(A)).toEqual([
-      { id: OUT_ONLINE, name: 'Online Store' },
-      { id: OUT_TAMPINES, name: 'Tampines Mall' },
+      { id: OUT_ONLINE, name: 'Online Store', online: true },
+      { id: OUT_TAMPINES, name: 'Tampines Mall', online: false },
     ])
-    expect(await listOutlets(B)).toEqual([{ id: OUT_B, name: 'Aardvark Stall' }])
+    expect(await listOutlets(B)).toEqual([{ id: OUT_B, name: 'Aardvark Stall', online: false }])
     expect(await listOutlets(randomUUID())).toEqual([])
   })
 })
