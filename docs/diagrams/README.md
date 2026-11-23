@@ -1,6 +1,6 @@
 # Diagrams for the technical document
 
-Mermaid sources (`*.mmd`) and the PNGs placed in `docs/NETS-Merchant-Portal-Technical-Document.docx` (v1.1):
+Mermaid sources (`*.mmd`) and the PNGs placed in `docs/NETS-Merchant-Portal-Technical-Document.docx` (v1.2):
 
 | File | Figure |
 |---|---|
