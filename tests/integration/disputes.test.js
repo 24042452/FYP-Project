@@ -4,6 +4,7 @@ import { adminExecute, insertFixture, resetTestDb } from './helpers.js'
 import { answerDispute, getDisputeFile, listDisputes } from '../../lib/data/disputes.js'
 import { listRefunds } from '../../lib/data/refunds.js'
 import { query } from '../../lib/db.js'
+import { sgtDate } from '../../lib/dates.js'
 
 const M = randomUUID() // the merchant under test
 const OTHER = randomUUID() // another merchant
@@ -25,6 +26,7 @@ const D_OLD = randomUUID()
 const D_NEW = randomUUID()
 const D_LATE = randomUUID()
 const D_OTHER = randomUUID()
+const D_EDGE = randomUUID() // other merchant, opened 23:30 UTC = next day in Singapore
 const FILE_OLD = randomUUID()
 const FILE_OTHER = randomUUID()
 const SETTLE = randomUUID()
@@ -78,6 +80,7 @@ beforeAll(async () => {
   await dispute(D_NEW, M, TXN_NEW, 5000, '2026-11-17 02:00:00.000', '2026-11-27')
   await dispute(D_LATE, M, TXN_LATE, 700, '2026-11-03 02:00:00.000', '2026-11-13')
   await dispute(D_OTHER, OTHER, TXN_OTHER, 1280, '2026-11-16 02:00:00.000', '2026-11-26')
+  await dispute(D_EDGE, OTHER, TXN_OTHER, 1280, '2026-11-18 23:30:00.000', '2026-11-28')
   await adminExecute(
     `INSERT INTO dispute_files (dispute_file_id, dispute_id, merchant_id, file_name, mime_type, size_bytes, data) VALUES (?, ?, ?, 'slip.png', 'image/png', 4, ?)`,
     [FILE_OLD, D_OLD, M, Buffer.from([0x89, 0x50, 0x4e, 0x47])],
@@ -134,6 +137,11 @@ describe('listDisputes', () => {
     expect(await listDisputes(randomUUID())).toEqual([])
   })
 
+  it('gives openedAt as the Singapore date (23:30 UTC is the next day)', async () => {
+    const edge = (await listDisputes(OTHER)).find((r) => r.id === D_EDGE)
+    expect(edge.openedAt).toBe('2026-11-19')
+  })
+
   it('counts same-amount payments for the hint', async () => {
     const rows = await listDisputes(M)
     // TXN_OLD itself + the refunded twin: same amount, card, terminal 1 and SGT day (10 Nov). The 16:30 UTC
@@ -177,7 +185,12 @@ describe('answerDispute', () => {
     expect(row).toMatchObject({
       status: 'declined', declineReason: 'paid_once', evidence: ['receipt', 'printout'], note: 'One payment only.', decideBy: '2026-12-20',
     })
-    expect(row.answeredAt).toMatch(/^\d{4}-\d{2}-\d{2}$/)
+    // answered_at is stored in UTC whatever the MySQL session time zone is (the pool reads DATETIME as UTC)
+    const [{ answeredAtUtc }] = await query('SELECT answered_at AS answeredAtUtc FROM disputes WHERE dispute_id = ?', [D_NEW])
+    expect(Math.abs(new Date(answeredAtUtc).getTime() - Date.now())).toBeLessThan(60_000)
+    expect(row.answeredAt).toBe(sgtDate(new Date(answeredAtUtc).toISOString()))
+    const [{ uploadedAtUtc }] = await query('SELECT uploaded_at AS uploadedAtUtc FROM dispute_files WHERE dispute_id = ?', [D_NEW])
+    expect(Math.abs(new Date(uploadedAtUtc).getTime() - Date.now())).toBeLessThan(60_000)
     expect(row.files).toEqual([{ id: expect.any(String), name: 'receipt.pdf', sizeBytes: 13 }])
     const stored = await getDisputeFile(M, row.files[0].id)
     expect(stored.mime).toBe('application/pdf')
