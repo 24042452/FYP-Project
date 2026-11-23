@@ -18,7 +18,7 @@ describe('NAV', () => {
   it('marks exactly the MVP pages as built', () => {
     const built = items.filter((i) => i.built).map((i) => i.href).sort()
     expect(built).toEqual(
-      ['/', '/transactions', '/insights', '/settlements', '/reconciliation', '/invoices', '/reports'].sort(),
+      ['/', '/transactions', '/insights', '/settlements', '/reconciliation', '/invoices', '/reports', '/disputes'].sort(),
     )
   })
 
@@ -34,9 +34,18 @@ describe('NAV', () => {
   })
 })
 
+describe('Refunds & disputes', () => {
+  it('is a built page with the technical term underneath, and no Coming Soon entry', () => {
+    const item = allNavItems().find((i) => i.href === '/disputes')
+    expect(item).toEqual({ label: 'Refunds & disputes', sub: 'Chargebacks', href: '/disputes', built: true, icon: 'refund' })
+    expect(Object.hasOwn(COMING_SOON, 'disputes')).toBe(false)
+    expect(comingSoonEntry('disputes')).toBeUndefined()
+  })
+})
+
 describe('comingSoonEntry', () => {
   it('finds real entries and ignores prototype names', () => {
-    expect(comingSoonEntry('disputes')).toBeDefined()
+    expect(comingSoonEntry('offers')).toBeDefined()
     expect(comingSoonEntry('insights')).toBeUndefined()
     for (const k of ['constructor', 'toString', '__proto__', 'hasOwnProperty']) expect(comingSoonEntry(k)).toBeUndefined()
   })
@@ -47,7 +56,7 @@ describe('navFor', () => {
 
   it('gives a merchant owner every built page, and no group overview', () => {
     const n = navFor({ tier: 'merchant' })
-    expect(hrefs(n)).toEqual(['/', '/transactions', '/insights', '/settlements', '/reconciliation', '/invoices', '/reports'])
+    expect(hrefs(n)).toEqual(['/', '/transactions', '/insights', '/settlements', '/reconciliation', '/invoices', '/reports', '/disputes'])
     expect(n.showAsk).toBe(true)
     expect(n.tabs.map((t) => t.href)).toEqual(['/', '/transactions', '/reconciliation', '/assistant'])
   })
@@ -58,7 +67,7 @@ describe('navFor', () => {
 
   it('shows an outlet manager only the pages that follow their outlet', () => {
     const n = navFor({ tier: 'outlet' })
-    expect(hrefs(n)).toEqual(['/', '/transactions', '/insights'])
+    expect(hrefs(n)).toEqual(['/', '/transactions', '/insights', '/disputes'])
     expect(n.showAsk).toBe(false)
     expect(n.tabs.map((t) => t.href)).toEqual(['/', '/transactions'])
   })
