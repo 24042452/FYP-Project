@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import { generateDataset } from '@/lib/synthetic/generate'
-import { addDays, sgtDate, sgtToIso } from '@/lib/dates'
+import { addDays, sgtDate, sgtHour, sgtToIso } from '@/lib/dates'
+import { promotionByKey, outletSuits } from '@/lib/promotions/catalogue'
+import { DEMOS } from '../../scripts/seed.mjs'
 import { CHANNELS } from '@/lib/channels'
 import { feeFor } from '@/lib/fees'
 
@@ -178,13 +180,18 @@ describe('refunds and disputes in the demo data', () => {
   const dayDiff = (a, b) => Math.round((Date.parse(`${a}T00:00:00Z`) - Date.parse(`${b}T00:00:00Z`)) / 86_400_000)
 
   it('keeps every existing payment the same', () => {
-    // Recorded from the generator before refunds and disputes were added.
-    const t = demo.transactions
-    expect(t).toHaveLength(18695)
-    expect([t[0].id, t[0].amount_cents, t[0].created_at]).toEqual(['0c8883d2-0c1f-49d4-a443-adfe13cadba7', 701, '2026-04-30T23:16:24.000Z'])
-    expect([t[1000].id, t[1000].amount_cents, t[1000].created_at]).toEqual(['c1567f5e-7245-488e-af16-1def3dd0483a', 293, '2026-05-11T08:29:48.000Z'])
-    const last = t[t.length - 1]
-    expect([last.id, last.amount_cents, last.created_at]).toEqual(['2b1cd6b2-f758-4cac-816a-f076e63df349', 687, '2026-11-23T13:03:25.000Z'])
+    // Recorded from the generator before refunds and disputes were added (18695 payments then; the past-promotion
+    // lift adds extra payments in between, so these are looked up by id rather than by position).
+    const byId = new Map(demo.transactions.map((t) => [t.id, t]))
+    expect(demo.transactions.length).toBeGreaterThan(18695)
+    for (const [id, amount, at] of [
+      ['0c8883d2-0c1f-49d4-a443-adfe13cadba7', 701, '2026-04-30T23:16:24.000Z'],
+      ['c1567f5e-7245-488e-af16-1def3dd0483a', 293, '2026-05-11T08:29:48.000Z'],
+      ['2b1cd6b2-f758-4cac-816a-f076e63df349', 687, '2026-11-23T13:03:25.000Z'],
+    ]) {
+      const t = byId.get(id)
+      expect([t.id, t.amount_cents, t.created_at]).toEqual([id, amount, at])
+    }
   })
 
   it('refunds 3 to 5 payments a month, 1 to 14 days later, from the payout of the refund day', () => {
@@ -305,5 +312,127 @@ describe('refunds and disputes in the demo data', () => {
       expect(accepted).toMatchObject({ reason: 'wrong_amount', files: 0, evidence: null, decline_reason: null })
       expect(sgtDate(accepted.answered_at)).toBe(addDays(today, -72))
     }
+  })
+})
+
+describe('past promotions in the demo data', () => {
+  const today = '2026-11-24'
+  const START = '2026-05-01'
+  const datasets = DEMOS.map((demo) => ({
+    demo,
+    d: generateDataset({
+      profile: demo.profile, seed: demo.seed, start: START, end: today, today, outlets: demo.outlets,
+      recentDelay: demo.recentDelay, anomalies: demo.anomalies, category: demo.category,
+    }),
+  }))
+  const hawker1001 = datasets[0].d
+  const weekday = (day) => new Date(`${day}T00:00:00Z`).getUTCDay()
+  /** Successful sales of the promotion's payment type, outlets, weekdays (and hours) per day, averaged over [from, to]. */
+  const dayAverage = (d, pp, promo, from, to) => {
+    const outletIds = new Set(pp.outletIds)
+    const days = []
+    for (let x = from; x <= to; x = addDays(x, 1)) if (promo.days.includes(weekday(x))) days.push(x)
+    const set = new Set(days)
+    let total = 0
+    for (const t of d.transactions) {
+      if (t.status !== 'success' || t.channel !== pp.channel || !outletIds.has(t.outlet_id)) continue
+      if (!set.has(sgtDate(t.created_at))) continue
+      if (promo.hours && (sgtHour(t.created_at) < promo.hours[0] || sgtHour(t.created_at) >= promo.hours[1])) continue
+      total += t.amount_cents
+    }
+    return total / days.length
+  }
+
+  it('keeps every existing payment amount and time the same', () => {
+    // Recorded from the generator before the promotion lift was added (hawker, seed 1001, today 2026-11-24: 18774 payments).
+    const byId = new Map(hawker1001.transactions.map((t) => [t.id, t]))
+    const refs = [
+      ['0c8883d2-0c1f-49d4-a443-adfe13cadba7', 701, '2026-04-30T23:16:24.000Z'],
+      ['c1567f5e-7245-488e-af16-1def3dd0483a', 293, '2026-05-11T08:29:48.000Z'],
+      ['bb6859f2-808b-4f26-97a5-fed87fc8c595', 546, '2026-11-24T12:42:00.000Z'],
+    ]
+    for (const [id, amount, at] of refs) {
+      const t = byId.get(id)
+      expect([t.id, t.amount_cents, t.created_at]).toEqual([id, amount, at])
+    }
+    expect(hawker1001.transactions[0].id).toBe(refs[0][0])
+    expect(hawker1001.transactions.at(-1).id).toBe(refs[2][0])
+    expect(hawker1001.transactions.length).toBeGreaterThan(18774)
+    // Still sorted by time.
+    for (let i = 1; i < hawker1001.transactions.length; i++) {
+      expect(hawker1001.transactions[i - 1].created_at <= hawker1001.transactions[i].created_at).toBe(true)
+    }
+  })
+
+  it('adds 2 past promotions per business that fit its category and outlets', () => {
+    for (const { demo, d } of datasets) {
+      expect(d.pastPromotions).toHaveLength(2)
+      const [recent, older] = d.pastPromotions
+      expect(recent.channel).not.toBe(older.channel)
+      const outlets = new Map(d.outlets.map((o) => [o.id, o]))
+      for (const pp of d.pastPromotions) {
+        const promo = promotionByKey(pp.key)
+        expect(promo.channel).toBe(pp.channel)
+        expect(promo.categories).toContain(demo.category)
+        expect(pp.outletIds.length).toBeGreaterThan(0)
+        // every suitable outlet takes part, and only those
+        expect(pp.outletIds).toEqual(d.outlets.filter((o) => outletSuits(pp.channel, o)).map((o) => o.id))
+        for (const oid of pp.outletIds) expect(outletSuits(pp.channel, outlets.get(oid))).toBe(true)
+        expect(addDays(pp.starts_on, 27)).toBe(pp.ends_on)
+        for (const [day, ch] of [['2026-10-18', 'card'], ['2026-10-29', 'nets_qr']]) {
+          if (pp.channel === ch) expect(day < pp.starts_on || day > pp.ends_on).toBe(true)
+        }
+      }
+      expect(recent.ends_on >= addDays(today, -56) && recent.ends_on <= addDays(today, -28)).toBe(true)
+      expect(older.ends_on >= addDays(today, -91) && older.ends_on <= addDays(today, -63)).toBe(true)
+    }
+    const tan = datasets.find(({ demo }) => demo.profile === 'retail').d
+    expect(tan.outlets.map((o) => o.online)).toEqual([false, false, true])
+    expect(hawker1001.outlets.map((o) => o.online)).toEqual([false])
+  })
+
+  it('lifts sales on past promotion days by about the catalogue lift', () => {
+    for (const { d } of datasets) {
+      for (const pp of d.pastPromotions) {
+        const promo = promotionByKey(pp.key)
+        const during = dayAverage(d, pp, promo, pp.starts_on, pp.ends_on)
+        const before = dayAverage(d, pp, promo, addDays(pp.starts_on, -28), addDays(pp.starts_on, -1))
+        const lift = (during / before - 1) * 100
+        expect(Math.abs(lift - promo.liftPct)).toBeLessThanOrEqual(4)
+      }
+    }
+  })
+
+  it('still injects the 3 October anomalies', () => {
+    for (const { demo, d } of datasets) {
+      if (demo.anomalies === false) continue
+      const sums = new Map()
+      for (const t of d.transactions) {
+        if (t.settlement_id) sums.set(t.settlement_id, (sums.get(t.settlement_id) ?? 0) + t.amount_cents)
+      }
+      const a = d.settlements.find((s) => s.business_date === '2026-10-18' && s.channel === 'card')
+      expect(a.gross_cents).toBe(sums.get(a.id) - 4210)
+      const b = d.settlements.find((s) => s.business_date === '2026-10-29' && s.channel === 'nets_qr')
+      expect(b.status).toBe('delayed')
+      const oct = d.invoices.find((i) => i.period === '2026-10-01')
+      const line = d.invoiceLines.find((l) => l.invoice_id === oct.id && l.channel === 'card')
+      const computed = d.transactions
+        .filter((t) => t.channel === 'card' && t.status !== 'failed' && sgtDate(t.created_at).startsWith('2026-10'))
+        .reduce((x, t) => x + t.fee_cents, 0)
+      expect(line.amount_cents).toBe(computed + 360)
+    }
+  })
+
+  it('gives the extra payments STANs, payouts and fees like any other payment', () => {
+    const d = hawker1001
+    const seen = new Set()
+    for (const t of d.transactions) {
+      const key = `${t.terminal_id}|${t.stan}`
+      expect(seen.has(key)).toBe(false)
+      seen.add(key)
+      if (t.status !== 'failed') expect(t.settlement_id).toBeTruthy()
+    }
+    const terminals = new Map(d.terminals.map((t) => [t.id, t]))
+    for (const t of d.transactions) expect(terminals.get(t.terminal_id).outlet_id).toBe(t.outlet_id)
   })
 })
