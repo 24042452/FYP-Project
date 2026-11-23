@@ -107,6 +107,13 @@ A 7-minute walkthrough of the MVP, then questions. One person **presents** (talk
 
 **Say (IDs):** "We also now use NETS' own identifiers: every merchant has a MID, every terminal a TID, and every payment a STAN. Open any payment and you see its TID and trace number."
 
+### 7b. Refunds & disputes: answer a chargeback (45 s)
+**Do:** log in as **Ah Hock**, open **Refunds & disputes**. Read the open "charged twice" case and the hint on what proof helps.
+**Say:** "A customer's bank asked for this money back. We show it as a case with a 3-step track and a deadline, and a hint on what proof helps."
+**Do:** click **Decline**, write a short reason, add a receipt photo, send. The case moves to **Waiting for NETS**.
+**Say:** "Only owners and outlet managers can answer; an accountant can look but not press anything."
+**Note:** re-seeding resets this case, so it is open again for the next run.
+
 ### 8. On a phone (30 s, optional)
 **Do:** show the same page on the phone: the bottom tabs (Home, Payments, Check-up, Ask, More), tap the search icon.
 **Say:** "Most hawkers will use this on their phone, so every screen is designed for a phone first."

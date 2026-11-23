@@ -250,7 +250,7 @@ Layout and copy exactly as `design/refunds.html` and spec "The page": title/subt
 ### Task 9: API and Excel export
 
 **Files:**
-- Modify: `lib/api/v1.js` (add `disputesResponse(merchantId, sp, today, scope)`, `refundsResponse(...)` following `transactionsResponse`: JSON `{data: [...], page, pageSize: 50, hasMore}`, outlet-scoped by `scope.outletId`, never includes file bytes or notes of other merchants), `lib/export/xlsx.js` (`buildRefundsWorkbook(rows)`: columns Refunded on, Bought on, Paid with, Reason, Amount, Payout), `app/api/export/[kind]/route.js` (kind `refunds`, last 3 months)
+- Modify: `lib/api/v1.js` (add `disputesResponse(merchantId, sp, today, scope)`, `refundsResponse(...)` following `transactionsResponse`: JSON `{data: [...], page, page_size: 50, has_more}`, outlet-scoped by `scope.outletId`, never includes file bytes or notes of other merchants), `lib/export/xlsx.js` (`buildRefundsWorkbook(rows)`: columns Refunded on, Bought on, Paid with, Reason, Amount, Payout), `app/api/export/[kind]/route.js` (kind `refunds`, last 3 months)
 - Create: `app/api/v1/disputes/route.js`, `app/api/v1/refunds/route.js`
 - Test: `tests/unit/api-v1.test.js`, `tests/integration/api.test.js`, `tests/unit/recon-export.test.js` pattern for the workbook
 

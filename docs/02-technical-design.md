@@ -198,7 +198,8 @@ The portal is **API-first**: our own UI uses the same data layer as the versione
 | GET | `/api/v1/invoices` · `/api/v1/invoices/{id}` · `/api/v1/invoices/{id}/pdf` | P1 |
 | GET | `/api/v1/reports/sales?from=&to=&group_by=` | P1 |
 | GET | `/api/v1/reconciliation/runs` · `/runs/{id}/exceptions` | P1 |
-| POST | `/api/v1/refunds` · GET `/api/v1/disputes` | P1 (with maker-checker in P4) |
+| GET | `/api/v1/disputes` · `/api/v1/refunds` | **Built** (read-only, `?page=N&outlet=`; answering a dispute uses server actions) |
+| POST | `/api/v1/refunds` | P1 (with maker-checker in P4) |
 | GET/POST/DELETE | `/api/v1/webhooks` (manage subscriptions) | P1 |
 | GET | `/api/v1/terminals` · POST `/api/v1/service-requests` | P3 |
 

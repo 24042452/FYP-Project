@@ -49,13 +49,23 @@ Extra e2e rows: TC-AUTH-01b (wrong password, Pass), TC-AUTH-03 (the "Try as Tan 
 
 **TC-AUTH-03 with DEMO_MODE off:** the e2e server's environment is fixed for a run, so e2e only tests the DEMO_MODE=true path. The off branch (no demo buttons, demo login refused) is covered by unit `tests/unit/login-form.test.jsx` and integration `tests/integration/demo-login.test.js`.
 
-## 4. Results (2026-11-15)
+Refunds & disputes rows:
+
+| ID | Feature | Pre-condition | Steps | Expected | Result detail | Status |
+|---|---|---|---|---|---|---|
+| TC-DSP-01 | Decline a dispute | Ah Hock has an open dispute | Open Refunds & disputes, Decline with a reason and a photo | Case moves to Waiting for NETS | e2e `disputes.spec.js` | Pass |
+| TC-DSP-02 | Accept a dispute | Open dispute | Accept and confirm | Case closes as accepted, customer refunded | e2e `disputes.spec.js` | Pass |
+| TC-DSP-03 | Role rules | Logged in as the Tan & Sons accountant | Open Refunds & disputes | Cases visible, no Accept or Decline | e2e `disputes.spec.js` (server also refuses, integration) | Pass |
+| TC-DSP-04 | File limit | Decline form open | Add a file over 2 MB | Plain refusal, nothing sent | e2e `disputes.spec.js` | Pass |
+| TC-DSP-05 | Phone layout | 375px viewport, form open | Open the page | No sideways scroll | e2e `disputes.spec.js` | Pass |
+
+## 4. Results (2026-11-23)
 
 | Suite | Command | Result |
 |---|---|---|
-| Unit (Vitest) | `npm test` | 25 files, 224 tests passed |
-| Integration (Vitest + MySQL 8, `nets_portal_test`) | `npm run test:integration` | 11 files, 91 tests passed |
-| End-to-end (Playwright, Microsoft Edge, desktop 1280x800 and iPhone 13) | `npm run test:e2e` | 26 tests passed (13 per project), against `npm run build && npm start` |
+| Unit (Vitest) | `npm test` | 40 files, 412 tests passed |
+| Integration (Vitest + MySQL 8, `nets_portal_test`) | `npm run test:integration` | 14 files, 148 tests passed |
+| End-to-end (Playwright, Microsoft Edge, desktop 1280x800 and iPhone 13) | `npm run test:e2e` | 76 passed, 14 skipped by design (single-project or multi-outlet-only cases), 90 total across desktop and iPhone 13, against `npm run build && npm start` |
 | Lint | `npm run lint` | no problems |
 
 Not yet done: AI evaluation set against a live model, accessibility scan (axe), usability sessions, UAT. GitHub Actions (`.github/workflows/ci.yml`) runs lint, unit and integration tests; e2e is run locally only because it needs a seeded database and a browser.

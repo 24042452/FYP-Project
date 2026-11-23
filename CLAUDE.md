@@ -34,6 +34,8 @@ Merged so far (all 2026-11-15):
 - PR #11 (2026-11-23): "This week in numbers" on Home (% changes and what drove them, by payment type)
 - PR #9 (2026-11-22): franchise tiers (ADR-003, `docs/features/franchise.md`): head office (group overview `/group`, view only), franchisee owner, outlet manager (locked to one outlet). Demo: Kopi Corner (East, West, North) with logins kopi.hq@, kopi.east@, kopi.bedok.local
 
+- PR (pending): **Refunds & disputes** `/disputes` (`docs/features/refunds-disputes.md`): refunds in payouts and the check-up, disputes with accept/decline and evidence files, read-only API. Authored as `igiveupman` (Deron's GitHub noreply), merge with a merge commit
+
 Waiting on the user:
 - Ask the school owner to **change the Azure database password** (it was exposed once in a session log on 2026-11-15), then update `.env.azure` and `DATABASE_URL` in Vercel
 - An Anthropic API key (optional; without it the assistant stays in rules mode)
