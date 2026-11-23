@@ -50,6 +50,11 @@ describe('buildDisputesPage', () => {
     ])
   })
 
+  it('with nothing at all, says so without a blue figure', () => {
+    const m = buildDisputesPage({ disputes: [], refunds: [], today: TODAY })
+    expect(m.sentence).toEqual({ before: 'Nothing to answer, and no refunds this month.', figure: '', after: '' })
+  })
+
   it('with nothing open or waiting, talks about this month’s refunds', () => {
     const m = buildDisputesPage({
       disputes: [],

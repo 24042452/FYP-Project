@@ -42,7 +42,7 @@ export default async function DisputesPage() {
           className="max-w-[34ch] text-[clamp(1.35rem,1.05rem+1.1vw,1.85rem)] leading-[1.3] font-semibold tracking-[-0.015em] text-balance"
         >
           {m.sentence.before}
-          <em className="text-info not-italic tabular-nums">{m.sentence.figure}</em>
+          {m.sentence.figure ? <em className="text-info not-italic tabular-nums">{m.sentence.figure}</em> : null}
           {m.sentence.after}
         </p>
         {m.hasOpen && answers ? (

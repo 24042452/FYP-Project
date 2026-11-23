@@ -117,6 +117,8 @@ describe('pageSentence', () => {
   it('nothing open or waiting', () => {
     expect(pageSentence(none, TODAY)).toEqual({ text: 'Nothing to answer. You had {figure} ($31.60) this month.', figure: '3 refunds' })
     expect(pageSentence({ ...none, refundsMonthCount: 1 }, TODAY).figure).toBe('1 refund')
+    expect(pageSentence({ ...none, refundsMonthCount: 1, refundsMonthCents: 1280 }, TODAY)).toEqual({ text: 'Nothing to answer. You had {figure} ($12.80) this month.', figure: '1 refund' })
+    expect(pageSentence({ ...none, refundsMonthCount: 0, refundsMonthCents: 0 }, TODAY)).toEqual({ text: 'Nothing to answer, and no refunds this month.', figure: '' })
   })
 })
 

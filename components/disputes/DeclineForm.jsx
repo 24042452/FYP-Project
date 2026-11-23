@@ -201,7 +201,9 @@ export function DeclineForm({ disputeId, reasons, headingRef, onCancel, onDone }
         ) : null}
         {left > 0 ? (
           <div className="flex flex-wrap items-center gap-x-3.5 gap-y-2.5 rounded-lg border border-dashed border-line-strong bg-page p-3.5 text-[14px] text-ink-2">
-            <label className={`${secondaryBtn} ${preparing ? 'opacity-60' : ''}`}>
+            <label
+              className={`${secondaryBtn} has-[:focus-visible]:outline-3 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-nets-blue ${preparing ? 'opacity-60' : ''}`}
+            >
               <Paperclip className="size-4" aria-hidden="true" />
               {preparing ? 'Getting the file ready…' : 'Add a file'}
               <input
