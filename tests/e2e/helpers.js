@@ -83,8 +83,8 @@ export async function resetPromotions(email) {
     )
     if (!rows[0]) throw new Error(`No merchant found for ${email}. Run npm run seed first.`)
     const id = rows[0].id
-    await conn.query('DELETE FROM promotion_runs WHERE merchant_id = ? AND created_at > NOW() - INTERVAL 2 DAY', [id])
-    await conn.query('DELETE FROM offer_takeups WHERE merchant_id = ? AND created_at > NOW() - INTERVAL 2 DAY', [id])
+    await conn.query('DELETE FROM promotion_runs WHERE merchant_id = ? AND created_at > UTC_TIMESTAMP() - INTERVAL 2 DAY', [id])
+    await conn.query('DELETE FROM offer_takeups WHERE merchant_id = ? AND created_at > UTC_TIMESTAMP() - INTERVAL 2 DAY', [id])
     await conn.query('UPDATE promotion_runs SET stopped_on = NULL, stopped_by = NULL WHERE merchant_id = ?', [id])
   } finally {
     await conn.end()
