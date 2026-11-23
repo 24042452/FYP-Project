@@ -66,9 +66,9 @@ describe('offerOutletChoices: in-store offers', () => {
 describe('offerSentence', () => {
   it('variants', () => {
     expect(offerSentence({ active: 1, first: { name: '0.5% off NETS QR fees', endsOn: '2027-02-28' } }))
-      .toEqual({ text: 'You have 1 offer active: {figure} until 28 Feb.', figure: '0.5% off NETS QR fees' })
+      .toEqual({ text: 'You have 1 offer active: {figure} until Sun 28 Feb.', figure: '0.5% off NETS QR fees' })
     expect(offerSentence({ active: 2, first: { name: 'Free NETS QR standee', endsOn: '2027-02-28' } }))
-      .toEqual({ text: 'You have 2 offers active. The next to end is {figure}, on 28 Feb.', figure: 'Free NETS QR standee' })
+      .toEqual({ text: 'You have 2 offers active. The next to end is {figure}, on Sun 28 Feb.', figure: 'Free NETS QR standee' })
     expect(offerSentence({ active: 0, first: null })).toEqual({ text: 'No offers active. Pick one below.', figure: '' })
   })
 })
@@ -93,6 +93,6 @@ describe('dates far ahead carry the year', () => {
     const [a] = offerOutletChoices({ offer: { key: 'qr_standee' }, outlets, takeups: [far], today: TODAY, access: owner })
     expect(a.reason).toBe('Already active until Tue 23 Nov 2027')
     expect(offerSentence({ active: 1, first: { name: 'Free NETS QR standee', endsOn: '2027-11-23' }, today: TODAY }).text)
-      .toBe('You have 1 offer active: {figure} until 23 Nov 2027.')
+      .toBe('You have 1 offer active: {figure} until Tue 23 Nov 2027.')
   })
 })

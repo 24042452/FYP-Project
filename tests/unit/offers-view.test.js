@@ -39,7 +39,7 @@ describe('buildOffersPage: sentence and Your offers', () => {
 
   it('one active offer: the name is the blue figure, with its end date', () => {
     const m = page({ takeups: [takeup()] })
-    expect(m.sentence).toEqual({ before: 'You have 1 offer active: ', figure: '0.5% off NETS QR fees', after: ' until 13 Feb.' })
+    expect(m.sentence).toEqual({ before: 'You have 1 offer active: ', figure: '0.5% off NETS QR fees', after: ' until Sat 13 Feb.' })
     expect(m.yours).toEqual([
       {
         id: 't1', kindLabel: 'Lower fees', name: '0.5% off NETS QR fees', outlets: 'Bedok Mall, Online store, Tampines Mall',
@@ -56,7 +56,7 @@ describe('buildOffersPage: sentence and Your offers', () => {
       ],
     })
     expect(m.sentence.before).toBe('You have 1 offer active: ')
-    expect(m.sentence.after).toBe(' until 13 Feb.')
+    expect(m.sentence.after).toBe(' until Sat 13 Feb.')
     expect(m.yours.map((y) => y.id)).toEqual(['t1', 't2'])
   })
 
@@ -83,7 +83,7 @@ describe('buildOffersPage: sentence and Your offers', () => {
   it('a 12-month offer ending next year shows the year everywhere', () => {
     const far = takeup({ key: 'qr_standee', startsOn: TODAY, endsOn: '2027-11-23' })
     const m = page({ takeups: [far] })
-    expect(m.sentence.after).toBe(' until 23 Nov 2027.')
+    expect(m.sentence.after).toBe(' until Tue 23 Nov 2027.')
     expect(m.yours[0].pill.text).toBe('Active until Tue 23 Nov 2027')
     const card = m.cards.find((c) => c.key === 'qr_standee')
     expect(card?.dates).toBe('12 months, from today to Tue 23 Nov 2027')
@@ -98,7 +98,7 @@ describe('buildOffersPage: sentence and Your offers', () => {
         takeup({ id: 'old', key: 'shelf_labels', startsOn: '2026-07-01', endsOn: '2026-09-30' }),
       ],
     })
-    expect(m.sentence).toEqual({ before: 'You have 2 offers active. The next to end is ', figure: 'Second terminal free for 2 months', after: ', on 19 Jan.' })
+    expect(m.sentence).toEqual({ before: 'You have 2 offers active. The next to end is ', figure: 'Second terminal free for 2 months', after: ', on Tue 19 Jan.' })
     expect(m.yours.map((y) => y.id)).toEqual(['t2', 't1'])
   })
 

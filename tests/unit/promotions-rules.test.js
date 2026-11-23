@@ -237,6 +237,8 @@ describe('listText', () => {
     expect(listText(['A'])).toBe('A')
     expect(listText(['A', 'B'])).toBe('A and B')
     expect(listText(['A', 'B', 'C'])).toBe('A, B and C')
+    // Hyphens in outlet names become non-breaking (display only), so "#B1-30" stays on one line.
+    expect(listText(['Bedok Mall #B1-30'])).toBe('Bedok Mall #B1‑30')
   })
 })
 
