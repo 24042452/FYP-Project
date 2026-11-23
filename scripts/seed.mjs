@@ -6,6 +6,7 @@ import { generateDataset } from '../lib/synthetic/generate.js'
 import { trimFuture } from '../lib/synthetic/trim.js'
 import { hashPassword } from '../lib/auth/password.js'
 import { randomUUID } from 'node:crypto'
+import { pathToFileURL } from 'node:url'
 import { periodRange, sgtDate, sgtToIso } from '../lib/dates.js'
 import { buildNudges } from '../lib/nudges/build.js'
 import { effectiveInvoiceStatus } from '../lib/invoices/status.js'
@@ -14,6 +15,9 @@ import { loadFaq } from '../lib/assistant/kb.js'
 const START = '2026-05-01'
 const BATCH = 1000
 
+/** 1x1 PNG used as a stand-in for evidence files. */
+const PLACEHOLDER_PNG = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=', 'base64')
+
 /** The franchise group and its head-office owner. */
 const KOPI_GROUP = {
   groupId: '33333333-3333-4333-8333-333333333333',
@@ -21,7 +25,7 @@ const KOPI_GROUP = {
   hq: { userId: 'cccccccc-cccc-4ccc-8ccc-cccccccccccc', email: 'kopi.hq@demo.local', name: 'Ms Lim' },
 }
 
-const DEMOS = [
+export const DEMOS = [
   {
     profile: 'hawker',
     seed: 1001,
@@ -42,7 +46,9 @@ const DEMOS = [
     merchantId: '22222222-2222-4222-8222-222222222222',
     mid: '110000000020002',
     tidPrefix: '1102',
-    users: [{ userId: 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb', email: 'retail@demo.local', name: 'Mr Tan', role: 'owner' }],
+    users: [{ userId: 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb', email: 'retail@demo.local', name: 'Mr Tan', role: 'owner' },
+      { userId: 'ffffffff-ffff-4fff-8fff-ffffffffffff', email: 'retail.accounts@demo.local', name: 'Ms Chen', role: 'accountant' },
+    ],
     legal_name: 'Tan & Sons Retail Pte Ltd',
     trading_name: 'Tan & Sons Retail',
     uen: '202612345K',
@@ -172,13 +178,31 @@ async function seedMerchant(conn, demo, password, nowIso, today) {
     await bulk(conn, 'terminals', ['terminal_id', 'tid', 'merchant_id', 'outlet_id', 'serial_no', 'model', 'status'],
       data.terminals.map((t, i) => [t.id, `${demo.tidPrefix}${String(i + 1).padStart(4, '0')}`, m, t.outlet_id, `${demo.serialPrefix}-${String(i + 1).padStart(4, '0')}`, 'NETS Smart Terminal', 'active']))
     await bulk(conn, 'settlements',
-      ['settlement_id', 'merchant_id', 'business_date', 'channel', 'gross_cents', 'fee_cents', 'net_cents', 'status', 'expected_date', 'paid_date', 'bank_ref'],
+      ['settlement_id', 'merchant_id', 'business_date', 'channel', 'gross_cents', 'fee_cents', 'net_cents', 'status', 'expected_date', 'paid_date', 'bank_ref', 'refund_cents'],
       data.settlements.map((s) => [s.id, m, s.business_date, s.channel, s.gross_cents, s.fee_cents, s.net_cents, s.status,
-        s.expected_date, s.paid_date, s.paid_date ? `BANK-${s.paid_date.replace(/-/g, '')}-${s.id.slice(0, 6).toUpperCase()}` : null]))
+        s.expected_date, s.paid_date, s.paid_date ? `BANK-${s.paid_date.replace(/-/g, '')}-${s.id.slice(0, 6).toUpperCase()}` : null, s.refund_cents ?? 0]))
     await bulk(conn, 'transactions',
       ['transaction_id', 'merchant_id', 'outlet_id', 'terminal_id', 'stan', 'channel', 'status', 'amount_cents', 'fee_cents', 'failure_code', 'settlement_id', 'created_at'],
       data.transactions.map((t) => [t.id, m, t.outlet_id, t.terminal_id, t.stan, t.channel, t.status, t.amount_cents, t.fee_cents,
         t.failure_code, t.settlement_id, dt(t.created_at)]))
+    await bulk(conn, 'refunds',
+      ['refund_id', 'merchant_id', 'transaction_id', 'amount_cents', 'reason', 'refunded_at', 'settlement_id'],
+      data.refunds.map((r) => [r.id, m, r.transaction_id, r.amount_cents, r.reason, dt(r.refunded_at), r.settlement_id]))
+    const answeredBy = demo.users.find((u) => u.role === 'owner')?.userId ?? null
+    await bulk(conn, 'disputes',
+      ['dispute_id', 'merchant_id', 'transaction_id', 'amount_cents', 'reason', 'opened_at', 'respond_by', 'status', 'answered_at', 'answered_by',
+        'decline_reason', 'evidence', 'note', 'decide_by', 'decided_at'],
+      data.disputes.map((d) => [d.id, m, d.transaction_id, d.amount_cents, d.reason, dt(d.opened_at), d.respond_by, d.status,
+        d.answered_at ? dt(d.answered_at) : null, d.answered_at ? answeredBy : null, d.decline_reason ?? null,
+        d.evidence ? JSON.stringify(d.evidence) : null, d.note ?? null, d.decide_by ?? null, d.decided_at ? dt(d.decided_at) : null]))
+    const fileRows = []
+    for (const d of data.disputes) {
+      for (let i = 1; i <= (d.files ?? 0); i++) {
+        fileRows.push([randomUUID(), d.id, m, `receipt-${i}.png`, 'image/png', PLACEHOLDER_PNG.length, PLACEHOLDER_PNG, dt(d.answered_at ?? d.opened_at)])
+      }
+    }
+    await bulk(conn, 'dispute_files',
+      ['dispute_file_id', 'dispute_id', 'merchant_id', 'file_name', 'mime_type', 'size_bytes', 'data', 'uploaded_at'], fileRows)
     await bulk(conn, 'invoices', ['invoice_id', 'merchant_id', 'period', 'total_cents', 'status', 'due_date'],
       data.invoices.map((v) => [v.id, m, v.period, v.total_cents, v.status, v.due_date]))
     await bulk(conn, 'invoice_lines',
@@ -200,6 +224,8 @@ async function seedMerchant(conn, demo, password, nowIso, today) {
     transactions: data.transactions.length,
     settlements: data.settlements.length,
     invoices: data.invoices.length,
+    refunds: data.refunds.length,
+    disputes: data.disputes.length,
   }
 }
 
@@ -271,7 +297,7 @@ async function main() {
       const nudgeCount = await seedNudges(conn, demo.merchantId, nowIso, today)
       console.log(
         `${demo.legal_name} (${demo.users.map((u) => u.email).join(', ') || 'no login'}): ${c.outlets} outlets, ${c.terminals} terminals, ` +
-          `${c.transactions} transactions, ${c.settlements} settlements, ${c.invoices} invoices, ${nudgeCount} alerts`,
+          `${c.transactions} transactions, ${c.settlements} settlements, ${c.invoices} invoices, ${c.refunds} refunds, ${c.disputes} disputes, ${nudgeCount} alerts`,
       )
     }
     // Help-centre content (shared, not merchant data): delete + insert so re-seeding is idempotent.
@@ -285,7 +311,9 @@ async function main() {
   }
 }
 
-main().catch((err) => {
-  console.error(`Seed failed: ${err.message}`)
-  process.exit(1)
-})
+if (import.meta.url === pathToFileURL(process.argv[1]).href) {
+  main().catch((err) => {
+    console.error(`Seed failed: ${err.message}`)
+    process.exit(1)
+  })
+}
