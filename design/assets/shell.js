@@ -69,7 +69,7 @@
       { id: 'check-up', n: 'Check-up', s: 'Reconciliation', i: 'check', href: 'check-up.html' },
       { id: 'invoices', n: 'Bills & charges', s: 'Invoices', i: 'bill', href: '#' },
       { id: 'reports', n: 'Reports', s: 'Finance reporting', i: 'report', href: '#' },
-      { id: 'refunds', n: 'Refunds & disputes', i: 'refund', soon: true }
+      { id: 'refunds', n: 'Refunds & disputes', s: 'Chargebacks', i: 'refund', href: 'refunds.html' }
     ] },
     { t: 'Grow', items: [
       { id: 'offers', n: 'Offers', i: 'tag', soon: true },

@@ -5,9 +5,10 @@ import { AnimatedMoney } from './AnimatedMoney'
 
 /**
  * One cell of the summary strip.
- * @param {{label: string, value: string, hint?: string, scope?: string, note?: string, tone?: 'default' | 'attention', href?: string, linkLabel?: string}} props
+ * @param {{label: string, value: string, hint?: string, scope?: string, note?: string, tone?: 'default' | 'attention', href?: string, linkLabel?: string, countUp?: boolean}} props
+ *   countUp: money figures count up from $0.00 when the tile first appears (off under reduced motion)
  */
-export function StatTile({ label, value, hint, scope, note, tone = 'default', href, linkLabel }) {
+export function StatTile({ label, value, hint, scope, note, tone = 'default', href, linkLabel, countUp = false }) {
   const attention = tone === 'attention'
   return (
     <div className="flex flex-col gap-1 px-[18px] py-4 sm:px-[22px] sm:py-5">
@@ -18,7 +19,7 @@ export function StatTile({ label, value, hint, scope, note, tone = 'default', hr
       <span
         className={`text-[28px] leading-[1.15] font-semibold tracking-[-0.025em] tabular-nums sm:text-[32px] ${attention ? 'text-bad' : 'text-ink'}`}
       >
-        <AnimatedMoney text={value} />
+        <AnimatedMoney text={value} countOnArrival={countUp} />
       </span>
       {hint ? <span className="text-[14px] text-ink-2">{hint}</span> : null}
       {note ? <span className="text-[14px] font-medium text-bad">{note}</span> : null}

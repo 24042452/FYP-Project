@@ -129,3 +129,25 @@ describe('composite merchant foreign keys', () => {
     }
   })
 })
+
+describe('refunds and disputes tables', () => {
+  it('has refunds, disputes and dispute_files with merchant-scoped foreign keys', async () => {
+    const cols = await query(
+      `SELECT TABLE_NAME AS t, COLUMN_NAME AS c, COLUMN_DEFAULT AS d, COLUMN_TYPE AS ty
+       FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE()
+         AND TABLE_NAME IN ('settlements','refunds','disputes','dispute_files')`,
+    )
+    const col = (t, c) => cols.find((r) => r.t === t && r.c === c)
+    expect(String(col('settlements', 'refund_cents').d)).toBe('0')
+    for (const t of ['refunds', 'disputes', 'dispute_files']) {
+      expect(cols.some((r) => r.t === t)).toBe(true)
+    }
+    expect(col('disputes', 'status').ty).toBe("enum('open','accepted','declined','won','lost')")
+    const fks = await query(
+      `SELECT CONSTRAINT_NAME AS n FROM information_schema.TABLE_CONSTRAINTS
+       WHERE TABLE_SCHEMA = DATABASE() AND CONSTRAINT_TYPE = 'FOREIGN KEY'
+         AND CONSTRAINT_NAME IN ('fk_refunds_txn','fk_disputes_txn','fk_dfiles_dispute')`,
+    )
+    expect(fks).toHaveLength(3)
+  })
+})

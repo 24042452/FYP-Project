@@ -9,7 +9,7 @@ const inputClass =
 
 const DEMOS = [
   { profile: 'hawker', title: 'Try as Ah Hock Chicken Rice', sub: 'Hawker stall · 1 outlet · Owner', Icon: Store },
-  { profile: 'retail', title: 'Try as Tan & Sons Retail', sub: '3 outlets incl. online shop · Accountant', Icon: Building2 },
+  { profile: 'retail', title: 'Try as Tan & Sons Retail', sub: '3 outlets incl. online shop · Owner', Icon: Building2 },
 ]
 
 // A franchise, to show the three levels of access: head office, one franchisee's owner, one outlet's manager.

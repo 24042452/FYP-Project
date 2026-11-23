@@ -16,6 +16,11 @@ describe('LoginForm demo buttons (TC-AUTH-03)', () => {
     expect(screen.getByRole('button', { name: /Try as Tan & Sons Retail/ })).toBeTruthy()
   })
 
+  it('labels Tan & Sons as an owner login', () => {
+    render(<LoginForm demoMode={true} />)
+    expect(screen.getByRole('button', { name: /Try as Tan & Sons Retail/ }).textContent).toContain('Owner')
+  })
+
   it('shows no demo buttons when demo mode is off, only the normal form', () => {
     render(<LoginForm demoMode={false} />)
     expect(screen.queryByRole('button', { name: /Try as/ })).toBeNull()

@@ -31,7 +31,7 @@ Today, most merchants open the portal about once a month to look at an invoice. 
 | Documentation and test plan (with results) | ✅ Done: [docs/04-documentation-and-test-plan.md](docs/04-documentation-and-test-plan.md) |
 | Visual design and clickable mockups | ✅ Done: [design/](design/), [DESIGN.md](DESIGN.md) |
 | App in plain JavaScript, MySQL database, synthetic data generator and seed | ✅ Built |
-| Login (form and demo buttons), Home, Insights, Sales & payments, Money to my bank, Bills & charges (with PDF), Check-up, Reports (Excel), NETS Assistant (quick answers), alerts bell | ✅ Built: one page per feature in [docs/features/](docs/features/) |
+| Login (form and demo buttons), Home, Insights, Sales & payments, Money to my bank, Bills & charges (with PDF), Check-up, Refunds & disputes, Reports (Excel), NETS Assistant (quick answers), alerts bell | ✅ Built: one page per feature in [docs/features/](docs/features/) |
 | Outlet menu (Home and Sales & payments follow the chosen outlet), check-up progress bar, clear "Log out" button | ✅ Built |
 | REST API `/api/v1` (payments, settlements, sales summary) | ✅ Built: [docs/features/api.md](docs/features/api.md) |
 | Tests: unit, integration (MySQL) and end-to-end (desktop and phone) | ✅ Passing; lint, unit and integration run on GitHub Actions for every pull request |

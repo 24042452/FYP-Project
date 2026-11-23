@@ -39,7 +39,8 @@ Each item says where it is and why it matters. Tick items off (or delete them) i
 - [ ] `recon_exceptions.settlement_id` / `transaction_id` are loose references (no foreign keys).
 - [ ] `withTransaction` hides the original error if the rollback itself fails.
 - [x] `healthScore` isn't guarded against a NaN growth figure (callers never pass one today). (done: non-finite inputs count as 0)
-- [ ] Refunds: channel mix ignores negative totals and `txnCount` includes refunded rows. Revisit when refunds are built (Phase 1).
+- [x] Refunds: channel mix ignores negative totals and `txnCount` includes refunded rows. (done with Refunds & disputes: refunds are counted in payouts and the check-up; chargebacks deliberately do not change sales totals)
+- [ ] Dispute alerts in the bell need `notifications.outlet_id` (outlet managers must only see their outlet).
 - [ ] Assistant: `get_settlement_status` has no maximum date range; the "unknown tool" check matches error text.
 - [ ] `getLatestRunSummary` returns the stored exception count (incl. failed payments) next to the open count (excl. them). Only the open count is shown; don't render both.
 

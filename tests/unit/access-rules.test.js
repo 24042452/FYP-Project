@@ -45,6 +45,8 @@ describe('canOpen', () => {
     const o = { tier: /** @type {const} */ ('outlet') }
     expect(canOpen(o, '/')).toBe(true)
     expect(canOpen(o, '/transactions')).toBe(true)
+    expect(canOpen(o, '/disputes')).toBe(true)
+    expect(canOpen(o, '/disputes/files/abc')).toBe(true)
     for (const p of ['/settlements', '/reconciliation', '/invoices/abc/pdf', '/reports', '/assistant', '/group']) {
       expect(canOpen(o, p)).toBe(false)
     }

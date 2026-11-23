@@ -3,6 +3,7 @@ import { randomUUID } from 'node:crypto'
 
 // Children first, so DELETE respects foreign keys.
 const TABLES = [
+  'dispute_files', 'disputes', 'refunds',
   'recon_exceptions', 'recon_runs', 'notifications', 'invoice_lines', 'invoices',
   'transactions', 'settlements', 'terminals', 'outlets',
   'merchant_users', 'group_users', 'sessions', 'users', 'merchants', 'merchant_groups',

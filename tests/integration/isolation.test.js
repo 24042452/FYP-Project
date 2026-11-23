@@ -8,6 +8,8 @@ import { getInvoiceLinesForMonth, getInvoiceWithLines, listInvoices } from '../.
 import { countUnread, insertNotifications, listNotifications, markAllRead, markRead } from '../../lib/data/notifications.js'
 import { listOutlets } from '../../lib/data/outlets.js'
 import { getLatestRunForMonth, getLatestRunSummary, getReconRun, getReconTransactions, listLatestRunIds } from '../../lib/data/recon.js'
+import { getDisputeFile, listDisputes } from '../../lib/data/disputes.js'
+import { listRefunds } from '../../lib/data/refunds.js'
 
 // Merchant isolation: for every data function, A's call must never return B's rows.
 // Each later data task adds one line to CASES: [name, call(merchantId), total(rows)].
@@ -26,6 +28,8 @@ const OUT_A = randomUUID()
 const OUT_B = randomUUID()
 const NOTE_A = randomUUID()
 const NOTE_B = randomUUID()
+const FILE_A = randomUUID()
+const FILE_B = randomUUID()
 const DAY = '2026-11-03'
 const FROM = '2026-11-01'
 const TO = '2026-11-07'
@@ -56,6 +60,9 @@ const CASES = [
   ['getOutletSettlementShares', (id) => getOutletSettlementShares(id, id === A ? OUT_A : OUT_B, { since: '2000-01-01' }), (rows) => rows.reduce((s, r) => s + r.netCents, 0)],
   ['getLatestRunSummary (outlet)', async (id) => { const r = await getLatestRunSummary(id, id === A ? OUT_A : OUT_B); return r ? [r] : [] }, (rows) => rows.reduce((s, r) => s + r.matchedCount, 0)],
   ['listLatestRunIds', (id) => listLatestRunIds(id), (rows) => (rows.length === 0 ? 0 : rows[0].id === RUN_A ? A_CENTS : B_CENTS)],
+  ['listDisputes', (id) => listDisputes(id), (rows) => rows.reduce((s, r) => s + r.amountCents, 0)],
+  ['listRefunds', (id) => listRefunds(id, { from: FROM, to: TO }), (rows) => rows.reduce((s, r) => s + r.amountCents, 0)],
+  ['getDisputeFile', async (id) => { const r = await getDisputeFile(id, id === A ? FILE_A : FILE_B); return r ? [r] : [] }, (rows) => rows.reduce((s, r) => s + r.data.length, 0)],
 ]
 
 beforeAll(async () => {
@@ -97,7 +104,28 @@ beforeAll(async () => {
       `INSERT INTO recon_exceptions (recon_exception_id, merchant_id, recon_run_id, type, status) VALUES (?, ?, ?, 'amount_mismatch', 'open')`,
       [randomUUID(), id, runId],
     )
+    const txnId = id === A ? TXN_A : TXN_B
+    const disputeId = randomUUID()
+    await adminExecute(
+      `INSERT INTO disputes (dispute_id, merchant_id, transaction_id, amount_cents, reason, opened_at, respond_by) VALUES (?, ?, ?, ?, 'not_received', '2026-11-04 04:00:00.000', '2026-11-14')`,
+      [disputeId, id, txnId, cents],
+    )
+    await adminExecute(
+      `INSERT INTO dispute_files (dispute_file_id, dispute_id, merchant_id, file_name, mime_type, size_bytes, data) VALUES (?, ?, ?, 'f.pdf', 'application/pdf', ?, ?)`,
+      [id === A ? FILE_A : FILE_B, disputeId, id, cents, Buffer.alloc(cents)],
+    )
+    await adminExecute(
+      `INSERT INTO refunds (refund_id, merchant_id, transaction_id, amount_cents, reason, refunded_at, settlement_id) VALUES (?, ?, ?, ?, 'other', '2026-11-04 04:00:00.000', NULL)`, // no payout link: keeps the payout cases above unchanged
+      [randomUUID(), id, txnId, cents],
+    )
   }
+})
+
+describe('merchant isolation: dispute files', () => {
+  it('getDisputeFile never returns another merchants file', async () => {
+    expect(await getDisputeFile(A, FILE_B)).toBeNull()
+    expect(await getDisputeFile(B, FILE_A)).toBeNull()
+  })
 })
 
 describe('merchant isolation', () => {

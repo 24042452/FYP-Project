@@ -37,6 +37,15 @@ describe('parseSettlementStatus', () => {
 })
 
 describe('buildSettlementsModel', () => {
+  it('labels a payout with refunds', () => {
+    const m = buildSettlementsModel({
+      month: '2026-11', today: TODAY, rows: [row({ id: 'a', refundCents: 1280 }), row({ id: 'b', refundCents: 0 }), row({ id: 'c' })], totals,
+    })
+    expect(m.groups[0].rows[0].refundsLabel).toBe('Refunds −$12.80')
+    expect(m.groups[0].rows[1].refundsLabel).toBeNull()
+    expect(m.groups[0].rows[2].refundsLabel).toBeNull()
+  })
+
   it('shows the empty month without bad values', () => {
     const m = buildSettlementsModel({ month: '2026-11', today: TODAY, rows: [], totals })
     expect(m.isEmpty).toBe(true)

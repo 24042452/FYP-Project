@@ -15,7 +15,7 @@ Every portal module, the phase it is built in, and what it does in plain words.
 | **Finance reporting** | P0 (export) → P1 | Download Excel/PDF reports laid out for an accountant; monthly sales, fees, GST summary; scheduled emails |
 | **NETS Assistant (AI copilot)** | P0 → P2 | Ask "How much did I take last week?" or "Why did this payment fail?", and get help-centre answers with sources |
 | **Notifications & alerts** | P0 (basic) → P1 | Nudges ("Sales up 12%"), plus configurable alerts for failed payments, settlement delays and sales dips |
-| **Refunds & chargeback disputes** | P1 | Issue refunds, respond to chargebacks, upload evidence, track status |
+| **Refunds & chargeback disputes** | P1 (built, see [features/refunds-disputes.md](features/refunds-disputes.md)) | See refunds, accept or decline chargebacks with proof (up to 3 files), track status. Issuing a refund from the portal is later |
 | **Offers (by NETS)** | P2 | Personalised NETS offers to grow the business (e.g. reduced MDR promo, new QR standee, partner deals) |
 | **Marketing campaigns** | P2 | Create simple promos, choose dates and channels, see the uplift afterwards |
 | **Partner integrations** | P3 | Connect SAP, Xero, QuickBooks, Shopify; see sync status and map fields |

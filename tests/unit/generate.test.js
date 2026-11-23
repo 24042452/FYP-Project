@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { generateDataset } from '@/lib/synthetic/generate'
-import { sgtDate, sgtToIso } from '@/lib/dates'
+import { addDays, sgtDate, sgtToIso } from '@/lib/dates'
 import { CHANNELS } from '@/lib/channels'
 import { feeFor } from '@/lib/fees'
 
@@ -36,7 +36,7 @@ describe('generateDataset', () => {
     for (const t of hawker.transactions) {
       expect(Number.isInteger(t.amount_cents)).toBe(true)
       expect(t.amount_cents).toBeGreaterThan(0)
-      expect(t.fee_cents).toBe(t.status === 'success' ? feeFor(t.channel, t.amount_cents) : 0)
+      expect(t.fee_cents).toBe(t.status === 'failed' ? 0 : feeFor(t.channel, t.amount_cents))
     }
   })
 
@@ -88,7 +88,7 @@ describe('generateDataset', () => {
       } else {
         expect(s.gross_cents).toBe(expected)
       }
-      expect(s.net_cents).toBe(s.gross_cents - s.fee_cents)
+      expect(s.net_cents).toBe(s.gross_cents - s.fee_cents - s.refund_cents)
     }
   })
 
@@ -102,7 +102,7 @@ describe('generateDataset', () => {
     const oct = hawker.invoices.find((i) => i.period === '2026-10-01')
     const line = hawker.invoiceLines.find((l) => l.invoice_id === oct.id && l.channel === 'card')
     const computed = hawker.transactions
-      .filter((t) => t.channel === 'card' && t.status === 'success' && sgtDate(t.created_at).startsWith('2026-10'))
+      .filter((t) => t.channel === 'card' && t.status !== 'failed' && sgtDate(t.created_at).startsWith('2026-10'))
       .reduce((a, t) => a + t.fee_cents, 0)
     expect(line.amount_cents).toBe(computed + 360)
     const lines = hawker.invoiceLines.filter((l) => l.invoice_id === oct.id)
@@ -156,5 +156,154 @@ describe('generateDataset options for franchisees', () => {
     const one = generateDataset({ ...base, outlets: [{ name: 'A', address: 'x' }] })
     const two = generateDataset({ ...base, outlets: [{ name: 'A', address: 'x' }, { name: 'B', address: 'y' }] })
     expect(two.transactions.length / one.transactions.length).toBeGreaterThan(1.8)
+  })
+})
+
+describe('refunds and disputes in the demo data', () => {
+  const today = '2026-11-23'
+  const demo = generateDataset({ profile: 'hawker', seed: 1001, start: '2026-05-01', end: today, today })
+  const others = [
+    generateDataset({ profile: 'retail', seed: 2002, start: '2026-05-01', end: today, today }),
+    generateDataset({
+      profile: 'cafe', seed: 3003, start: '2026-05-01', end: today, today, recentDelay: false,
+      outlets: [{ name: 'A', address: 'x' }, { name: 'B', address: 'y' }],
+    }),
+    generateDataset({ profile: 'cafe', seed: 4004, start: '2026-05-01', end: today, today, outlets: [{ name: 'A', address: 'x' }] }),
+    generateDataset({
+      profile: 'cafe', seed: 5005, start: '2026-05-01', end: today, today, recentDelay: false, anomalies: false,
+      outlets: [{ name: 'A', address: 'x' }],
+    }),
+  ]
+  const all = [demo, ...others]
+  const dayDiff = (a, b) => Math.round((Date.parse(`${a}T00:00:00Z`) - Date.parse(`${b}T00:00:00Z`)) / 86_400_000)
+
+  it('keeps every existing payment the same', () => {
+    // Recorded from the generator before refunds and disputes were added.
+    const t = demo.transactions
+    expect(t).toHaveLength(18695)
+    expect([t[0].id, t[0].amount_cents, t[0].created_at]).toEqual(['0c8883d2-0c1f-49d4-a443-adfe13cadba7', 701, '2026-04-30T23:16:24.000Z'])
+    expect([t[1000].id, t[1000].amount_cents, t[1000].created_at]).toEqual(['c1567f5e-7245-488e-af16-1def3dd0483a', 293, '2026-05-11T08:29:48.000Z'])
+    const last = t[t.length - 1]
+    expect([last.id, last.amount_cents, last.created_at]).toEqual(['2b1cd6b2-f758-4cac-816a-f076e63df349', 687, '2026-11-23T13:03:25.000Z'])
+  })
+
+  it('refunds 3 to 5 payments a month, 1 to 14 days later, from the payout of the refund day', () => {
+    for (const d of all) {
+      const txns = new Map(d.transactions.map((t) => [t.id, t]))
+      const setts = new Map(d.settlements.map((s) => [s.id, s]))
+      const perMonth = new Map()
+      for (const r of d.refunds) {
+        const t = txns.get(r.transaction_id)
+        expect(t.status).toBe('refunded')
+        expect(['nets_qr', 'card', 'nets_click']).toContain(t.channel)
+        expect(r.amount_cents).toBe(t.amount_cents)
+        const gap = dayDiff(sgtDate(r.refunded_at), sgtDate(t.created_at))
+        expect(gap).toBeGreaterThanOrEqual(1)
+        expect(gap).toBeLessThanOrEqual(14)
+        expect(sgtDate(r.refunded_at) < today).toBe(true)
+        const s = setts.get(r.settlement_id)
+        expect(s.channel).toBe(t.channel)
+        expect(s.business_date).toBe(sgtDate(r.refunded_at))
+        // the payment itself stays in its own day's payout
+        expect(setts.get(t.settlement_id).business_date).toBe(sgtDate(t.created_at))
+        expect(['wrong_order', 'charged_twice', 'sold_out', 'changed_mind', 'other']).toContain(r.reason)
+        const m = sgtDate(t.created_at).slice(0, 7)
+        perMonth.set(m, (perMonth.get(m) ?? 0) + 1)
+      }
+      expect(new Set(d.refunds.map((r) => r.transaction_id)).size).toBe(d.refunds.length)
+      expect([...perMonth.keys()].sort()).toEqual(['2026-05', '2026-06', '2026-07', '2026-08', '2026-09', '2026-10', '2026-11'])
+      for (const n of perMonth.values()) {
+        expect(n).toBeGreaterThanOrEqual(3)
+        expect(n).toBeLessThanOrEqual(5)
+      }
+      for (const s of d.settlements) {
+        const sum = d.refunds.filter((r) => r.settlement_id === s.id).reduce((a, r) => a + r.amount_cents, 0)
+        expect(s.refund_cents).toBe(sum)
+      }
+    }
+  })
+
+  it('net is gross minus fees minus refunds', () => {
+    for (const d of all) {
+      for (const s of d.settlements) {
+        expect(s.net_cents).toBe(s.gross_cents - s.fee_cents - s.refund_cents)
+        expect(s.net_cents).toBeGreaterThanOrEqual(0)
+      }
+    }
+  })
+
+  it('keeps refunded payments in their payout gross and in the invoice fees', () => {
+    const sums = new Map()
+    for (const t of demo.transactions) {
+      if (t.settlement_id) sums.set(t.settlement_id, (sums.get(t.settlement_id) ?? 0) + t.amount_cents)
+    }
+    for (const s of demo.settlements) {
+      const off = s.business_date === '2026-10-18' && s.channel === 'card' ? 4210 : 0
+      expect(s.gross_cents).toBe(sums.get(s.id) - off)
+    }
+    const sep = demo.invoices.find((i) => i.period === '2026-09-01')
+    for (const c of CHANNELS) {
+      const line = demo.invoiceLines.find((l) => l.invoice_id === sep.id && l.channel === c)
+      const fees = demo.transactions
+        .filter((t) => t.channel === c && t.status !== 'failed' && sgtDate(t.created_at).startsWith('2026-09'))
+        .reduce((a, t) => a + t.fee_cents, 0)
+      expect(line.amount_cents).toBe(fees)
+    }
+  })
+
+  it('never puts a refund on the October check-up anomalies', () => {
+    for (const d of all) {
+      const txns = new Map(d.transactions.map((t) => [t.id, t]))
+      const banned = new Set(
+        d.settlements
+          .filter(
+            (s) =>
+              (s.business_date === '2026-10-18' && s.channel === 'card') ||
+              (s.business_date === '2026-10-29' && s.channel === 'nets_qr') ||
+              s.status === 'delayed',
+          )
+          .map((s) => s.id),
+      )
+      for (const r of d.refunds) {
+        expect(banned.has(r.settlement_id)).toBe(false)
+        expect(banned.has(txns.get(r.transaction_id).settlement_id)).toBe(false)
+      }
+    }
+    const a = demo.settlements.find((s) => s.business_date === '2026-10-18' && s.channel === 'card')
+    expect(a.refund_cents).toBe(0)
+  })
+
+  it('makes one open, one waiting, one won and one accepted dispute on card, NETS Click or eNETS', () => {
+    for (const d of all) {
+      const txns = new Map(d.transactions.map((t) => [t.id, t]))
+      expect(d.disputes.map((x) => x.status)).toEqual(['open', 'declined', 'won', 'accepted'])
+      for (const x of d.disputes) {
+        const t = txns.get(x.transaction_id)
+        expect(['card', 'nets_click', 'enets']).toContain(t.channel)
+        expect(t.status).toBe('success')
+        expect(x.amount_cents).toBe(t.amount_cents)
+        expect(x.respond_by).toBe(addDays(sgtDate(x.opened_at), 10))
+      }
+      const [open, waiting, won, accepted] = d.disputes
+      expect(open).toMatchObject({ reason: 'charged_twice', respond_by: addDays(today, 7), answered_at: null, files: 0 })
+      expect(open.opened_at).toBe(sgtToIso(addDays(today, -3), 10, 0))
+      const ot = txns.get(open.transaction_id)
+      const twins = d.transactions.filter(
+        (t) =>
+          t.terminal_id === ot.terminal_id && t.channel === ot.channel &&
+          sgtDate(t.created_at) === sgtDate(ot.created_at) && t.amount_cents === ot.amount_cents,
+      )
+      expect(twins).toHaveLength(1)
+      expect(Math.abs(dayDiff(sgtDate(ot.created_at), addDays(today, -10)))).toBeLessThanOrEqual(3)
+      expect(waiting).toMatchObject({
+        reason: 'not_recognised', decline_reason: 'made_payment', evidence: ['receipt', 'printout'],
+        decide_by: addDays(addDays(today, -14), 30), decided_at: null, files: 2,
+      })
+      expect(sgtDate(waiting.answered_at)).toBe(addDays(today, -14))
+      expect(won).toMatchObject({ reason: 'not_received', evidence: ['photo'], files: 1 })
+      expect(sgtDate(won.decided_at)).toBe(addDays(today, -20))
+      expect(accepted).toMatchObject({ reason: 'wrong_amount', files: 0, evidence: null, decline_reason: null })
+      expect(sgtDate(accepted.answered_at)).toBe(addDays(today, -72))
+    }
   })
 })
