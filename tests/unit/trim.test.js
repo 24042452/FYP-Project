@@ -34,6 +34,29 @@ describe('trimFuture', () => {
     expect(out.settlements[0]).toMatchObject({ gross_cents: 900, net_cents: 891 })
   })
 
+  it('keeps refund_cents when recomputing a trimmed payout', () => {
+    const d = mk()
+    d.transactions[0].status = 'refunded'
+    d.settlements[1] = { ...d.settlements[1], refund_cents: 400, net_cents: 2570 }
+    d.settlements[0] = { ...d.settlements[0], refund_cents: 0 }
+    d.settlements[2] = { ...d.settlements[2], refund_cents: 0 }
+    d.refunds = [
+      { id: 'r1', transaction_id: 't1', amount_cents: 1000, settlement_id: 's1' },
+      { id: 'r2', transaction_id: 't2', amount_cents: 2000, settlement_id: 's0' },
+    ]
+    d.disputes = [
+      { id: 'd1', transaction_id: 't0' },
+      { id: 'd2', transaction_id: 't4' },
+    ]
+    const out = trimFuture(d, '2026-11-13T03:00:00.000Z')
+    // t1 is refunded but still counts in its own payout; s1 keeps its refunds taken that day
+    expect(out.settlements.find((s) => s.id === 's1')).toMatchObject({
+      gross_cents: 1000, fee_cents: 10, refund_cents: 400, net_cents: 590,
+    })
+    expect(out.refunds.map((r) => r.id)).toEqual(['r1'])
+    expect(out.disputes.map((x) => x.id)).toEqual(['d1'])
+  })
+
   it('does not mutate the input', () => {
     const d = mk()
     trimFuture(d, '2026-11-13T03:00:00.000Z')
