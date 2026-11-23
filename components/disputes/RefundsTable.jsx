@@ -50,7 +50,7 @@ export function RefundsTable({ rows }) {
               {rows.map((r) => (
                 <tr key={r.id} data-testid="refund-row" className="border-b border-line last:border-0 hover:bg-page">
                   <td className="px-5 py-3 whitespace-nowrap">
-                    <Link href={r.href} className="font-semibold text-info underline-offset-[3px] hover:text-ink">
+                    <Link href={r.href} scroll={false} className="font-semibold text-info underline-offset-[3px] hover:text-ink">
                       {r.refundedOn}
                     </Link>
                   </td>
@@ -67,7 +67,7 @@ export function RefundsTable({ rows }) {
           <ul className="m-0 mt-2 list-none p-0 sm:hidden" aria-label="Refunds">
             {rows.map((r) => (
               <li key={r.id} className="border-t border-line">
-                <Link href={r.href} className="flex flex-col gap-1.5 px-4 py-3 text-ink no-underline hover:bg-page">
+                <Link href={r.href} scroll={false} className="flex flex-col gap-1.5 px-4 py-3 text-ink no-underline hover:bg-page">
                   <span className="flex items-baseline justify-between gap-3">
                     <span className="font-semibold">{r.reason}</span>
                     <span className="font-semibold tabular-nums">{r.amount}</span>

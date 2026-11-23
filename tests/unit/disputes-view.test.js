@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { buildDisputesPage, fileSize, paymentHref, toRefundView } from '@/lib/disputes/view'
+import { buildDisputesPage, disputeNotice, drawerHref, fileSize, paymentHref, toRefundView } from '@/lib/disputes/view'
 
 const TODAY = '2026-11-23'
 /** @param {Partial<import('@/lib/data/disputes').DisputeRow>} over */
@@ -25,7 +25,7 @@ describe('buildDisputesPage', () => {
     expect(c.meta).toBe('Cards · paid Sat 14 Nov, 12:41 pm · TID 70012345 · STAN 004512')
     expect(c.hint).toMatch(/^We found only one payment of \$46.50 that day/)
     expect(c.reasons.map((r) => r.value)).toEqual(['paid_once', 'something_else'])
-    expect(c.paymentHref).toBe('/transactions?id=t1&from=2026-11-14&to=2026-11-14')
+    expect(c.paymentHref).toBe('/disputes?payment=t1')
   })
 
   it('puts waiting cases after open ones and closed ones in the list, latest decision first, with files', () => {
@@ -81,5 +81,18 @@ describe('small helpers', () => {
     expect(fileSize(500)).toBe('1 KB')
     expect(fileSize(3_565_158)).toBe('3.4 MB')
     expect(paymentHref('abc', '2026-11-14T17:30:00.000Z')).toBe('/transactions?id=abc&from=2026-11-15&to=2026-11-15')
+    expect(drawerHref('abc')).toBe('/disputes?payment=abc')
+  })
+})
+
+describe('disputeNotice', () => {
+  it('says the payment is disputed, why, when, and where the dispute stands', () => {
+    expect(disputeNotice(dispute({}), '2026-11-23')).toEqual({
+      title: 'Disputed by the customer',
+      text: 'Customer says they were charged twice. Disputed on Fri 20 Nov.',
+      status: 'Answer by Mon 30 Nov',
+    })
+    expect(disputeNotice(dispute({ status: 'declined' }), '2026-11-23').status).toBe('Waiting for NETS')
+    expect(disputeNotice(dispute({ status: 'won' }), '2026-11-23').status).toBe('Won, money kept')
   })
 })

@@ -8,6 +8,10 @@ Shows a merchant the money they gave back to customers (refunds) and the cases w
 - Components: `components/disputes/` (`DisputesPanel`, `DisputeCase`, `Track`, `DeclineForm`, `AcceptConfirm`, `FileLinks`, `ClosedList`, `RefundsTable`, `shrink-image.js`)
 - Data: `lib/data/disputes.js`, `lib/data/refunds.js` (every query filters by the session merchant)
 
+## Payment details
+
+"See the payment" and the refund dates open the payment in the same side panel Sales & payments uses (`/disputes?payment=<id>`). A disputed payment shows an amber "Disputed by the customer" note above "What happened", with the reason, the date and where the dispute stands (amber picked over red, so it does not look like a failed payment). Clicking outside, Esc or × closes it and the page keeps its place. Only payments of disputes or refunds shown on the page can open, so an outlet manager cannot open another outlet's payment by editing the address. "Open in Sales & payments" inside the panel goes to the full list.
+
 ## How a dispute is answered
 - Each open dispute shows a 3-step track (Customer disputed, Your answer, NETS decides), the reason in plain words, a hint on what proof helps, and the deadline.
 - **Accept** (white button, blue outline): asks "Are you sure?", then gives the money back to the customer.
@@ -52,4 +56,4 @@ Answering a dispute is done by server actions, not the public API (yet).
 
 ## Tests
 - Unit and integration: refunds and disputes data functions, merchant isolation, role rules, API responses, the Excel workbook, the check-up with refunds
-- End-to-end `tests/e2e/disputes.spec.js`: TC-DSP-01 decline with proof and a photo; TC-DSP-02 accept; TC-DSP-03 accountant looks only; TC-DSP-04 file over 2 MB refused; TC-DSP-05 no sideways scroll on a phone
+- End-to-end `tests/e2e/disputes.spec.js`: TC-DSP-01 decline with proof and a photo; TC-DSP-02 accept; TC-DSP-03 accountant looks only; TC-DSP-04 file over 2 MB refused; TC-DSP-05 no sideways scroll on a phone; TC-DSP-06 payment details open in a side panel and close by clicking outside or Esc; TC-DSP-07 the address cannot open another business's payment

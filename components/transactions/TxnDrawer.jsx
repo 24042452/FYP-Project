@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { useReducedMotion } from '@/components/dashboard/use-reduced-motion'
+import { AlertTriangle } from 'lucide-react'
 
 /** How long the drawer takes to slide in or out (keep in step with the duration classes below). */
 const SLIDE_MS = 300
@@ -15,6 +16,7 @@ const PILL = {
   mute: 'bg-mute-bg text-mute',
 }
 const BOX = {
+  warn: 'bg-warn-bg text-warn',
   bad: 'bg-bad-bg text-bad',
   info: 'bg-info-bg text-info',
   ok: 'bg-ok-bg text-ok',
@@ -27,9 +29,12 @@ const BOX = {
  * Closing first lets the drawer slide out to the right, and only then changes the address
  * (changing it straight away would remove the drawer before its exit animation could play).
  * With reduced motion the drawer closes at once.
- * @param {{detail: ReturnType<import('@/lib/transactions/format').toDetailView>, closeHref: string}} props
+ * `moreHref`/`moreLabel` add a link to the full page (used where the panel opens on another page, e.g. Refunds & disputes).
+ * `notice` adds a highlighted note above "What happened" (Refunds & disputes uses it to say the payment is disputed).
+ * @param {{detail: ReturnType<import('@/lib/transactions/format').toDetailView>, closeHref: string, moreHref?: string, moreLabel?: string,
+ *   notice?: {title: string, text: string, status: string, tone?: 'warn' | 'bad' | 'info'}}} props
  */
-export function TxnDrawer({ detail, closeHref }) {
+export function TxnDrawer({ detail, closeHref, moreHref, moreLabel, notice }) {
   const router = useRouter()
   const reduceMotion = useReducedMotion()
   const [open, setOpen] = useState(true)
@@ -66,6 +71,16 @@ export function TxnDrawer({ detail, closeHref }) {
               <SheetTitle className="text-[32px] leading-tight font-semibold tabular-nums">{detail.amount}</SheetTitle>
               <SheetDescription className="text-[15px]">{detail.when}</SheetDescription>
             </SheetHeader>
+            {notice ? (
+              <div data-testid="payment-notice" className={`mx-5 flex gap-3 rounded-lg px-3.5 py-3 text-[15px] ${BOX[notice.tone ?? 'warn']}`}>
+                <AlertTriangle className="mt-0.5 size-4 flex-none" aria-hidden="true" />
+                <div className="flex flex-col gap-1">
+                  <b className="font-semibold">{notice.title}</b>
+                  <span>{notice.text}</span>
+                  <span className="font-semibold">{notice.status}</span>
+                </div>
+              </div>
+            ) : null}
             <div className="flex flex-col gap-3 px-5">
               <h3 className="text-base font-semibold">What happened</h3>
               <p className={`rounded-lg px-3.5 py-3 text-[15px] ${BOX[detail.plainTone]}`}>{detail.plain}</p>
@@ -83,6 +98,16 @@ export function TxnDrawer({ detail, closeHref }) {
                 </div>
               ))}
             </dl>
+            {moreHref ? (
+              <div className={`px-5 ${detail.assistantHref ? '' : 'pb-6'}`}>
+                <Link
+                  href={moreHref}
+                  className="inline-flex min-h-11 w-full items-center justify-center rounded-lg border border-line-strong bg-white px-4 text-[15px] font-semibold text-ink no-underline shadow-panel hover:border-ink-3"
+                >
+                  {moreLabel ?? 'Open the full page'}
+                </Link>
+              </div>
+            ) : null}
             {detail.assistantHref ? (
               <div className="px-5 pb-6">
                 <Link

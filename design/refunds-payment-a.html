@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Refunds &amp; disputes · Merchant Portal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;650;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/portal.css">
+<link rel="stylesheet" href="assets/refunds.css">
+<style>
+/* Option A: each dispute is a case with a three-step track; Decline opens its form inside the case */
+.case { padding: 20px; display: grid; grid-template-columns: 40px minmax(0, 1fr); gap: 4px 16px; }
+.case + .case { border-top: 1px solid var(--border); }
+.case .ic { width: 40px; height: 40px; border-radius: 10px; background: var(--red-soft); color: var(--red-ink); display: grid; place-items: center; grid-row: span 2; }
+.case h3 { font-size: 18px; font-weight: 650; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+.case .meta { color: var(--ink-2); font-size: 14px; }
+.case .why { margin-top: 14px; padding: 12px 14px; border-radius: var(--r); background: var(--accent-soft); color: var(--accent-ink); font-size: 15px; display: flex; gap: 10px; }
+.case .why .icon { margin-top: 2px; flex: none; }
+.case .acts { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+.case.quiet .ic { background: var(--accent-soft); color: var(--accent-ink); }
+.case .form { margin-top: 18px; padding-top: 18px; border-top: 1px solid var(--border); }
+.closed li .amt { font-variant-numeric: tabular-nums; font-weight: 600; }
+.closed .t { font-weight: 600; }
+.closed .s { font-size: 13px; color: var(--ink-3); }
+@media (max-width: 640px) {
+  .case { grid-template-columns: 1fr; padding: 16px; }
+  .case .ic { grid-row: auto; }
+  .case .acts .btn { flex: 1 1 100%; }
+  .track3 { grid-template-columns: 1fr; gap: 10px; }
+  .track3 li { padding: 0 0 0 26px; }
+  .track3 li::before { left: 6px; right: auto; top: 16px; bottom: -12px; width: 2px; height: auto; }
+  .track3 li::after { top: 2px; }
+  .track3 li:last-child::before { display: none; }
+}
+</style>
+<style>
+.pp-scrim{position:fixed;inset:0;background:rgba(4,22,60,.45);z-index:60}
+.pp{position:fixed;z-index:61;background:#fff;box-shadow:var(--shadow-pop);overflow:auto;display:flex;flex-direction:column}
+.pp.right{top:0;right:0;bottom:0;width:min(448px,100vw);border-left:1px solid var(--border)}
+.pp.center{top:50%;left:50%;transform:translate(-50%,-50%);width:min(520px,calc(100vw - 32px));max-height:calc(100vh - 48px);border-radius:16px}
+.pp-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;padding:18px 20px;border-bottom:1px solid var(--border)}
+.pp-head h2{font-size:18px;font-weight:650}.pp-head p{font-size:14px;color:var(--ink-2)}
+.pp-top{padding:18px 20px;display:flex;flex-direction:column;gap:6px;border-bottom:1px solid var(--border)}
+.pp-amt{font-size:32px;font-weight:650;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.pp-sec{padding:16px 20px;border-bottom:1px solid var(--border);margin:0}.pp-sec h3{font-size:16px;font-weight:650;margin-bottom:6px}
+.pp-acts{padding:16px 20px 20px;display:flex;flex-direction:column;gap:10px}
+@media (max-width:640px){.pp.center,.pp.right{top:0;left:0;right:0;bottom:0;width:100%;max-height:none;transform:none;border-radius:0}}
+</style></head>
+<body data-page="refunds" data-merchant="ahhock">
+<div class="app">
+  <aside class="sidebar" id="sidebar"></aside>
+  <div class="scrim"></div>
+  <div class="main">
+    <header class="topbar" id="topbar"></header>
+    <main class="page">
+      <div class="page-head">
+        <div>
+          <h1>Refunds &amp; disputes</h1>
+          <p class="tech">Chargebacks · money customers asked for back</p>
+        </div>
+      </div>
+
+      <div class="page-head">
+        <div>
+          <p class="answer">1 dispute needs your answer by Mon 30 Nov. <em>$46.50</em> is at stake.</p>
+          <p class="answer-sub">A customer's bank asked for their money back. Accept it, or decline it and show NETS why the payment was right.</p>
+        </div>
+      </div>
+
+      <section class="panel summary" aria-label="Summary">
+        <div class="attn"><span class="k">Needs your answer</span><span class="v">1 dispute</span><span class="d">Answer by Mon 30 Nov · 7 days left</span></div>
+        <div><span class="k">Waiting for NETS</span><span class="v">$18.20</span><span class="d">1 dispute you declined on 9 Nov</span></div>
+        <div><span class="k">Refunds this month</span><span class="v">$31.60</span><span class="d">3 refunds · taken from your payouts</span></div>
+      </section>
+
+      <section class="panel" aria-labelledby="disputes-h">
+        <div class="panel-head"><h2 id="disputes-h">Disputes <span class="tech">Chargebacks</span></h2></div>
+        <div class="case" id="case-1">
+          <span class="ic"><i data-icon="alert"></i></span>
+          <div>
+            <h3>Customer says they were charged twice <span class="money">$46.50</span> <span class="pill bad"><i data-icon="clock"></i>Answer by Mon 30 Nov</span></h3>
+            <p class="meta">Cards · paid Sat 14 Nov, 12:41pm · TID 70012345 · STAN 004512</p>
+          </div>
+          <div style="grid-column: 2">
+            <ol class="track3" aria-label="Where this dispute is">
+              <li class="done"><b>Customer disputed</b>Fri 20 Nov</li>
+              <li class="now"><b>Your answer</b>7 days left</li>
+              <li><b>NETS decides</b>About 30 days after</li>
+            </ol>
+            <p class="why"><i data-icon="info"></i><span>We found only one payment of $46.50 that day, so declining may win this. If you lose, $46.50 is taken back from a future payout.</span></p>
+            <div class="acts">
+              <button class="btn btn-decline" type="button" data-open-form><i data-icon="x"></i>Decline</button>
+              <button class="btn btn-accept" type="button"><i data-icon="tick"></i>Accept and refund $46.50</button>
+              <a class="btn btn-quiet" href="transactions.html">See the payment</a>
+            </div>
+            <form class="form" id="form-1" hidden>
+              <h3>Tell NETS why the payment was right</h3>
+              <div class="field">
+                <span class="lab">Why do you disagree?</span>
+                <div class="choices">
+                  <label class="choice on"><input type="radio" name="why" checked>The customer paid only once. I can show the one payment.</label>
+                  <label class="choice"><input type="radio" name="why">The customer got their food or goods.</label>
+                  <label class="choice"><input type="radio" name="why">Something else</label>
+                </div>
+              </div>
+              <div class="field">
+                <span class="lab">What proof do you have?</span>
+                <span class="hint">Tick all that you can send.</span>
+                <div class="choices two">
+                  <label class="choice on"><input type="checkbox" checked>Receipt or order slip</label>
+                  <label class="choice on"><input type="checkbox" checked>Terminal printout</label>
+                  <label class="choice"><input type="checkbox">Photo of the order</label>
+                  <label class="choice"><input type="checkbox">Messages with the customer</label>
+                </div>
+              </div>
+              <div class="field">
+                <label class="lab" for="note-1">Anything else NETS should know?</label>
+                <textarea class="input" id="note-1">Regular customer, catering order for the office. Only one card payment that afternoon.</textarea>
+              </div>
+              <div class="field">
+                <span class="lab">Add photos or PDFs</span>
+                <span class="hint">Up to 3 files, 2 MB each. On a phone you can take a photo.</span>
+                <div class="file"><i data-icon="bill"></i>receipt-14-nov.jpg<span class="sz">640 KB</span><button class="btn btn-quiet" type="button">Remove</button></div>
+                <div class="drop"><button class="btn btn-secondary" type="button"><i data-icon="download"></i>Add a file</button>2 more files allowed</div>
+              </div>
+              <div class="form-acts">
+                <button class="btn btn-primary" type="button"><i data-icon="send"></i>Send my answer to NETS</button>
+                <button class="btn btn-quiet" type="button" data-close-form>Cancel</button>
+              </div>
+            </form>
+          </div>
+        </div>
+        <div class="case quiet">
+          <span class="ic"><i data-icon="clock"></i></span>
+          <div>
+            <h3>Customer doesn't recognise this payment <span class="money">$18.20</span> <span class="pill info"><i data-icon="clock"></i>Waiting for NETS</span></h3>
+            <p class="meta">NETS Click · paid Mon 2 Nov, 7:05pm · you declined it on Mon 9 Nov</p>
+          </div>
+          <div style="grid-column: 2">
+            <ol class="track3" aria-label="Where this dispute is">
+              <li class="done"><b>Customer disputed</b>Thu 5 Nov</li>
+              <li class="done"><b>You declined</b>Mon 9 Nov · 2 files sent</li>
+              <li class="wait"><b>NETS decides</b>By Wed 9 Dec</li>
+            </ol>
+          </div>
+        </div>
+        <div class="panel-body" style="padding-top:4px">
+          <ul class="list closed" aria-label="Closed disputes">
+            <li><div><span class="t">Item not received · $22.40</span><br><span class="s">Cards · Oct · you declined with 1 file</span></div><span class="pill ok"><i data-icon="tick"></i>Won, money kept</span></li>
+            <li><div><span class="t">Charged the wrong amount · $9.80</span><br><span class="s">Cards · Sep · you accepted</span></div><span class="pill mute"><i data-icon="refund"></i>Accepted, refunded</span></li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="panel" aria-labelledby="refunds-h">
+        <div class="panel-head"><h2 id="refunds-h">Refunds</h2><a class="small" href="#" style="font-weight:600">Download Excel</a></div>
+        <div class="table-wrap" style="margin-top:8px">
+          <table class="data">
+            <thead><tr><th>Refunded on</th><th>Paid with</th><th>Reason</th><th class="n">Amount</th><th>Payout</th></tr></thead>
+            <tbody>
+              <tr><td>Sat 21 Nov</td><td>NETS QR</td><td>Wrong order</td><td class="n amount">$12.80</td><td><span class="pill ok"><i data-icon="tick"></i>Taken from payout Mon 23 Nov</span></td></tr>
+              <tr><td>Mon 16 Nov</td><td>Cards</td><td>Charged twice</td><td class="n amount">$6.00</td><td><span class="pill ok"><i data-icon="tick"></i>Taken from payout Tue 17 Nov</span></td></tr>
+              <tr><td>Mon 9 Nov</td><td>NETS QR</td><td>Item sold out</td><td class="n amount">$12.80</td><td><span class="pill ok"><i data-icon="tick"></i>Taken from payout Tue 10 Nov</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+  <nav class="tabbar" id="tabbar" aria-label="Main"></nav>
+</div>
+<div class="pp-scrim" data-close></div>
+<aside class="pp right" role="dialog" aria-modal="true" aria-labelledby="pp-h">
+  <div class="pp-head"><div><h2 id="pp-h">Payment details</h2><p>Sat 14 Nov, 12:41pm · Cards</p></div><button class="icon-btn" type="button" aria-label="Close" data-close><i data-icon="x"></i></button></div>
+  <div class="pp-top"><span class="pill info" style="align-self:flex-start"><i data-icon="alert"></i>Disputed by the customer</span><span class="pp-amt">$46.50</span><span class="muted">Went through · in your bank on Mon 16 Nov</span></div>
+  <div class="pp-sec"><h3>What happened</h3><p class="small">The payment went through and was paid to your bank. On Fri 20 Nov the customer's bank disputed it: they say they were charged twice.</p></div>
+  <dl class="kv pp-sec"><dt>Paid with</dt><dd>Visa ending 4821</dd><dt>Outlet</dt><dd>Tampines Round Market #01-23</dd><dt>Terminal (TID)</dt><dd>70012345</dd><dt>Trace number (STAN)</dt><dd>004512</dd><dt>NETS fee</dt><dd>$1.02</dd><dt>Payout</dt><dd>Mon 16 Nov</dd></dl>
+  <div class="pp-acts"><a class="btn btn-secondary" href="#"><i data-icon="receipt"></i>Open in Sales &amp; payments</a><button class="btn btn-quiet" type="button"><i data-icon="copy"></i>Copy reference</button></div>
+</aside>
+<script src="assets/shell.js"></script>
+<script>
+  document.addEventListener('click', function (e) {
+    var open = e.target.closest('[data-open-form]');
+    var close = e.target.closest('[data-close-form]');
+    if (open) { document.getElementById('form-1').hidden = false; open.closest('.acts').hidden = true; }
+    if (close) { document.getElementById('form-1').hidden = true; document.querySelector('#case-1 .acts').hidden = false; }
+  });
+  if (location.hash === '#form') document.addEventListener('DOMContentLoaded', function () { document.querySelector('[data-open-form]').click(); });
+</script>
+</body>
+</html>

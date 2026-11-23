@@ -124,7 +124,7 @@ export function DisputeCase({ d, canRespond, onKeep }) {
                 </button>
               </>
             ) : null}
-            <Link href={d.paymentHref} className={quietBtn}>
+            <Link href={d.paymentHref} scroll={false} className={quietBtn}>
               See the payment
             </Link>
           </div>
