@@ -16,13 +16,17 @@ Two pages in the "Grow" part of the menu. **Promotions** (`/campaigns`, sub-labe
 
 ### Promotions
 - A promotion runs **4 weeks, starting tomorrow**.
-- **One running or scheduled promotion per payment type per outlet.** This is enforced on the server in a locked transaction, so two quick requests cannot both get in.
-- **Stop** asks inline first. A scheduled promotion is removed. A running one stops today and moves to Results.
-- **Results** compare the average sales per promotion day (for the promotion's payment type, days and hours, at its outlets) with the same weekdays in the 28 days before. Within plus or minus 2% it says "About the same". A promotion that ran under 7 days, or has no earlier days to compare with, says "Too short to compare". Results are labelled as an estimate.
+- **Answer sentence** names what was measured and counts scheduled promotions apart from running ones, for example "1 promotion is running and 1 starts tomorrow. Your last one, **Tuesday NETS QR**, brought in about 12% more in NETS QR sales on Tuesdays." The days in words ("on Tuesdays", "on weekends", "on weekday lunchtimes", "every day") come from the catalogue's days and hours. With nothing running: "1 promotion starts tomorrow." or "No promotions running."
+- **One running or scheduled promotion per payment type per outlet.** This is enforced on the server in a locked transaction, so two quick requests cannot both get in. Start and stop both lock the merchant's row first, then the runs (the same order, so they cannot deadlock).
+- **Card notes** sit above Take up, so every Take up in a row lines up on the card's bottom edge. When some outlets are busy, the note names them: "Running at Tampines Mall #02-15 until Tue 15 Dec. You can start it at Bedok Mall #B1-30." (another promotion of the same payment type: "Another NETS QR promotion is on at ..."). An outlet manager only ever sees their own outlet, so their notes never name other outlets.
+- **Running now** cards show the name with the pill and Stop on the right, then the 4-week bar with "Week 1 of 4 · results when it ends" (on phones: one column, Stop last). On a 1280×800 screen the first row of promotion cards, Take up included, fits above the fold.
+- **Stop** asks inline first. A scheduled promotion is removed ("Stop this promotion? It won't start."). A running one stops today and moves to Results ("Stop this promotion? It ends today at all its outlets.").
+- **Results** compare the average sales per promotion day (for the promotion's payment type, days and hours, at its outlets) with the same weekdays in the 28 days before. Each row shows both figures: "$1,240 a weekend day" and, under it, "$1,088 a weekend day before". Within plus or minus 2% it says "About the same". A promotion that ran under 7 days, or has no earlier days to compare with, says "Too short to compare". Results are labelled as an estimate.
 
 ### Offers
 - A catalogue grouped by kind (lower fees, equipment, partner deals), picked for the business category (F&B or Retail). Every offer carries a "Sample offer" tag.
 - Several offers can be active at once. The same offer cannot be taken up twice at one outlet while it is active. Dates far ahead show the year.
+- **In-store offers** ("0.5% off NETS QR fees", "Free NETS QR standee", "Second terminal free for 2 months"; NETS QR is counter-only) cannot go to an online outlet: in the panel the online store is greyed out with "In-store only", and the server refuses a forged form ("Pick an outlet that can take this offer."). Partner deals suit every outlet. A card for an offer active at every outlet that suits it says "Active at all your in-store outlets until Sat 13 Feb" (or "all your outlets" / "your outlet"), in the same date format as the Your offers pill.
 
 ## Who can do what
 - **Owner and outlet manager** can take up and stop. An outlet manager can act only for their own outlet, and can stop a promotion only if it runs at their outlet alone. For a shared one the page says "Only the owner can stop a promotion that runs at more than one outlet."
@@ -30,7 +34,7 @@ Two pages in the "Grow" part of the menu. **Promotions** (`/campaigns`, sub-labe
 - All of this is checked on the server, not just hidden in the page.
 
 ## Data model
-Migration `0010`: `promotion_runs`, `promotion_run_outlets`, `offer_takeups`, `offer_takeup_outlets`, and `outlets.is_online`. Composite keys (id, merchant_id) keep every row inside one merchant. Seed adds, per business, 2 finished promotions (with a small sales lift on their days so results look believable), 1 running promotion ("10% off on Tuesdays"; Tan & Sons at Tampines Mall only, so its outlet list shows a busy, an unsuitable and a free outlet) and 1 offer taken up ("0.5% off NETS QR fees"). The extra lift payments do not change the October check-up (still 3 problems).
+Migration `0010`: `promotion_runs`, `promotion_run_outlets`, `offer_takeups`, `offer_takeup_outlets`, and `outlets.is_online`. Composite keys (id, merchant_id) keep every row inside one merchant. Seed adds, per business, 2 finished promotions (with a small sales lift on their days so results look believable), 1 running promotion ("10% off on Tuesdays"; Tan & Sons at Tampines Mall only, so its outlet list shows a busy, an unsuitable and a free outlet) and 1 offer taken up ("0.5% off NETS QR fees", at the physical outlets only, as it is in-store). The extra lift payments do not change the October check-up (still 3 problems).
 
 ## Known simplifications
 - Taking up an offer does not change fees or bills.
