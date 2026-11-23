@@ -114,6 +114,15 @@ A 7-minute walkthrough of the MVP, then questions. One person **presents** (talk
 **Say:** "Only owners and outlet managers can answer; an accountant can look but not press anything."
 **Note:** re-seeding resets this case, so it is open again for the next run.
 
+### 7c. Offers & Promotions: take up a promotion (45 s)
+**Do:** log in as **Tan & Sons owner**, open **Promotions**. Point at the running "10% off on Tuesdays" card and the answer sentence.
+**Say:** "NETS shows these deals to your customers when they pay. Each one runs for 4 weeks."
+**Do:** click **Take up** on the weekend **Cards** promotion. In the slide-out, tick two outlets with **Select all outlets that can run it**, and press **Start at 2 outlets**. (To show a busy outlet, open the NETS QR "10% off on Tuesdays" one instead: Tampines Mall is greyed out with the reason.)
+**Say:** "One promotion per payment type per outlet, so nobody runs two deals at once. Stop is one tap, with a check."
+**Do:** scroll to **Results** and point at a finished promotion.
+**Say:** "When it ends we compare its days with the same days before. It is an estimate, and we say so."
+**Note:** re-seeding resets promotions, so the demo starts clean again.
+
 ### 8. On a phone (30 s, optional)
 **Do:** show the same page on the phone: the bottom tabs (Home, Payments, Check-up, Ask, More), tap the search icon.
 **Say:** "Most hawkers will use this on their phone, so every screen is designed for a phone first."

@@ -16,8 +16,8 @@ Every portal module, the phase it is built in, and what it does in plain words.
 | **NETS Assistant (AI copilot)** | P0 → P2 | Ask "How much did I take last week?" or "Why did this payment fail?", and get help-centre answers with sources |
 | **Notifications & alerts** | P0 (basic) → P1 | Nudges ("Sales up 12%"), plus configurable alerts for failed payments, settlement delays and sales dips |
 | **Refunds & chargeback disputes** | P1 (built, see [features/refunds-disputes.md](features/refunds-disputes.md)) | See refunds, accept or decline chargebacks with proof (up to 3 files), track status. Issuing a refund from the portal is later |
-| **Offers (by NETS)** | P2 | Personalised NETS offers to grow the business (e.g. reduced MDR promo, new QR standee, partner deals) |
-| **Marketing campaigns** | P2 | Create simple promos, choose dates and channels, see the uplift afterwards |
+| **Offers (by NETS)** | P2 (built, see [features/offers-promotions.md](features/offers-promotions.md)) | Sample NETS and partner offers picked for the business type (reduced fee promo, QR standee, partner deals); take up at chosen outlets. Real terms and fee changes are later |
+| **Marketing campaigns (Promotions)** | P2 (built, see [features/offers-promotions.md](features/offers-promotions.md)) | Take up ready-made 4-week promotions per payment type and outlet, stop them, and see an estimate of the uplift afterwards. Writing your own promotions is later |
 | **Partner integrations** | P3 | Connect SAP, Xero, QuickBooks, Shopify; see sync status and map fields |
 | **Business structure** | P3 | Manage company details, outlets, UEN, GST/tax settings, accounting settings, bank accounts |
 | **Terminal management** | P3 | See every terminal and its status; request a replacement, repair or supplies |

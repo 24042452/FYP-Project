@@ -142,6 +142,8 @@ MySQL conventions:
 | `invoice_lines` | invoice_line_id, invoice_id, charge_type (MDR fee, terminal rental, …), qty, unit_price, amount |
 | `recon_runs` | recon_run_id, merchant_id, period, run_at, matched_count, exception_count |
 | `recon_exceptions` | recon_exception_id, recon_run_id, type (amount_mismatch, missing_settlement, settlement_delay, failed_payment, fee_mismatch), ref ids, expected, actual, status (open/resolved), note |
+| `promotion_runs` / `promotion_run_outlets` | A 4-week promotion a merchant took up: promotion_run_id, merchant_id, promotion_key (from `lib/promotions/catalogue.js`), channel, starts_on, ends_on, stopped_on; one row per outlet in `promotion_run_outlets`. One running or scheduled run per channel per outlet, enforced in a locked transaction |
+| `offer_takeups` / `offer_takeup_outlets` | An offer a merchant took up: offer_takeup_id, merchant_id, offer_key, starts_on, ends_on; one row per outlet. Also `outlets.is_online` |
 | `notifications` | notification_id, merchant_id, kind, title, body, link, read_at |
 | `alert_rules` | merchant_id, rule_type, threshold, channel (in_app/email), enabled |
 | `kb_chunks` | kb_chunk_id, source_doc, heading, content, `FULLTEXT(heading, content)`; Phase 2 adds embedding (JSON) |
@@ -199,6 +201,7 @@ The portal is **API-first**: our own UI uses the same data layer as the versione
 | GET | `/api/v1/reports/sales?from=&to=&group_by=` | P1 |
 | GET | `/api/v1/reconciliation/runs` · `/runs/{id}/exceptions` | P1 |
 | GET | `/api/v1/disputes` · `/api/v1/refunds` | **Built** (read-only, `?page=N&outlet=`; answering a dispute uses server actions) |
+| (server actions) | `startPromotionAction`, `stopPromotionAction`, `takeUpOfferAction` | **Built** (owner and outlet manager only, checked on the server; no public API yet, see [features/offers-promotions.md](features/offers-promotions.md)) |
 | POST | `/api/v1/refunds` | P1 (with maker-checker in P4) |
 | GET/POST/DELETE | `/api/v1/webhooks` (manage subscriptions) | P1 |
 | GET | `/api/v1/terminals` · POST `/api/v1/service-requests` | P3 |
