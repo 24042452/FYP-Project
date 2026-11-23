@@ -139,7 +139,7 @@ Rule: `role ∈ {'owner','outlet_manager'}` and not read-only, checked on the se
 ## Demo data
 
 - `lib/synthetic/generate.js` (second PRNG only; every existing payment stays the same, so the check-up keeps its 3 October problems): for each business, 2 finished promotions in the past (one 4–8 weeks ago, one 9–13 weeks ago, on payment types the business uses, never on the October anomaly days/payouts) and their lift: extra successful payments of that payment type on the promotion days (and hours) so the day's sales are about the catalogue lift higher (e.g. +14%, +6%). Extra payments get STANs, settlements and invoice fees like any other payment.
-- Seed: 1 running promotion per business (started 6 days before the seed day; Tan & Sons at 2 of 3 outlets, so the outlet rule shows), the 2 finished ones, and 1 offer taken up (e.g. "0.5% off NETS QR fees" until 3 months later).
+- Seed: 1 running promotion per business (started 6 days before the seed day; Tan & Sons' NETS QR promotion at Tampines Mall only, so its outlet list shows a busy outlet, an unsuitable one and a free one), the 2 finished ones, and 1 offer taken up (e.g. "0.5% off NETS QR fees" until 3 months later).
 
 ## Testing
 
