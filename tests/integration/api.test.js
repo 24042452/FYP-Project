@@ -1,7 +1,7 @@
 import { beforeAll, describe, expect, it } from 'vitest'
 import { randomUUID } from 'node:crypto'
 import { adminExecute, insertFixture, resetTestDb } from './helpers.js'
-import { settlementsResponse, summaryResponse, transactionsResponse } from '../../lib/api/v1.js'
+import { disputesResponse, refundsResponse, settlementsResponse, summaryResponse, transactionsResponse } from '../../lib/api/v1.js'
 
 const A = randomUUID()
 const B = randomUUID()
@@ -163,5 +163,84 @@ describe('GET /api/v1/summary', () => {
 
   it('400 for a bad period', async () => {
     expect((await summaryResponse(A, { period: 'year' }, TODAY)).status).toBe(400)
+  })
+})
+
+describe('GET /api/v1/disputes and /api/v1/refunds', () => {
+  const OUT_1 = randomUUID()
+  const OUT_2 = randomUUID()
+  const D1 = randomUUID() // open, on time
+  const D2 = randomUUID() // open, past its deadline -> missed
+  const R1 = randomUUID()
+  const R2 = randomUUID()
+  const R_OLD = randomUUID()
+
+  beforeAll(async () => {
+    await adminExecute(`INSERT INTO outlets (outlet_id, merchant_id, name) VALUES (?, ?, 'One'), (?, ?, 'Two')`, [OUT_1, A, OUT_2, A])
+    await adminExecute('UPDATE transactions SET outlet_id = ? WHERE transaction_id = ?', [OUT_1, idOf(1)])
+    await adminExecute('UPDATE transactions SET outlet_id = ? WHERE transaction_id = ?', [OUT_2, idOf(2)])
+    const d = (id, merchantId, txn, cents, openedAt, respondBy) =>
+      adminExecute(
+        `INSERT INTO disputes (dispute_id, merchant_id, transaction_id, amount_cents, reason, opened_at, respond_by, status, note)
+         VALUES (?, ?, ?, ?, 'charged_twice', ?, ?, 'open', 'private note')`,
+        [id, merchantId, txn, cents, openedAt, respondBy],
+      )
+    await d(D1, A, idOf(1), 10000, '2026-11-10 02:00:00.000', '2026-11-20')
+    await d(D2, A, idOf(2), 20000, '2026-11-02 02:00:00.000', '2026-11-09')
+    await d(randomUUID(), B, B_TXN, 77777, '2026-11-10 02:00:00.000', '2026-11-20')
+    const r = (id, merchantId, txn, cents, at) =>
+      adminExecute(
+        `INSERT INTO refunds (refund_id, merchant_id, transaction_id, amount_cents, reason, refunded_at) VALUES (?, ?, ?, ?, 'wrong_order', ?)`,
+        [id, merchantId, txn, cents, at],
+      )
+    await r(R1, A, idOf(1), 1000, '2026-11-10 03:00:00.000')
+    await r(R2, A, idOf(2), 2000, '2026-11-11 03:00:00.000')
+    await r(R_OLD, A, idOf(8), 3000, '2026-07-01 03:00:00.000') // outside the 3-month window
+    await r(randomUUID(), B, B_TXN, 4000, '2026-11-11 03:00:00.000')
+  })
+
+  it('lists this merchant disputes with the effective status and no notes or files', async () => {
+    const res = await disputesResponse(A, {}, TODAY)
+    expect(res.status).toBe(200)
+    expect(res.headers.get('cache-control')).toBe('private, no-store')
+    const b = await body(res)
+    expect(b).toMatchObject({ page: 1, pageSize: 50, hasMore: false })
+    expect(b.data.map((r) => [r.id, r.status])).toEqual([[D1, 'open'], [D2, 'missed']])
+    expect(b.data[0]).toMatchObject({
+      transaction_id: idOf(1), amount_cents: 10000, reason: 'charged_twice', respond_by: '2026-11-20',
+      channel: 'nets_qr', paid_at: '2026-11-09T04:00:00.000Z', file_count: 0,
+    })
+    expect(JSON.stringify(b)).not.toMatch(/private note|evidence|note/)
+  })
+
+  it("never shows another merchant's disputes or refunds", async () => {
+    const d = await body(await disputesResponse(B, {}, TODAY))
+    expect(d.data.map((r) => r.amount_cents)).toEqual([77777])
+    const r = await body(await refundsResponse(B, {}, TODAY))
+    expect(r.data.map((x) => x.amount_cents)).toEqual([4000])
+  })
+
+  it('limits to one outlet (query or outlet manager) and refuses another', async () => {
+    const q = await body(await disputesResponse(A, { outlet: OUT_2 }, TODAY))
+    expect(q.data.map((r) => r.id)).toEqual([D2])
+    const mgr = await body(await refundsResponse(A, {}, TODAY, { tier: 'outlet', outletId: OUT_1 }))
+    expect(mgr.data.map((r) => r.id)).toEqual([R1])
+    expect((await disputesResponse(A, { outlet: OUT_2 }, TODAY, { tier: 'outlet', outletId: OUT_1 })).status).toBe(403)
+    expect((await refundsResponse(A, { outlet: randomUUID() }, TODAY)).status).toBe(400)
+  })
+
+  it('refunds: last 3 months only, newest first, with the payout', async () => {
+    const b = await body(await refundsResponse(A, {}, TODAY))
+    expect(b.data.map((r) => r.id)).toEqual([R2, R1])
+    expect(b.data[0]).toMatchObject({
+      transaction_id: idOf(2), amount_cents: 2000, reason: 'wrong_order', channel: 'nets_qr',
+      refunded_at: '2026-11-11T03:00:00.000Z', payout: null,
+    })
+  })
+
+  it('pages 50 at a time and rejects a bad page', async () => {
+    expect((await body(await disputesResponse(A, { page: '2' }, TODAY))).data).toEqual([])
+    expect((await disputesResponse(A, { page: '0' }, TODAY)).status).toBe(400)
+    expect((await refundsResponse(A, { page: 'x' }, TODAY)).status).toBe(400)
   })
 })

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import ExcelJS from 'exceljs'
-import { buildReconWorkbook, buildTransactionsWorkbook } from '../../lib/export/xlsx.js'
+import { buildReconWorkbook, buildRefundsWorkbook, buildTransactionsWorkbook } from '../../lib/export/xlsx.js'
 import { buildRunView } from '../../lib/recon/view.js'
 
 const exceptions = [
@@ -59,5 +59,24 @@ describe('Excel exports', () => {
     expect(ws.getCell('E2').numFmt).toBe('"$"#,##0.00')
     expect(ws.getCell('G2').value).toMatch(/declined/)
     expect(ws.views[0]).toMatchObject({ state: 'frozen', ySplit: 1 })
+  })
+
+  it('the refunds workbook has the six columns and amounts that add up to the rows', async () => {
+    const rows = [
+      { id: 'r1', transactionId: 't1', amountCents: 900, reason: 'wrong_order', refundedAt: '2026-11-08T03:00:00.000Z', paidAt: '2026-11-05T04:00:00.000Z', channel: 'nets_qr', payout: { id: 's', businessDate: '2026-11-08', status: 'paid', expectedDate: '2026-11-10', paidDate: '2026-11-10' } },
+      { id: 'r2', transactionId: 't2', amountCents: 1280, reason: 'charged_twice', refundedAt: '2026-11-12T03:00:00.000Z', paidAt: '2026-11-10T02:00:00.000Z', channel: 'card', payout: null },
+    ]
+    const wb = new ExcelJS.Workbook()
+    await wb.xlsx.load(await buildRefundsWorkbook(rows))
+    const ws = wb.getWorksheet('Refunds')
+    expect(ws.getRow(1).values.slice(1)).toEqual(['Refunded on', 'Bought on', 'Paid with', 'Reason', 'Amount', 'Payout'])
+    expect(ws.views[0]).toMatchObject({ state: 'frozen', ySplit: 1 })
+    expect(ws.getCell('E2').numFmt).toBe('"$"#,##0.00')
+    expect(Math.round((ws.getCell('E2').value + ws.getCell('E3').value) * 100)).toBe(rows.reduce((s, r) => s + r.amountCents, 0))
+    expect(ws.getCell('C2').value).toBe('NETS QR')
+    expect(ws.getCell('D3').value).toBe('Charged twice')
+    expect(ws.getCell('F2').value).toMatch(/^Taken from payout/)
+    expect(ws.getCell('F3').value).toBe('Next payout')
+    expect(ws.rowCount).toBe(3)
   })
 })

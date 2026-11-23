@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from 'vitest'
 
 vi.mock('../../lib/api/auth.js', () => ({ getCurrentMerchantForApi: async () => null }))
 
-const { withMerchant, transactionsResponse } = await import('../../lib/api/v1.js')
+const { withMerchant, transactionsResponse, disputesResponse, refundsResponse } = await import('../../lib/api/v1.js')
 const { fromApiTransaction, toApiTransaction } = await import('../../lib/transactions/api.js')
 const { validateTxnQuery } = await import('../../lib/transactions/params.js')
 
@@ -46,5 +46,15 @@ describe('transaction JSON shape', () => {
     }
     expect(fromApiTransaction(toApiTransaction(t))).toEqual(t)
     expect(toApiTransaction(t).amount_cents).toBe(5)
+  })
+})
+
+describe('disputes and refunds handlers', () => {
+  it('answer 400 for a bad page before touching the database', async () => {
+    for (const fn of [disputesResponse, refundsResponse]) {
+      const res = await fn('m', { page: '0' }, '2026-11-12')
+      expect(res.status).toBe(400)
+      expect((await res.json()).error.code).toBe('invalid_params')
+    }
   })
 })

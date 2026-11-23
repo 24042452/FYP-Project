@@ -2,7 +2,9 @@ import { getCurrentMerchant } from '@/lib/data/merchant'
 import { canOpen } from '@/lib/access/rules'
 import { listTransactionsForExport } from '@/lib/data/transactions'
 import { loadReconExport } from '@/lib/recon/run'
-import { buildReconWorkbook, buildTransactionsWorkbook } from '@/lib/export/xlsx'
+import { listRefunds } from '@/lib/data/refunds'
+import { refundsRange } from '@/lib/disputes/view'
+import { buildReconWorkbook, buildRefundsWorkbook, buildTransactionsWorkbook } from '@/lib/export/xlsx'
 import { renderReconPdf } from '@/lib/export/pdf'
 import { addDays, sgtDate } from '@/lib/dates'
 import { isValidDate } from '@/lib/transactions/params'
@@ -51,6 +53,13 @@ export async function GET(request, { params }) {
     if (to > addDays(from, MAX_DAYS - 1)) return fail(400, `Please pick at most ${MAX_DAYS} days.`)
     const rows = await listTransactionsForExport(merchant.id, from, to, merchant.outletId)
     return file(await buildTransactionsWorkbook(rows), XLSX, `payments-${from}-to-${to}.xlsx`)
+  }
+
+  if (kind === 'refunds') {
+    if (!canOpen(merchant, '/disputes')) return fail(403, 'Not available for your login')
+    if (format !== 'xlsx') return fail(400, 'Unknown format')
+    const rows = await listRefunds(merchant.id, { ...refundsRange(today), outletId: merchant.outletId })
+    return file(await buildRefundsWorkbook(rows), XLSX, `refunds-${today}.xlsx`)
   }
 
   return fail(404, 'Not found')
