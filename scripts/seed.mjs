@@ -7,7 +7,10 @@ import { trimFuture } from '../lib/synthetic/trim.js'
 import { hashPassword } from '../lib/auth/password.js'
 import { randomUUID } from 'node:crypto'
 import { pathToFileURL } from 'node:url'
-import { periodRange, sgtDate, sgtToIso } from '../lib/dates.js'
+import { addDays, periodRange, sgtDate, sgtToIso } from '../lib/dates.js'
+import { offerEndsOn } from '../lib/offers/rules.js'
+import { outletSuits } from '../lib/promotions/catalogue.js'
+import { offerByKey, offerSuits } from '../lib/offers/catalogue.js'
 import { buildNudges } from '../lib/nudges/build.js'
 import { effectiveInvoiceStatus } from '../lib/invoices/status.js'
 import { loadFaq } from '../lib/assistant/kb.js'
@@ -152,6 +155,27 @@ async function seedGroup(conn, group, password) {
   await conn.query("INSERT INTO group_users (group_id, user_id, role) VALUES (?, ?, 'hq_owner')", [group.groupId, group.hq.userId])
 }
 
+/**
+ * The promotions and offer each demo business starts with: its 2 finished promotions (from the dataset),
+ * one running NETS QR promotion (started 6 days ago, 4 weeks long; Tan & Sons at Tampines Mall only so its
+ * picker shows a busy, an unsuitable and a free outlet), and the QR fee-cut offer taken up 10 days ago at the
+ * outlets that suit it (it is in-store only, so not at an online store).
+ */
+export function planPromotionsAndOffer(demo, data, today) {
+  const physical = data.outlets.filter((o) => outletSuits('nets_qr', o))
+  const runOutlets = demo.profile === 'retail' ? physical.filter((o) => o.name === 'Tampines Mall #02-15') : physical
+  const startsOn = addDays(today, -6)
+  const offerStart = addDays(today, -10)
+  const offer = offerByKey('qr_fee_cut')
+  return {
+    runs: [
+      ...data.pastPromotions.map((r) => ({ key: r.key, channel: r.channel, outletIds: r.outletIds, starts_on: r.starts_on, ends_on: r.ends_on, running: false })),
+      { key: 'qr_tuesday', channel: 'nets_qr', outletIds: runOutlets.map((o) => o.id), starts_on: startsOn, ends_on: addDays(startsOn, 27), running: true },
+    ],
+    offer: { key: offer.key, starts_on: offerStart, ends_on: offerEndsOn(offerStart, offer.months), outletIds: data.outlets.filter((o) => offerSuits(offer, o)).map((o) => o.id) },
+  }
+}
+
 async function seedMerchant(conn, demo, password, nowIso, today) {
   const data = trimFuture(
     generateDataset({ profile: demo.profile, seed: demo.seed, start: START, end: today, today, outlets: demo.outlets, recentDelay: demo.recentDelay, anomalies: demo.anomalies }),
@@ -169,8 +193,8 @@ async function seedMerchant(conn, demo, password, nowIso, today) {
       [m, demo.mid, demo.groupId ?? null, demo.legal_name, demo.trading_name, demo.uen, demo.category, demo.gst],
     )
 
-    await bulk(conn, 'outlets', ['outlet_id', 'merchant_id', 'name', 'address'],
-      data.outlets.map((o) => [o.id, m, o.name, o.address]))
+    await bulk(conn, 'outlets', ['outlet_id', 'merchant_id', 'name', 'address', 'is_online'],
+      data.outlets.map((o) => [o.id, m, o.name, o.address, o.online ? 1 : 0]))
     for (const u of demo.users) {
       const outletId = u.outletIndex === undefined ? null : data.outlets[u.outletIndex].id
       await conn.query('INSERT INTO merchant_users (merchant_id, user_id, role, outlet_id) VALUES (?, ?, ?, ?)', [m, u.userId, u.role, outletId])
@@ -213,6 +237,16 @@ async function seedMerchant(conn, demo, password, nowIso, today) {
         const qty = rental ? data.terminals.length : 1
         return [l.id, m, l.invoice_id, type, l.channel ?? null, l.description, qty, rental ? l.amount_cents / qty : null, l.amount_cents]
       }))
+    const plan = planPromotionsAndOffer(demo, data, today)
+    const runRows = plan.runs.map((r) => ({ ...r, runId: randomUUID() }))
+    await bulk(conn, 'promotion_runs', ['promotion_run_id', 'merchant_id', 'promotion_key', 'channel', 'starts_on', 'ends_on', 'started_by', 'created_at'],
+      runRows.map((r) => [r.runId, m, r.key, r.channel, r.starts_on, r.ends_on, answeredBy, dt(sgtToIso(addDays(r.starts_on, -1), 9, 0))]))
+    await bulk(conn, 'promotion_run_outlets', ['promotion_run_id', 'merchant_id', 'outlet_id'],
+      runRows.flatMap((r) => r.outletIds.map((o) => [r.runId, m, o])))
+    const takeupId = randomUUID()
+    await conn.query('INSERT INTO offer_takeups (offer_takeup_id, merchant_id, offer_key, starts_on, ends_on, taken_by, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)',
+      [takeupId, m, plan.offer.key, plan.offer.starts_on, plan.offer.ends_on, answeredBy, dt(sgtToIso(plan.offer.starts_on, 9, 0))])
+    await bulk(conn, 'offer_takeup_outlets', ['offer_takeup_id', 'merchant_id', 'outlet_id'], plan.offer.outletIds.map((o) => [takeupId, m, o]))
     await conn.commit()
   } catch (err) {
     await conn.rollback()

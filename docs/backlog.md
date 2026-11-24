@@ -41,6 +41,7 @@ Each item says where it is and why it matters. Tick items off (or delete them) i
 - [x] `healthScore` isn't guarded against a NaN growth figure (callers never pass one today). (done: non-finite inputs count as 0)
 - [x] Refunds: channel mix ignores negative totals and `txnCount` includes refunded rows. (done with Refunds & disputes: refunds are counted in payouts and the check-up; chargebacks deliberately do not change sales totals)
 - [ ] Dispute alerts in the bell need `notifications.outlet_id` (outlet managers must only see their outlet).
+- [ ] Offers & Promotions: no bell alerts (promotion ending, offer expiring); offers do not change fees or bills; discounts do not change recorded amounts. Needs real NETS terms first.
 - [ ] Assistant: `get_settlement_status` has no maximum date range; the "unknown tool" check matches error text.
 - [ ] `getLatestRunSummary` returns the stored exception count (incl. failed payments) next to the open count (excl. them). Only the open count is shown; don't render both.
 

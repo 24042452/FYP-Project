@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Promotions · Merchant Portal (option A)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;650;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/portal.css">
+<style>
+[hidden] { display: none !important; }
+.btn-accept { background: var(--surface); color: var(--accent-ink); border: 1px solid var(--accent); box-shadow: var(--shadow); }
+.chan { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: var(--ink-2); }
+.chan i { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); display: inline-block; }
+.promo-title { font-size: 17px; font-weight: 650; }
+.promo-sub { font-size: 14px; color: var(--ink-2); }
+.bar4 { height: 8px; border-radius: 6px; background: var(--mute-bg); overflow: hidden; }
+.bar4 i { display: block; height: 100%; width: 25%; background: var(--accent); border-radius: 6px; }
+.blocked { font-size: 13px; color: var(--ink-3); }
+.up { color: var(--ok); font-weight: 650; }
+.est { font-size: 13px; color: var(--ink-3); }
+.scrim2 { position: fixed; inset: 0; background: rgba(4,22,60,.45); z-index: 60; }
+.dlg { position: fixed; top: 0; right: 0; bottom: 0; width: min(448px, 100vw); background: #fff; box-shadow: var(--shadow-pop); display: flex; flex-direction: column; overflow: auto; } .dlg .b { flex: 1; } .dlg .x { position: absolute; top: 14px; right: 14px; }
+.dlg .h { padding: 18px 20px; border-bottom: 1px solid var(--border); }
+.dlg .h h2 { font-size: 18px; font-weight: 650; } .dlg .h p { font-size: 14px; color: var(--ink-2); margin-top: 2px; }
+.dlg .b { padding: 14px 20px; display: flex; flex-direction: column; gap: 8px; }
+.dlg .f { padding: 14px 20px 20px; display: flex; gap: 10px; flex-wrap: wrap; }
+.pick { display: flex; gap: 10px; align-items: flex-start; min-height: 44px; padding: 10px 12px; border: 1px solid var(--border-strong); border-radius: 8px; font-size: 15px; }
+.pick input { width: 18px; height: 18px; margin-top: 2px; accent-color: var(--accent); }
+.pick.on { border-color: var(--accent); background: var(--accent-soft); }
+.pick.off { opacity: .6; }
+.pick small { display: block; color: var(--ink-3); font-size: 13px; }
+.pick.all { font-weight: 600; }
+@media (max-width: 640px) { .dlg { width: 100vw; } .dlg .f .btn { flex: 1 1 100%; } }
+.chips{display:flex;gap:8px;flex-wrap:wrap}.chip{min-height:36px;padding:0 12px;border:1px solid var(--border-strong);border-radius:999px;background:#fff;font:inherit;font-size:14px;font-weight:600;color:var(--ink-2)}.chip.on{background:var(--accent-soft);color:var(--accent-ink);border-color:var(--accent)}.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}@media(max-width:1023px){.grid3{grid-template-columns:1fr 1fr}}@media(max-width:640px){.grid3{grid-template-columns:1fr}}
+</style>
+</head>
+<body data-page="promos" data-merchant="tansons">
+<div class="app">
+  <aside class="sidebar" id="sidebar"></aside>
+  <div class="scrim"></div>
+  <div class="main">
+    <header class="topbar" id="topbar"></header>
+    <main class="page">
+      <div class="page-head"><div><h1>Promotions</h1><p class="tech">Marketing campaigns · deals NETS runs for your customers</p></div></div>
+      <div class="page-head"><div>
+        <p class="answer">1 promotion is running. Your last one, <em>weekend Cards</em>, brought in about 14% more on weekends.</p>
+        <p class="answer-sub">Take up a promotion and NETS shows it to your customers when they pay. Each one runs for 4 weeks.</p>
+      </div></div>
+      <section style="display:flex;flex-direction:column;gap:12px"><h2 style="font-size:17px;font-weight:650">Running now</h2><div class="panel" style="padding:18px 20px;display:flex;flex-direction:column;gap:10px">
+  <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:flex-start">
+    <div><span class="chan"><i></i>NETS QR</span><div class="promo-title">10% off on Tuesdays</div><div class="promo-sub">Tampines Mall, Bedok Mall · started Tue 18 Nov</div></div>
+    <span class="pill info"><i data-icon="clock"></i>Running · ends Mon 15 Dec</span>
+  </div>
+  <div class="bar4" role="img" aria-label="Week 1 of 4"><i></i></div>
+  <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center"><span class="est">Week 1 of 4 · results when it ends</span><button class="btn btn-secondary" type="button"><i data-icon="x"></i>Stop</button></div>
+</div></section>
+      <section style="display:flex;flex-direction:column;gap:12px"><h2 style="font-size:17px;font-weight:650">Promotions you can start</h2>
+      <div class="chips"><button class="chip on">All</button><button class="chip">NETS QR</button><button class="chip">Cards</button><button class="chip">NETS Click</button><button class="chip">SGQR</button><button class="chip">eNETS</button></div>
+      <div class="grid3"><div class="panel" style="padding:16px 18px;display:flex;flex-direction:column;gap:8px">
+  <span class="chan"><i></i>NETS QR</span><div class="promo-title">Lunch deal: $1 off orders over $8</div><div class="promo-sub">11am to 2pm on weekdays · 4 weeks</div>
+  <div style="margin-top:6px"><button class="btn btn-accept" type="button" data-take>Take up</button><div class="blocked" style="margin-top:6px">Already running a NETS QR promotion at 2 of your 3 outlets</div></div></div><div class="panel" style="padding:16px 18px;display:flex;flex-direction:column;gap:8px">
+  <span class="chan"><i></i>Cards</span><div class="promo-title">10% off weekends with Cards</div><div class="promo-sub">Saturdays and Sundays · 4 weeks</div>
+  <div style="margin-top:6px"><button class="btn btn-accept" type="button" data-take>Take up</button></div></div><div class="panel" style="padding:16px 18px;display:flex;flex-direction:column;gap:8px">
+  <span class="chan"><i></i>NETS Click</span><div class="promo-title">$2 off online orders over $20</div><div class="promo-sub">Every day, online store · 4 weeks</div>
+  <div style="margin-top:6px"><button class="btn btn-accept" type="button" data-take>Take up</button></div></div><div class="panel" style="padding:16px 18px;display:flex;flex-direction:column;gap:8px">
+  <span class="chan"><i></i>SGQR</span><div class="promo-title">Free drink with orders over $10</div><div class="promo-sub">Every day · 4 weeks</div>
+  <div style="margin-top:6px"><span class="blocked">SGQR is not set up at your outlets yet</span></div></div><div class="panel" style="padding:16px 18px;display:flex;flex-direction:column;gap:8px">
+  <span class="chan"><i></i>eNETS</span><div class="promo-title">Free delivery over $30 with eNETS</div><div class="promo-sub">Every day, online store · 4 weeks</div>
+  <div style="margin-top:6px"><button class="btn btn-accept" type="button" data-take>Take up</button></div></div></div></section>
+      <section class="panel"><div class="panel-head"><h2>Results <span class="tech">Finished promotions</span></h2></div>
+  <div class="table-wrap" style="margin-top:8px"><table class="data"><thead><tr><th>Promotion</th><th class="n">Sales on promotion days</th><th class="n">Compared with before</th></tr></thead><tbody><tr><td><b style="font-weight:600">10% off weekends with Cards</b><br><span class="est">Cards · Sat 4 Oct to Fri 31 Oct</span></td><td class="n amount">$1,240 a weekend day</td><td class="n"><span class="up">+14%</span></td></tr><tr><td><b style="font-weight:600">$2 off online orders over $20</b><br><span class="est">NETS Click · Mon 1 Sep to Sun 28 Sep</span></td><td class="n amount">$318 a day</td><td class="n"><span class="up">+6%</span></td></tr></tbody></table></div>
+  <div class="panel-foot est">Estimate: promotion days compared with the same days in the 4 weeks before. Other things can change sales too.</div></section>
+    </main>
+  </div>
+  <nav class="tabbar" id="tabbar" aria-label="Main"></nav>
+</div>
+<div class="scrim2" id="picker" hidden>
+  <div class="dlg" role="dialog" aria-modal="true" aria-labelledby="pk-h">
+    <button class="icon-btn x" type="button" aria-label="Close" data-close><i data-icon="x"></i></button>
+    <div class="h" style="padding-right:64px"><span class="chan"><i></i>NETS QR</span><h2 id="pk-h" style="margin-top:4px">Lunch deal: $1 off orders over $8</h2><p>11am to 2pm on weekdays · 4 weeks, from tomorrow (Tue 25 Nov) to Mon 22 Dec</p></div>
+    <div class="b">
+      <p class="small" style="color:var(--accent-ink);background:var(--accent-soft);padding:12px 14px;border-radius:8px">NETS shows this deal to your customers when they pay by NETS QR at the outlets you pick. The discount comes off the price they pay; you see the results when it ends.</p>
+      <h3 style="font-size:16px;font-weight:650;margin-top:6px">Which outlets?</h3>
+      <label class="pick all"><input type="checkbox">Select all outlets that can run it</label>
+      <label class="pick off"><input type="checkbox" disabled><span>Tampines Mall #02-15<small>Already running "10% off on Tuesdays" (NETS QR) until Mon 15 Dec</small></span></label>
+      <label class="pick off"><input type="checkbox" disabled><span>Bedok Mall #B1-30<small>Already running "10% off on Tuesdays" (NETS QR) until Mon 15 Dec</small></span></label>
+      <label class="pick on"><input type="checkbox" checked>Online store</label>
+    </div>
+    <div class="f"><button class="btn btn-primary" type="button">Start at 1 outlet</button><button class="btn btn-quiet" type="button" data-close>Cancel</button></div>
+  </div>
+</div>
+<script src="assets/shell.js"></script>
+<script>
+  document.addEventListener('click', function (e) {
+    if (e.target.closest('[data-take]')) document.getElementById('picker').hidden = false;
+    if (e.target.closest('[data-close]')) document.getElementById('picker').hidden = true;
+  });
+  if (location.hash === '#picker') document.addEventListener('DOMContentLoaded', function () { document.getElementById('picker').hidden = false; });
+</script>
+</body>
+</html>
